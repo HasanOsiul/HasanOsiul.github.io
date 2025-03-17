@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASSIGNMENT - Google Docs Links Tracker</title>
+    <style>
+        :root {
+            --primary: #4285F4;
+            --secondary: #34A853;
+            --accent: #EA4335;
+            --background: #f9f9f9;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text);
+            font-weight: normal;
+            margin-top: 0.5rem;
+        }
+        
+        .add-form {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        .links-container {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .links-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .links-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .link-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .link-item:last-child {
+            border-bottom: none;
+        }
+        
+        .link-details {
+            flex-grow: 1;
+        }
+        
+        .link-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .link-url {
+            word-break: break-all;
+            color: var(--primary);
+        }
+        
+        .link-date {
+            color: #777;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .link-actions {
+            margin-left: 1rem;
+        }
+        
+        .delete-btn {
+            background-color: var(--accent);
+            padding: 0.4rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .delete-btn:hover {
+            background-color: #d23b2a;
+        }
+        
+        .no-links {
+            text-align: center;
+            color: #777;
+            padding: 2rem 0;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .link-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .link-actions {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ASSIGNMENT TRACKER</h1>
+            <p class="subtitle">Store and organize your Google Docs assignment links</p>
+        </header>
+        
+        <section class="add-form">
+            <form id="assignment-form">
+                <div class="form-group">
+                    <label for="assignment-title">Assignment Title</label>
+                    <input type="text" id="assignment-title" placeholder="Enter assignment title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignment-url">Google Docs URL</label>
+                    <input type="url" id="assignment-url" placeholder="https://docs.google.com/..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignment-notes">Notes (Optional)</label>
+                    <textarea id="assignment-notes" rows="2" placeholder="Add any notes about this assignment"></textarea>
+                </div>
+                
+                <button type="submit">Add Assignment</button>
+            </form>
+        </section>
+        
+        <section class="links-container">
+            <div class="links-header">
+                <h2>Your Assignments</h2>
+                <span id="assignment-count">0 assignments</span>
+            </div>
+            
+            <ul class="links-list" id="links-list">
+                <li class="no-links" id="no-links">
+                    No assignments added yet. Add your first assignment above.
+                </li>
+                <!-- Assignment links will appear here -->
+            </ul>
+        </section>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved assignments
+            loadAssignments();
+            
+            // Form submission handler
+            document.getElementById('assignment-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const title = document.getElementById('assignment-title').value.trim();
+                const url = document.getElementById('assignment-url').value.trim();
+                const notes = document.getElementById('assignment-notes').value.trim();
+                
+                if (title && url) {
+                    // Add new assignment
+                    addAssignment(title, url, notes);
+                    
+                    // Reset form
+                    this.reset();
+                }
+            });
+            
+            // Initialize delete functionality
+            document.getElementById('links-list').addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-btn')) {
+                    const index = e.target.getAttribute('data-index');
+                    deleteAssignment(index);
+                }
+            });
+        });
+        
+        // Get assignments from local storage
+        function getAssignments() {
+            const assignments = localStorage.getItem('assignments');
+            return assignments ? JSON.parse(assignments) : [];
+        }
+        
+        // Save assignments to local storage
+        function saveAssignments(assignments) {
+            localStorage.setItem('assignments', JSON.stringify(assignments));
+        }
+        
+        // Add new assignment
+        function addAssignment(title, url, notes) {
+            const assignments = getAssignments();
+            
+            // Create new assignment object
+            const newAssignment = {
+                title: title,
+                url: url,
+                notes: notes,
+                date: new Date().toLocaleDateString()
+            };
+            
+            // Add to assignments array
+            assignments.push(newAssignment);
+            
+            // Save and reload
+            saveAssignments(assignments);
+            loadAssignments();
+        }
+        
+        // Delete assignment
+        function deleteAssignment(index) {
+            const assignments = getAssignments();
+            
+            // Remove assignment at index
+            assignments.splice(index, 1);
+            
+            // Save and reload
+            saveAssignments(assignments);
+            loadAssignments();
+        }
+        
+        // Load and display assignments
+        function loadAssignments() {
+            const assignments = getAssignments();
+            const linksList = document.getElementById('links-list');
+            const noLinks = document.getElementById('no-links');
+            const assignmentCount = document.getElementById('assignment-count');
+            
+            // Update assignment count
+            assignmentCount.textContent = `${assignments.length} assignment${assignments.length !== 1 ? 's' : ''}`;
+            
+            // Clear list
+            linksList.innerHTML = '';
+            
+            if (assignments.length === 0) {
+                // Show no assignments message
+                linksList.appendChild(noLinks);
+                return;
+            }
+            
+            // Add each assignment to the list
+            assignments.forEach((assignment, index) => {
+                const li = document.createElement('li');
+                li.className = 'link-item';
+                
+                // Create HTML structure for assignment
+                li.innerHTML = `
+                    <div class="link-details">
+                        <div class="link-title">${escapeHTML(assignment.title)}</div>
+                        <a href="${escapeHTML(assignment.url)}" target="_blank" class="link-url">${escapeHTML(assignment.url)}</a>
+                        ${assignment.notes ? `<div class="link-notes">${escapeHTML(assignment.notes)}</div>` : ''}
+                        <div class="link-date">Added: ${assignment.date}</div>
+                    </div>
+                    <div class="link-actions">
+                        <button class="delete-btn" data-index="${index}">Delete</button>
+                    </div>
+                `;
+                
+                linksList.appendChild(li);
+            });
+        }
+        
+        // Helper function to escape HTML
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag]));
+        }
+    </script>
+</body>
+</html>
