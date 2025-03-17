@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASSIGNMENT - Google Docs Links Tracker</title>
+    <style>
+        :root {
+            --primary: #4285F4;
+            --secondary: #34A853;
+            --accent: #EA4335;
+            --background: #f9f9f9;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text);
+            font-weight: normal;
+            margin-top: 0.5rem;
+        }
+        
+        .add-form {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        .links-container {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .links-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .links-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .link-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .link-item:last-child {
+            border-bottom: none;
+        }
+        
+        .link-details {
+            flex-grow: 1;
+        }
+        
+        .link-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .link-url {
+            word-break: break-all;
+            color: var(--primary);
+        }
+        
+        .link-date {
+            color: #777;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .link-actions {
+            margin-left: 1rem;
+        }
+        
+        .delete-btn {
+            background-color: var(--accent);
+            padding: 0.4rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .delete-btn:hover {
+            background-color: #d23b2a;
+        }
+        
+        .no-links {
+            text-align: center;
+            color: #777;
+            padding: 2rem 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem 0;
+            color: #777;
+        }
+        
+        .status-message {
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .link-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .link-actions {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ASSIGNMENT TRACKER</h1>
+            <p class="subtitle">Store and organize your Google Docs assignment links</p>
+        </header>
+        
+        <div id="status-container"></div>
+        
+        <section class="add-form">
+            <form id="assignment-form">
+                <div class="form-group">
+                    <label for="assignment-title">Assignment Title</label>
+                    <input type="text" id="assignment-title" placeholder="Enter assignment title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignment-url">Google Docs URL</label>
+                    <input type="url" id="assignment-url" placeholder="https://docs.google.com/..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignment-notes">Notes (Optional)</label>
+                    <textarea id="assignment-notes" rows="2" placeholder="Add any notes about this assignment"></textarea>
+                </div>
+                
+                <button type="submit" id="submit-btn">Add Assignment</button>
+            </form>
+        </section>
+        
+        <section class="links-container">
+            <div class="links-header">
+                <h2>Your Assignments</h2>
+                <span id="assignment-count">Loading...</span>
+            </div>
+            
+            <div id="links-container">
+                <p class="loading">Loading assignments...</p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.20.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.20.0/firebase-firestore-compat.min.js"></script>
+    
+    <script>
+        // Firebase configuration - REPLACE WITH YOUR OWN CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        let db;
+        let assignmentsCollection;
+        
+        // Show status message
+        function showStatus(message, type) {
+            const statusContainer = document.getElementById('status-container');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.textContent = message;
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(statusDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+        
+        // Initialize app
+        function initApp() {
+            try {
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                assignmentsCollection = db.collection('assignments');
+                
+                // Load assignments
+                loadAssignments();
+                
+                // Form submission handler
+                document.getElementById('assignment-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    addAssignment();
+                });
+                
+                // Setup deletion event delegation
+                document.getElementById('links-container').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('delete-btn')) {
+                        const id = e.target.getAttribute('data-id');
+                        deleteAssignment(id);
+                    }
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showStatus("Firebase initialization failed. Please check your configuration.", "error");
+                
+                // Fallback to local storage
+                showStatus("Falling back to local storage mode. Data will only be saved in this browser.", "error");
+                loadLocalAssignments();
+                
+                // Form submission handler for local storage
+                document.getElementById('assignment-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    addLocalAssignment();
+                });
+                
+                // Setup deletion event delegation for local storage
+                document.getElementById('links-container').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('delete-btn')) {
+                        const index = e.target.getAttribute('data-index');
+                        deleteLocalAssignment(index);
+                    }
+                });
+            }
+        }
+        
+        // Add new assignment to Firebase
+        function addAssignment() {
+            const submitBtn = document.getElementById('submit-btn');
+            const title = document.getElementById('assignment-title').value.trim();
+            const url = document.getElementById('assignment-url').value.trim();
+            const notes = document.getElementById('assignment-notes').value.trim();
+            
+            if (title && url) {
+                // Disable button during submission
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Adding...';
+                
+                // Create new assignment object
+                const newAssignment = {
+                    title: title,
+                    url: url,
+                    notes: notes,
+                    date: new Date().toISOString(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Add to Firebase
+                assignmentsCollection.add(newAssignment)
+                    .then(() => {
+                        // Reset form
+                        document.getElementById('assignment-form').reset();
+                        showStatus("Assignment added successfully!", "success");
+                    })
+                    .catch(error => {
+                        console.error("Error adding assignment:", error);
+                        showStatus("Failed to add assignment. Please try again.", "error");
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Add Assignment';
+                    });
+            }
+        }
+        
+        // Delete assignment from Firebase
+        function deleteAssignment(id) {
+            if (confirm("Are you sure you want to delete this assignment?")) {
+                assignmentsCollection.doc(id).delete()
+                    .then(() => {
+                        showStatus("Assignment deleted successfully!", "success");
+                    })
+                    .catch(error => {
+                        console.error("Error deleting assignment:", error);
+                        showStatus("Failed to delete assignment. Please try again.", "error");
+                    });
+            }
+        }
+        
+        // Load assignments from Firebase
+        function loadAssignments() {
+            const linksContainer = document.getElementById('links-container');
+            const assignmentCount = document.getElementById('assignment-count');
+            
+            // Real-time listener for assignments
+            assignmentsCollection.orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    const assignments = [];
+                    snapshot.forEach(doc => {
+                        assignments.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    // Update assignment count
+                    assignmentCount.textContent = `${assignments.length} assignment${assignments.length !== 1 ? 's' : ''}`;
+                    
+                    // Render assignments
+                    renderAssignments(assignments);
+                }, error => {
+                    console.error("Error getting assignments:", error);
+                    linksContainer.innerHTML = `
+                        <div class="error status-message">
+                            Error loading assignments. Please refresh the page.
+                        </div>
+                    `;
+                });
+        }
+        
+        // Render assignments to DOM
+        function renderAssignments(assignments) {
+            const linksContainer = document.getElementById('links-container');
+            
+            if (assignments.length === 0) {
+                linksContainer.innerHTML = `
+                    <p class="no-links">
+                        No assignments added yet. Add your first assignment above.
+                    </p>
+                `;
+                return;
+            }
+            
+            // Create list
+            const ul = document.createElement('ul');
+            ul.className = 'links-list';
+            
+            // Add each assignment
+            assignments.forEach(assignment => {
+                const li = document.createElement('li');
+                li.className = 'link-item';
+                
+                // Format date
+                let displayDate = "Unknown date";
+                try {
+                    if (assignment.date) {
+                        displayDate = new Date(assignment.date).toLocaleDateString();
+                    }
+                } catch (e) {
+                    console.error("Date formatting error:", e);
+                }
+                
+                // Create HTML structure
+                li.innerHTML = `
+                    <div class="link-details">
+                        <div class="link-title">${escapeHTML(assignment.title)}</div>
+                        <a href="${escapeHTML(assignment.url)}" target="_blank" class="link-url">${escapeHTML(assignment.url)}</a>
+                        ${assignment.notes ? `<div class="link-notes">${escapeHTML(assignment.notes)}</div>` : ''}
+                        <div class="link-date">Added: ${displayDate}</div>
+                    </div>
+                    <div class="link-actions">
+                        <button class="delete-btn" data-id="${assignment.id}">Delete</button>
+                    </div>
+                `;
+                
+                ul.appendChild(li);
+            });
+            
+            // Replace loading spinner with list
+            linksContainer.innerHTML = '';
+            linksContainer.appendChild(
