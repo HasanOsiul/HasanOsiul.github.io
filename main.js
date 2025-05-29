@@ -1,4 +1,4 @@
-// Load file or textarea
+// Helper: load input from textarea or file
 function loadInput(callback) {
   const fileInput = document.getElementById('fileInput');
   if (fileInput.files.length) {
@@ -10,46 +10,53 @@ function loadInput(callback) {
   }
 }
 
-// Display result block
+// Helper: create a result block for an algorithm
 function createResult(title, content) {
   const div = document.createElement('div');
   div.className = 'result-block';
-  div.innerHTML = `<h3>${title}</h3><textarea readonly>${content}</textarea>
-                   <br><button onclick="downloadResult('${title}', \`${content}\`)">Download</button>`;
+  div.innerHTML = `
+    <h3>${title}</h3>
+    <textarea readonly>${content}</textarea><br>
+    <button onclick="downloadResult('${title}', \`${content}\`)">Download</button>
+  `;
   document.getElementById('results').appendChild(div);
 }
 
-// Download text as .txt
+// Helper: download a result as .txt
 function downloadResult(name, text) {
-  const a = document.createElement('a');
   const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = name + '.txt';
+  a.download = `${name}.txt`;
   a.click();
 }
 
-// Encrypt all
+// ENCRYPT ALL: run all six algorithms
 document.getElementById('encryptBtn').addEventListener('click', () => {
-  document.getElementById('results').innerHTML = '';
+  const results = document.getElementById('results');
+  results.innerHTML = ''; // clear previous results
+
   loadInput(text => {
-    createResult('Caesar', caesarEncrypt(text));
-    createResult('Reverse', reverseCipher(text));
+    createResult('Caesar',   caesarEncrypt(text));
+    createResult('Reverse',  reverseCipher(text));
     createResult('Vigenère', vigenereEncrypt(text));
     createResult('Playfair', playfairEncrypt(text));
-    createResult('AES', aesEncrypt(text));
-    createResult('RSA', rsaEncrypt(text));
+    createResult('AES',      aesEncrypt(text));
+    createResult('RSA',      rsaEncrypt(text));
   });
 });
 
-// Decrypt all
+// DECRYPT ALL: run all six decryption routines
 document.getElementById('decryptBtn').addEventListener('click', () => {
-  document.getElementById('results').innerHTML = '';
+  const results = document.getElementById('results');
+  results.innerHTML = ''; // clear previous results
+
   loadInput(text => {
-    createResult('Caesar', caesarDecrypt(text));
-    createResult('Reverse', reverseCipher(text));
+    createResult('Caesar',   caesarDecrypt(text));
+    createResult('Reverse',  reverseCipher(text));      // same function for reverse
     createResult('Vigenère', vigenereDecrypt(text));
     createResult('Playfair', playfairDecrypt(text));
-    createResult('AES', aesDecrypt(text));
-    createResult('RSA', rsaDecrypt(text));
+    createResult('AES',      aesDecrypt(text));
+    createResult('RSA',      rsaDecrypt(text));
   });
 });
