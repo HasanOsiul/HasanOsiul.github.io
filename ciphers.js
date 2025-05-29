@@ -1,4 +1,6 @@
-// Simple: Caesar Cipher
+// --- Simple Ciphers ---
+
+// Caesar (shift = 3)
 function caesarEncrypt(text, shift = 3) {
   return text.replace(/[A-Za-z]/g, c => {
     const base = c < 'a' ? 65 : 97;
@@ -9,39 +11,47 @@ function caesarDecrypt(text, shift = 3) {
   return caesarEncrypt(text, 26 - shift);
 }
 
-// Simple: Reverse Cipher
+// Reverse
 function reverseCipher(text) {
   return text.split('').reverse().join('');
 }
 
-// Intermediate: Vigenère Cipher
+// --- Intermediate Ciphers ---
+
+// Vigenère (default key = "KEY")
 function vigenereEncrypt(text, key = 'KEY') {
-  let out = '', ki = 0;
-  for (let c of text) {
-    if (/[A-Za-z]/.test(c)) {
-      const base = c < 'a' ? 65 : 97;
+  let result = '', ki = 0;
+  for (const ch of text) {
+    if (/[A-Za-z]/.test(ch)) {
+      const base = ch < 'a' ? 65 : 97;
       const shift = key.charCodeAt(ki % key.length) - base;
-      out += String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
+      result += String.fromCharCode((ch.charCodeAt(0) - base + shift) % 26 + base);
       ki++;
-    } else out += c;
+    } else {
+      result += ch;
+    }
   }
-  return out;
+  return result;
 }
 function vigenereDecrypt(text, key = 'KEY') {
-  const inv = key.split('').map(c => String.fromCharCode((26 - (c.toLowerCase().charCodeAt(0) - 97)) % 26 + 97)).join('');
-  return vigenereEncrypt(text, inv);
+  const invKey = key
+    .split('')
+    .map(c => String.fromCharCode((26 - (c.toLowerCase().charCodeAt(0) - 97)) % 26 + 97))
+    .join('');
+  return vigenereEncrypt(text, invKey);
 }
 
-// Intermediate: Playfair Cipher (simplified, uppercase, no J)
+// Playfair (stub – echoes input for now)
 function playfairEncrypt(text, key = 'PLAYFAIREXAMPLE') {
-  // Implementation placeholder: real implementation would go here
-  return text; 
+  return text;
 }
 function playfairDecrypt(text, key = 'PLAYFAIREXAMPLE') {
   return text;
 }
 
-// Advanced: AES (using CryptoJS)
+// --- Advanced Ciphers ---
+
+// AES (via CryptoJS)
 function aesEncrypt(text, pass = 'password') {
   return CryptoJS.AES.encrypt(text, pass).toString();
 }
@@ -50,9 +60,9 @@ function aesDecrypt(cipher, pass = 'password') {
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-// Advanced: RSA (demo stub)
+// RSA (base64 stub)
 function rsaEncrypt(text) {
-  return btoa(text); // base64 as placeholder
+  return btoa(text);
 }
 function rsaDecrypt(cipher) {
   return atob(cipher);
