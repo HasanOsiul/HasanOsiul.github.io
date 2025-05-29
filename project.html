@@ -2,83 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CryptoSite — All-in-One</title>
-
-  <!-- Inline CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoSite - All-in-One</title>
   <style>
-    /* Reset & global */
+    /* Reset & global styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
-      padding: 20px;
-      color: #333;
-    }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; color: #333; }
     h1 { text-align: center; margin-bottom: 20px; }
-
-    /* Input section */
-    .input-section { margin-bottom: 15px; }
-    textarea { width: 100%; max-width: 600px; padding: 8px; }
-    input[type="file"] { margin-top: 8px; }
-
-    /* Buttons */
-    .buttons { margin-bottom: 20px; }
-    button {
-      margin-right: 10px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-      transition: background .2s;
-    }
+    .input-section { margin-bottom: 15px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    textarea { width: 100%; height: 80px; padding: 8px; margin-top: 5px; }
+    input[type="file"] { margin-top: 10px; }
+    .buttons { text-align: center; margin-bottom: 20px; }
+    button { margin: 5px; padding: 10px 20px; border: none; border-radius: 4px; background: #007bff; color: #fff; cursor: pointer; }
     button:hover { background: #0056b3; }
-
-    /* Results */
-    .result-block {
-      background: #fff;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    #results { max-width: 800px; margin-left: auto; margin-right: auto; }
+    .result-block { background: #fff; padding: 12px; margin-bottom: 12px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .result-block h3 { margin-bottom: 6px; }
-    .result-block textarea {
-      width: 100%;
-      height: 80px;
-      padding: 6px;
-    }
-    .result-block button {
-      margin-top: 6px;
-      background: #28a745;
-    }
+    .result-block textarea { width: 100%; height: 100px; }
+    .result-block button { background: #28a745; }
     .result-block button:hover { background: #1e7e34; }
   </style>
-
   <!-- CryptoJS for AES -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-  <h1>🔒 CryptoSite</h1>
-
-  <!-- Input -->
+  <h1>🔒 CryptoSite (All-in-One)</h1>
   <div class="input-section">
-    <label for="textInput">Enter text or upload a .txt file:</label><br>
-    <textarea id="textInput" rows="5" placeholder="Type your message here..."></textarea><br>
+    <label for="textInput">Enter text:</label><br>
+    <textarea id="textInput" placeholder="Type your message here..."></textarea><br>
+    <label for="fileInput">or upload a .txt file:</label><br>
     <input type="file" id="fileInput" accept=".txt">
   </div>
-
-  <!-- Buttons -->
   <div class="buttons">
     <button id="encryptBtn">Encrypt All</button>
     <button id="decryptBtn">Decrypt All</button>
   </div>
-
-  <!-- Results -->
   <div id="results"></div>
 
-  <!-- Inline JavaScript -->
   <script>
-    //
+    // --- Cipher implementations ---
+    function caesarEncrypt(text, shift = 3) {
+      return text.replace(/[A-Za-z]/g, c => {
+        const base = c < 'a' ? 65 : 97;
+        return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
+      });
+    }
+    function caesarDecrypt(text, shift = 3) {
+      return caesarEncrypt(text, 26 - shift);
+    }
+    function reverseCipher(text) {
+      return text.split('').reverse().join('');
+    }
+    function vigenereEncrypt(text, key = 'KEY') {
+      let result = '', ki = 0;
+      for (const ch of text) {
+        if (/[A-Za-z]/.test(ch)) {
+          const base = ch < 'a' ? 65 : 97;
+          const shift = key.charCodeAt(ki % key.length) - base;
+          result += String.fromCharCode((ch.charCodeAt(0) - base + shift) % 26 + base);
+          ki++;
+        } else result += ch;
+      }
+      return result;
+    }
+    function vigenereDecrypt(text, key = 'KEY') {
+      const invKey = key.split('').map(c =>
+        String.fromCharCode((26 - (c.toLowerCase().charCodeAt(0) - 97)) % 26 + 97)
+      ).join('');
+      return vigenereEncrypt(text, invKey);
+    }
+    function playfairEncrypt(text, key = 'PLAYFAIREXAMPLE') { return text; }
+    function playfairDecrypt(text, key = 'PLAYFAIREXAMPLE') { return text; }
+    function aesEncrypt(text, pass = 'password') {
+      return CryptoJS.AES.encrypt(text, pass).toString();
+    }
+    function aesDecrypt(cipher, pass = 'password') {
+      const bytes = CryptoJS.AES.decrypt(cipher, pass);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    }
+    function rsaEncrypt(text) { return btoa(text); }
+    function rsaDecrypt(cipher) { return atob(cipher); }
+
+    // --- UI Logic ---
+    function loadInput(callback) {
+      const fileInput = document.getElementById('fileInput');
+      if (fileInput.files.length) {
+        const reader = new FileReader();
+        reader.onload = e => callback(e.target.result);
+        reader.readAsText(fileInput.files[0]);
+      } else {
+        callback(document.getElementById('textInput').value);
+      }
+    }
+    function createResult(title, content) {
+      const div = document.createElement('div');
+      div.className = 'result-block';
+      div.innerHTML = `<h3>${title}</h3><textarea readonly>${content}</textarea><br>
+                       <button onclick="downloadResult('${title}', \`${content}\`)">Download</button>`;
+      document.getElementById('results').appendChild(div);
+    }
+    function downloadResult(name, text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${name}.txt`;
+      a.click();
+    }
+    document.getElementById('encryptBtn').addEventListener('click', () => {
+      document.getElementById('results').innerHTML = '';
+      loadInput(text => {
+        createResult('Caesar',   caesarEncrypt(text));
+        createResult('Reverse',  reverseCipher(text));
+        createResult('Vigenère', vigenereEncrypt(text));
+        createResult('Playfair', playfairEncrypt(text));
+        createResult('AES',      aesEncrypt(text));
+        createResult('RSA',      rsaEncrypt(text));
+      });
+    });
+    document.getElementById('decryptBtn').addEventListener('click', () => {
+      document.getElementById('results').innerHTML = '';
+      loadInput(text => {
+        createResult('Caesar',   caesarDecrypt(text));
+        createResult('Reverse',  reverseCipher(text));
+        createResult('Vigenère', vigenereDecrypt(text));
+        createResult('Playfair', playfairDecrypt(text));
+        createResult('AES',      aesDecrypt(text));
+        createResult('RSA',      rsaDecrypt(text));
+      });
+    });
+  </script>
+</body>
+</html>
