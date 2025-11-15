@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AUDITX Game Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1a1a1a;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .subtext {
+      font-size: 16px;
+      margin-top: 5px;
+      color: #bbbbbb;
+    }
+    .upload-section {
+      background: #1a1a1a;
+      padding: 25px;
+      margin: 20px;
+      border-radius: 12px;
+    }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .game-card {
+      background: #1c1c1c;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+    .game-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .upload-form input, .upload-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+    .upload-btn {
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: #4caf50;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    AUDITX GAME HUB
+    <div class="subtext">Showcase your games made with the AUDITX Engine</div>
+  </header>
+
+  <section class="upload-section">
+    <h2>Upload Your Game</h2>
+    <p>Developers using AUDITX can post their games here.</p>
+    <form class="upload-form">
+      <input type="text" placeholder="Game Title" required />
+      <textarea placeholder="Short Description" required></textarea>
+      <input type="file" required />
+      <button class="upload-btn">Upload Game</button>
+    </form>
+  </section>
+
+  <h2 style="padding-left:20px;">Games Made With AUDITX</h2>
+
+  <section class="games-grid">
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=1" />
+      <h3>Pixel Drift Racers</h3>
+      <p>Retro‑style low‑poly racing game built with AUDITX.</p>
+    </div>
+
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=2" />
+      <h3>Shadow Mines</h3>
+      <p>2D exploration game where players uncover secrets in dark caverns.</p>
+    </div>
+
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=3" />
+      <h3>Neon Courier</h3>
+      <p>A fast‑paced delivery runner set in a neon cyber‑city.</p>
+    </div>
+
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=4" />
+      <h3>Forest Guardian</h3>
+      <p>Adventure game where players protect nature spirits from invaders.</p>
+    </div>
+
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=5" />
+      <h3>Block Builders</h3>
+      <p>Creative sandbox where players design structures using voxel blocks.</p>
+    </div>
+
+    <div class="game-card">
+      <img src="https://picsum.photos/300/200?random=6" />
+      <h3>Space Trader Zero</h3>
+      <p>Lightweight trading & exploration game optimized for low‑end PCs.</p>
+    </div>
+  </section>
+</body>
+</html>
