@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linear Problem Solver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #7c6fff;
+      --accent2: #ff6fb0;
+      --text: #e8e8f0;
+      --text-muted: #6b6b88;
+      --success: #4fffb0;
+      --error: #ff6b6b;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,111,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,111,255,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 52px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,111,255,0.12);
+      border: 1px solid rgba(124,111,255,0.3);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.08em;
+    }
+
+    .badge::before {
+      content: '◆';
+      font-size: 8px;
+    }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 300;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+    }
+
+    .tab.active {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* Panel */
+    .panel {
+      display: none;
+      animation: fadeUp 0.4s ease both;
+    }
+    .panel.active { display: block; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Input row */
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      letter-spacing: 0.06em;
+    }
+
+    input[type="number"], input[type="text"], textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      padding: 10px 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,111,255,0.12);
+    }
+
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+    .eq-symbol {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--text-muted);
+      padding-top: 22px;
+      flex-shrink: 0;
+    }
+
+    /* Equation rows for 2-var */
+    .equations { display: flex; flex-direction: column; gap: 16px; }
+
+    .eq-row {
+      display: grid;
+      grid-template-columns: 80px auto 80px auto 80px auto 80px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .eq-row .op {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .var-label {
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--accent);
+      padding-left: 4px;
+    }
+
+    /* Solve button */
+    .solve-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+
+    .solve-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .solve-btn:active { transform: translateY(0); }
+
+    /* Result */
+    .result-box {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 20px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+    }
+
+    .result-box.success .result-header { background: rgba(79,255,176,0.12); color: var(--success); border: 1px solid rgba(79,255,176,0.25); border-bottom: none; }
+    .result-box.error .result-header   { background: rgba(255,107,107,0.12); color: var(--error);   border: 1px solid rgba(255,107,107,0.25); border-bottom: none; }
+
+    .result-body {
+      padding: 20px;
+      border: 1px solid;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .result-box.success .result-body { border-color: rgba(79,255,176,0.25);  background: rgba(79,255,176,0.04); }
+    .result-box.error   .result-body { border-color: rgba(255,107,107,0.25); background: rgba(255,107,107,0.04); }
+
+    .result-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .result-value .var { color: var(--accent); }
+    .result-value .num { color: var(--success); }
+
+    .steps-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .step-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: rgba(124,111,255,0.12);
+      border: 1px solid rgba(124,111,255,0.2);
+      border-radius: 4px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text { color: var(--text-muted); }
+    .step-text em { color: var(--text); font-style: normal; font-family: var(--mono); }
+
+    /* Text input for expression solver */
+    .expr-input-wrap { position: relative; }
+
+    .expr-input-wrap textarea {
+      resize: vertical;
+      min-height: 90px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .hint code {
+      font-family: var(--mono);
+      background: var(--surface2);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .eq-row { grid-template-columns: 64px auto 64px auto 64px auto 64px; }
+      .eq-row input { font-size: 13px; padding: 8px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">LINEAR MATH SOLVER</div>
+    <h1>Solve <span>Linear</span><br>Problems Instantly</h1>
+    <p class="subtitle">Step-by-step solutions for linear equations with one or two variables.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('one')">ONE VARIABLE</button>
+    <button class="tab" onclick="switchTab('two')">TWO VARIABLES</button>
+    <button class="tab" onclick="switchTab('expr')">EXPRESSION</button>
+  </div>
+
+  <!-- ONE VARIABLE: ax + b = c -->
+  <div class="panel active" id="panel-one">
+    <div class="card">
+      <div class="card-title">ax + b = c</div>
+      <div class="input-row">
+        <div class="field-group">
+          <label>a (coeff of x)</label>
+          <input type="number" id="one-a" value="3" placeholder="a" />
+        </div>
+        <div class="var-label" style="padding-top:22px">x +</div>
+        <div class="field-group">
+          <label>b (constant)</label>
+          <input type="number" id="one-b" value="5" placeholder="b" />
+        </div>
+        <div class="eq-symbol">=</div>
+        <div class="field-group">
+          <label>c (result)</label>
+          <input type="number" id="one-c" value="14" placeholder="c" />
+        </div>
+      </div>
+      <button class="solve-btn" onclick="solveOne()">▶ SOLVE</button>
+    </div>
+    <div id="one-result"></div>
+  </div>
+
+  <!-- TWO VARIABLES -->
+  <div class="panel" id="panel-two">
+    <div class="card">
+      <div class="card-title">System of Two Equations</div>
+      <div class="equations">
+        <div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:8px;">EQUATION 1</div>
+          <div class="eq-row">
+            <input type="number" id="a1" value="2" />
+            <div class="op">x +</div>
+            <input type="number" id="b1" value="3" />
+            <div class="op">y =</div>
+            <input type="number" id="c1" value="12" />
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:8px;">EQUATION 2</div>
+          <div class="eq-row">
+            <input type="number" id="a2" value="5" />
+            <div class="op">x −</div>
+            <input type="number" id="b2" value="1" />
+            <div class="op">y =</div>
+            <input type="number" id="c2" value="7" />
+          </div>
+        </div>
+      </div>
+      <button class="solve-btn" onclick="solveTwo()">▶ SOLVE SYSTEM</button>
+    </div>
+    <div id="two-result"></div>
+  </div>
+
+  <!-- EXPRESSION evaluator -->
+  <div class="panel" id="panel-expr">
+    <div class="card">
+      <div class="card-title">Evaluate / Simplify Expression</div>
+      <div class="expr-input-wrap">
+        <textarea id="expr-input" placeholder="Enter a linear expression or equation, e.g.&#10;  3x + 2 = 11&#10;  (5x - 3) / 2 = 7&#10;  2(x + 4) = 18"></textarea>
+      </div>
+      <p class="hint">
+        Supports: <code>ax + b = c</code>, <code>(ax + b) / d = c</code>, parentheses, decimals, negatives.
+        Use <code>x</code> as the variable.
+      </p>
+      <button class="solve-btn" onclick="solveExpr()">▶ SOLVE FOR x</button>
+    </div>
+    <div id="expr-result"></div>
+  </div>
+</div>
+
+<script>
+/* ─── Utilities ─────────────────────────────────────── */
+const fmt = n => {
+  if (!isFinite(n)) return '∞';
+  const r = Math.round(n * 1e9) / 1e9;
+  return Number.isInteger(r) ? r.toString() : r.toFixed(6).replace(/\.?0+$/, '');
+};
+
+const frac = (num, den) => {
+  if (den === 0) return null;
+  const g = gcd(Math.abs(Math.round(num * 1e6)), Math.abs(Math.round(den * 1e6)));
+  const n = Math.round(num * 1e6) / g, d = Math.round(den * 1e6) / g;
+  return d === 1 ? `${n}` : `${n}/${d}`;
+};
+
+const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+
+function renderResult(containerId, { ok, values, steps, error }) {
+  const el = document.getElementById(containerId);
+  if (!ok) {
+    el.innerHTML = `
+      <div class="result-box error">
+        <div class="result-header">✕ ERROR</div>
+        <div class="result-body"><div class="step-text">${error}</div></div>
+      </div>`;
+    return;
+  }
+
+  const valHtml = values.map(([v, n]) =>
+    `<div><span class="var">${v}</span> = <span class="num">${n}</span></div>`
+  ).join('');
+
+  const stepHtml = steps.map((s, i) => `
+    <div class="step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-text">${s}</div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="result-box success">
+      <div class="result-header">✓ SOLVED</div>
+      <div class="result-body">
+        <div class="result-value">${valHtml}</div>
+        <div class="steps-title">Step-by-step</div>
+        <div class="steps">${stepHtml}</div>
+      </div>
+    </div>`;
+}
+
+/* ─── ONE VARIABLE: ax + b = c → x = (c-b)/a ────────── */
+function solveOne() {
+  const a = parseFloat(document.getElementById('one-a').value);
+  const b = parseFloat(document.getElementById('one-b').value);
+  const c = parseFloat(document.getElementById('one-c').value);
+
+  if ([a, b, c].some(isNaN)) return renderResult('one-result', { ok: false, error: 'Please fill in all fields.' });
+  if (a === 0) return renderResult('one-result', { ok: false, error: 'Coefficient <em>a</em> cannot be zero (no variable).' });
+
+  const x = (c - b) / a;
+  const steps = [
+    `Start: <em>${fmt(a)}x + ${fmt(b)} = ${fmt(c)}</em>`,
+    `Subtract ${fmt(b)} from both sides: <em>${fmt(a)}x = ${fmt(c)} − ${fmt(b)} = ${fmt(c - b)}</em>`,
+    `Divide both sides by ${fmt(a)}: <em>x = ${fmt(c - b)} ÷ ${fmt(a)}</em>`,
+    `Result: <em>x = ${fmt(x)}</em>`
+  ];
+
+  renderResult('one-result', { ok: true, values: [['x', fmt(x)]], steps });
+}
+
+/* ─── TWO VARIABLES: Cramer's Rule ─────────────────── */
+function solveTwo() {
+  const a1 = parseFloat(document.getElementById('a1').value);
+  const b1 = parseFloat(document.getElementById('b1').value);
+  const c1 = parseFloat(document.getElementById('c1').value);
+  const a2 = parseFloat(document.getElementById('a2').value);
+  const b2 = parseFloat(document.getElementById('b2').value);
+  const c2 = parseFloat(document.getElementById('c2').value);
+
+  const eq1 = `${fmt(a1)}x + ${fmt(b1)}y = ${fmt(c1)}`;
+  const eq2 = `${fmt(a2)}x − ${fmt(b2)}y = ${fmt(c2)}`;
+
+  if ([a1,b1,c1,a2,b2,c2].some(isNaN))
+    return renderResult('two-result', { ok: false, error: 'Please fill in all fields.' });
+
+  // Note: eq2 uses subtraction so actual b2 coefficient is negative
+  const B2 = -b2;
+  const D  = a1 * B2 - a2 * b1;
+
+  if (D === 0) {
+    const parallel = (c1 * B2 !== c2 * b1);
+    return renderResult('two-result', {
+      ok: false,
+      error: parallel
+        ? 'The system has <em>no solution</em> — the equations are parallel lines.'
+        : 'The system has <em>infinite solutions</em> — the equations are the same line.'
+    });
+  }
+
+  const Dx = c1 * B2 - c2 * b1;
+  const Dy = a1 * c2 - a2 * c1;
+  const x  = Dx / D;
+  const y  = Dy / D;
+
+  const steps = [
+    `Equations: <em>${eq1}</em>  and  <em>${eq2}</em>`,
+    `Using elimination / Cramer's rule: D = (${fmt(a1)})(${fmt(B2)}) − (${fmt(a2)})(${fmt(b1)}) = <em>${fmt(D)}</em>`,
+    `Dₓ = (${fmt(c1)})(${fmt(B2)}) − (${fmt(c2)})(${fmt(b1)}) = <em>${fmt(Dx)}</em>`,
+    `x = Dₓ / D = ${fmt(Dx)} / ${fmt(D)} = <em>${fmt(x)}</em>`,
+    `Dᵧ = (${fmt(a1)})(${fmt(c2)}) − (${fmt(a2)})(${fmt(c1)}) = <em>${fmt(Dy)}</em>`,
+    `y = Dᵧ / D = ${fmt(Dy)} / ${fmt(D)} = <em>${fmt(y)}</em>`,
+    `Verification eq1: ${fmt(a1)}(${fmt(x)}) + ${fmt(b1)}(${fmt(y)}) = <em>${fmt(a1*x + b1*y)}</em> ✓`,
+    `Verification eq2: ${fmt(a2)}(${fmt(x)}) ${B2 >= 0 ? '+' : '−'} ${fmt(Math.abs(B2))}(${fmt(y)}) = <em>${fmt(a2*x + B2*y)}</em> ✓`
+  ];
+
+  renderResult('two-result', { ok: true, values: [['x', fmt(x)], ['y', fmt(y)]], steps });
+}
+
+/* ─── EXPRESSION PARSER ─────────────────────────────── */
+/*
+  Parses linear equations/expressions for x.
+  Supports: ax + b = c, (ax+b)/d = c, a(x+b) = c, decimals, negatives.
+  Strategy: convert to two polynomials lhs and rhs of degree ≤ 1, then solve.
+*/
+function solveExpr() {
+  const raw = document.getElementById('expr-input').value.trim();
+  if (!raw) return renderResult('expr-result', { ok: false, error: 'Please enter an expression.' });
+
+  try {
+    const { x, steps } = parseAndSolve(raw);
+    renderResult('expr-result', { ok: true, values: [['x', fmt(x)]], steps });
+  } catch (e) {
+    renderResult('expr-result', { ok: false, error: e.message });
+  }
+}
+
+/* Tokenizer + recursive descent for linear expressions */
+function parseAndSolve(raw) {
+  const steps = [`Input: <em>${raw}</em>`];
+
+  // Split on '='
+  const sides = raw.split('=');
+  if (sides.length > 2) throw new Error('More than one "=" found. Enter a single equation.');
+
+  let lhsPoly, rhsPoly;
+  if (sides.length === 2) {
+    lhsPoly = parseExpr(sides[0].trim());
+    rhsPoly  = parseExpr(sides[1].trim());
+    steps.push(`Left side parsed: <em>${polyStr(lhsPoly)}</em>`);
+    steps.push(`Right side parsed: <em>${polyStr(rhsPoly)}</em>`);
+  } else {
+    lhsPoly = parseExpr(sides[0].trim());
+    rhsPoly  = [0, 0]; // = 0
+    steps.push(`Expression parsed: <em>${polyStr(lhsPoly)}</em>`);
+  }
+
+  // Move everything to lhs: lhs - rhs = 0
+  const poly = [lhsPoly[0] - rhsPoly[0], lhsPoly[1] - rhsPoly[1]];
+  // poly[0] = coeff of x, poly[1] = constant
+  // poly[0]*x + poly[1] = 0
+
+  steps.push(`Rearranged: <em>${polyStr(poly)} = 0</em>`);
+
+  if (poly[0] === 0) {
+    if (Math.abs(poly[1]) < 1e-9) throw new Error('Identity: true for all x (infinite solutions).');
+    throw new Error('No variable x found in the equation. Cannot solve.');
+  }
+
+  const x = -poly[1] / poly[0];
+  steps.push(`Isolate x: <em>x = ${fmt(-poly[1])} ÷ ${fmt(poly[0])} = ${fmt(x)}</em>`);
+  return { x, steps };
+}
+
+/* Returns [coeff_of_x, constant] */
+function parseExpr(str) {
+  const tokens = tokenize(str);
+  let pos = 0;
+
+  function peek() { return tokens[pos]; }
+  function consume() { return tokens[pos++]; }
+
+  function parseAddSub() {
+    let result = parseMulDiv();
+    while (peek() === '+' || peek() === '-') {
+      const op = consume();
+      const right = parseMulDiv();
+      result = op === '+'
+        ? [result[0] + right[0], result[1] + right[1]]
+        : [result[0] - right[0], result[1] - right[1]];
+    }
+    return result;
+  }
+
+  function parseMulDiv() {
+    let result = parseUnary();
+    while (peek() === '*' || peek() === '/') {
+      const op = consume();
+      const right = parseUnary();
+      if (op === '*') {
+        // At least one must be constant
+        if (result[0] !== 0 && right[0] !== 0) throw new Error('Non-linear term detected (x²). Only linear equations supported.');
+        result = [result[0] * right[1] + result[1] * right[0], result[1] * right[1]];
+      } else {
+        // Division: rhs must be constant
+        if (right[0] !== 0) throw new Error('Cannot divide by an expression containing x.');
+        result = [result[0] / right[1], result[1] / right[1]];
+      }
+    }
+    return result;
+  }
+
+  function parseUnary() {
+    if (peek() === '-') { consume(); const v = parsePrimary(); return [-v[0], -v[1]]; }
+    if (peek() === '+') { consume(); }
+    return parsePrimary();
+  }
+
+  function parsePrimary() {
+    const t = peek();
+    if (t === '(') {
+      consume(); // (
+      const v = parseAddSub();
+      if (peek() !== ')') throw new Error('Missing closing parenthesis.');
+      consume(); // )
+      // Check for implicit multiplication: number(expr) already handled by tokenizer lookahead
+      return v;
+    }
+    if (t === 'x') { consume(); return [1, 0]; }
+    if (typeof t === 'number') { consume(); return [0, t]; }
+    throw new Error(`Unexpected token: "${t}"`);
+  }
+
+  return parseAddSub();
+}
+
+function tokenize(str) {
+  // Insert * for implicit multiplication: 2x → 2*x, 2( → 2*(, )(  → )*(
+  str = str
+    .replace(/\s+/g, '')
+    .replace(/(\d)(x)/g, '$1*$2')
+    .replace(/(\d)\(/g,  '$1*(')
+    .replace(/\)\(/g,    ')*(')
+    .replace(/\)(x)/g,   ')*$1');
+
+  const tokens = [];
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if ('+-*/()'.includes(ch)) { tokens.push(ch); i++; continue; }
+    if (ch === 'x') { tokens.push('x'); i++; continue; }
+    if (/\d|\./.test(ch)) {
+      let num = '';
+      while (i < str.length && /[\d.]/.test(str[i])) num += str[i++];
+      tokens.push(parseFloat(num));
+      continue;
+    }
+    throw new Error(`Unknown character: "${ch}"`);
+  }
+  return tokens;
+}
+
+function polyStr([cx, c]) {
+  const parts = [];
+  if (cx !== 0) parts.push(cx === 1 ? 'x' : cx === -1 ? '−x' : `${fmt(cx)}x`);
+  if (c !== 0 || parts.length === 0) {
+    parts.push(c < 0 ? `− ${fmt(Math.abs(c))}` : (parts.length ? `+ ${fmt(c)}` : fmt(c)));
+  }
+  return parts.join(' ') || '0';
+}
+
+/* ─── Tab switching ─────────────────────────────────── */
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const ids = ['one','two','expr'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+}
+</script>
+</body>
+</html>
