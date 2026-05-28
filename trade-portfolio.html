@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRADE — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:        #c8a84b;
+      --gold-light:  #e5cc87;
+      --gold-dim:    rgba(200,168,75,0.18);
+      --gold-border: rgba(200,168,75,0.35);
+      --bg:          #070b13;
+      --bg-card:     #0c1220;
+      --bg-card2:    #111826;
+      --text:        #e8e0cc;
+      --text-muted:  #7a8494;
+      --text-dim:    #4a5260;
+      --red-accent:  #c84b4b;
+      --teal-accent: #4bc8a2;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── GRID LINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,168,75,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,168,75,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 3rem 4rem 2rem;
+      border-bottom: 1px solid var(--gold-border);
+    }
+
+    .header-left { flex: 1; }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    h1.site-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4.5rem, 12vw, 9rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 0.9;
+      color: var(--text);
+      background: linear-gradient(135deg, #e8e0cc 0%, #c8a84b 60%, #e8e0cc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle-line {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .subtitle-line span {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .dot-sep {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+
+    /* ── GRADE VIEWER BUTTON ── */
+    .grade-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+
+    .grade-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .grade-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s;
+    }
+
+    .grade-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .grade-btn:hover::before { transform: scaleX(1); }
+    .grade-btn:hover { color: var(--bg); }
+
+    .grade-btn span, .grade-btn svg { position: relative; z-index: 1; }
+
+    .grade-btn .ticker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .grade-btn .arrow {
+      transition: transform 0.3s;
+    }
+
+    .grade-btn:hover .arrow { transform: translate(3px, -3px); }
+
+    .grade-ticker-strip {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+
+    .ticker-val { color: var(--teal-accent); font-weight: 400; }
+    .ticker-val.neg { color: var(--red-accent); }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      position: relative;
+      z-index: 10;
+      padding: 3rem 4rem 5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold-border), transparent);
+    }
+
+    /* ── ASSIGNMENTS GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5px;
+    }
+
+    /* ── ASSIGNMENT CARD ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(200,168,75,0.1);
+      padding: 2rem;
+      position: relative;
+      transition: border-color 0.3s, background 0.3s;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      background: var(--gold);
+      transition: height 0.4s ease;
+    }
+
+    .card:hover {
+      border-color: var(--gold-border);
+      background: var(--bg-card2);
+    }
+
+    .card:hover::before { height: 100%; }
+
+    .card-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4.5rem;
+      font-weight: 700;
+      line-height: 1;
+      color: rgba(200,168,75,0.08);
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      transition: color 0.3s;
+      user-select: none;
+    }
+
+    .card:hover .card-number { color: rgba(200,168,75,0.15); }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid rgba(200,168,75,0.2);
+      padding: 0.2rem 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    /* Gold primary button */
+    .btn-gold {
+      color: var(--gold);
+      border-color: var(--gold-border);
+      background: transparent;
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-dim);
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+
+    /* Teal secondary button */
+    .btn-teal {
+      color: var(--teal-accent);
+      border-color: rgba(75,200,162,0.3);
+      background: transparent;
+    }
+
+    .btn-teal:hover {
+      background: rgba(75,200,162,0.08);
+      border-color: var(--teal-accent);
+    }
+
+    /* Muted button for readings */
+    .btn-muted {
+      color: var(--text-muted);
+      border-color: rgba(122,132,148,0.3);
+      background: transparent;
+    }
+
+    .btn-muted:hover {
+      background: rgba(122,132,148,0.08);
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .btn svg {
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+
+    /* ── READINGS SECTION ── */
+    .readings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5px;
+      margin-top: 1.5px;
+    }
+
+    .reading-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(200,168,75,0.08);
+      padding: 1.5rem;
+      position: relative;
+      transition: border-color 0.3s, background 0.3s;
+      overflow: hidden;
+    }
+
+    .reading-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .reading-card:hover {
+      border-color: var(--gold-border);
+      background: var(--bg-card2);
+    }
+
+    .reading-card:hover::after { opacity: 1; }
+
+    .reading-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.05em;
+    }
+
+    .reading-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 10;
+      border-top: 1px solid var(--gold-border);
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-right {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── ICON INLINE SVGs ── */
+    .icon { display: inline-block; vertical-align: middle; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header { animation: fadeInUp 0.6s ease both; }
+    .card  { animation: fadeInUp 0.5s ease both; }
+    .card:nth-child(1)  { animation-delay: 0.05s; }
+    .card:nth-child(2)  { animation-delay: 0.10s; }
+    .card:nth-child(3)  { animation-delay: 0.15s; }
+    .card:nth-child(4)  { animation-delay: 0.20s; }
+
+    .reading-card { animation: fadeInUp 0.5s ease both; }
+    .reading-card:nth-child(1) { animation-delay: 0.25s; }
+    .reading-card:nth-child(2) { animation-delay: 0.30s; }
+    .reading-card:nth-child(3) { animation-delay: 0.35s; }
+    .reading-card:nth-child(4) { animation-delay: 0.40s; }
+    .reading-card:nth-child(5) { animation-delay: 0.45s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header { flex-direction: column; padding: 2rem; gap: 1.5rem; }
+      .grade-btn-wrap { align-items: flex-start; }
+      h1.site-title { font-size: 5rem; }
+      main { padding: 2rem; }
+      footer { padding: 1.5rem 2rem; flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+  <header>
+    <div class="header-left">
+      <div class="eyebrow">Academic Portfolio &nbsp;·&nbsp; Trade &amp; Management Science</div>
+      <h1 class="site-title">TRADE</h1>
+      <div class="subtitle-line">
+        <span>Course Work</span>
+        <div class="dot-sep"></div>
+        <span>Assignments &amp; Readings</span>
+        <div class="dot-sep"></div>
+        <span>2024 – 2025</span>
+      </div>
+    </div>
+
+    <div class="grade-btn-wrap">
+      <span class="grade-label">Academic Record</span>
+      <!-- REPLACE # WITH YOUR GRADE VIEWER URL -->
+      <a href="#" target="_blank" class="grade-btn">
+        <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+        <span class="ticker">
+          Grade Viewer
+        </span>
+        <svg class="arrow icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 17L17 7M7 7h10v10"/>
+        </svg>
+      </a>
+      <div class="grade-ticker-strip">
+        <span>GPA</span>
+        <span class="ticker-val">▲ Live</span>
+        <span>&nbsp;·&nbsp;</span>
+        <span>Status</span>
+        <span class="ticker-val">Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+  <main>
+
+    <!-- ─── MAJOR ASSIGNMENTS ─── -->
+    <div class="section-header">
+      <span class="section-label">Assignments</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="grid">
+
+      <!-- 01 · Ridiculous Tariffs -->
+      <div class="card">
+        <div class="card-number">01</div>
+        <div class="card-tag">Google Doc</div>
+        <h2>Ridiculous Tariffs</h2>
+        <div class="btn-group">
+          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
+          <a href="#" target="_blank" class="btn btn-gold">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Open Document
+          </a>
+        </div>
+      </div>
+
+      <!-- 02 · I Require a Story! -->
+      <div class="card">
+        <div class="card-number">02</div>
+        <div class="card-tag">Google Doc</div>
+        <h2>I Require a Story!</h2>
+        <div class="btn-group">
+          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
+          <a href="#" target="_blank" class="btn btn-gold">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Open Document
+          </a>
+        </div>
+      </div>
+
+      <!-- 03 · DAH-Snarky -->
+      <div class="card">
+        <div class="card-number">03</div>
+        <div class="card-tag">External Link</div>
+        <h2>DAH‑Snarky</h2>
+        <div class="btn-group">
+          <!-- REPLACE # WITH YOUR DAH-SNARKY LINK -->
+          <a href="#" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Open Link
+          </a>
+        </div>
+      </div>
+
+      <!-- 04 · May the 4th Be With You! -->
+      <div class="card">
+        <div class="card-number">04</div>
+        <div class="card-tag">Video &amp; Google Doc</div>
+        <h2>May the 4th Be With You!</h2>
+        <div class="btn-group">
+          <!-- REPLACE may-4th-video.mp4 WITH YOUR VIDEO FILENAME -->
+          <a href="may-4th-video.mp4" target="_blank" class="btn btn-gold">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Watch Video
+          </a>
+          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
+          <a href="#" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Open Document
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+
+    <!-- ─── READINGS SECTION ─── -->
+    <div class="section-header" style="margin-top: 3.5rem;">
+      <span class="section-label">Readings</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="readings-grid">
+
+      <!-- Reading 1 -->
+      <div class="reading-card">
+        <div class="reading-num">Reading · 01</div>
+        <div class="reading-title">Reading 1</div>
+        <div class="btn-group">
+          <!-- REPLACE reading1-p1.jpg WITH YOUR FILE NAME -->
+          <a href="reading1-p1.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 1
+          </a>
+          <!-- REPLACE reading1-p2.jpg WITH YOUR FILE NAME -->
+          <a href="reading1-p2.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 2
+          </a>
+        </div>
+      </div>
+
+      <!-- Reading 2 -->
+      <div class="reading-card">
+        <div class="reading-num">Reading · 02</div>
+        <div class="reading-title">Reading 2</div>
+        <div class="btn-group">
+          <a href="reading2-p1.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 1
+          </a>
+          <a href="reading2-p2.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 2
+          </a>
+        </div>
+      </div>
+
+      <!-- Reading 3 -->
+      <div class="reading-card">
+        <div class="reading-num">Reading · 03</div>
+        <div class="reading-title">Reading 3</div>
+        <div class="btn-group">
+          <a href="reading3-p1.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 1
+          </a>
+          <a href="reading3-p2.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 2
+          </a>
+        </div>
+      </div>
+
+      <!-- Reading 4 -->
+      <div class="reading-card">
+        <div class="reading-num">Reading · 04</div>
+        <div class="reading-title">Reading 4</div>
+        <div class="btn-group">
+          <a href="reading4-p1.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 1
+          </a>
+          <a href="reading4-p2.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 2
+          </a>
+        </div>
+      </div>
+
+      <!-- Reading 5 -->
+      <div class="reading-card">
+        <div class="reading-num">Reading · 05</div>
+        <div class="reading-title">Reading 5</div>
+        <div class="btn-group">
+          <a href="reading5-p1.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 1
+          </a>
+          <a href="reading5-p2.jpg" target="_blank" class="btn btn-muted">
+            <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+            Page 2
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /readings-grid -->
+
+  </main>
+
+  <!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+  <footer>
+    <span class="footer-name">Hasan Osiul &nbsp;—&nbsp; 2417921</span>
+    <span class="footer-right">Trade &amp; Management Science &nbsp;·&nbsp; Portfolio</span>
+  </footer>
+
+</body>
+</html>
