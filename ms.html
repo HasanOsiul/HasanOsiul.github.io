@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Management Science — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:          #06b6d4;
+      --cyan-dim:      rgba(6,182,212,0.10);
+      --cyan-border:   rgba(6,182,212,0.28);
+      --emerald:       #10b981;
+      --emerald-dim:   rgba(16,185,129,0.10);
+      --emerald-border:rgba(16,185,129,0.28);
+      --amber:         #f59e0b;
+      --amber-dim:     rgba(245,158,11,0.10);
+      --amber-border:  rgba(245,158,11,0.28);
+      --bg:            #050c19;
+      --bg-card:       #091425;
+      --bg-card2:      #0d1c35;
+      --text:          #ddeeff;
+      --text-muted:    #4d6a88;
+      --text-dim:      #243448;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── GRID OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(6,182,212,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6,182,212,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── DECORATIVE NETWORK SVG ── */
+    .bg-diagram {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 55%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.07;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 3rem 4rem 2.5rem;
+      border-bottom: 1px solid rgba(6,182,212,0.18);
+    }
+
+    .header-left { flex: 1; }
+
+    .eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 22px;
+      height: 1px;
+      background: var(--cyan);
+    }
+
+    h1.site-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 0.92;
+      font-size: clamp(3rem, 9vw, 7rem);
+    }
+
+    .title-line-1 { color: var(--text); }
+    .title-line-2 { color: var(--cyan); }
+
+    .subtitle-line {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .subtitle-line span {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .dot-sep {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--cyan);
+      opacity: 0.5;
+    }
+
+    .formula {
+      display: inline-block;
+      margin-top: 1.3rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      font-style: italic;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      border-left: 2px solid rgba(6,182,212,0.2);
+      padding-left: 0.7rem;
+    }
+
+    /* ── GRADE VIEWER ── */
+    .grade-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+
+    .grade-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .grade-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 0.72rem 1.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s;
+    }
+
+    .grade-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--cyan);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .grade-btn:hover::before { transform: scaleX(1); }
+    .grade-btn:hover { color: var(--bg); }
+    .grade-btn > * { position: relative; z-index: 1; }
+    .grade-btn .arrow { transition: transform 0.3s; }
+    .grade-btn:hover .arrow { transform: translate(3px, -3px); }
+
+    .grade-subtext {
+      font-size: 0.5rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    .grade-subtext em {
+      color: var(--emerald);
+      font-style: normal;
+    }
+
+    /* ── MAIN ── */
+    main {
+      position: relative;
+      z-index: 10;
+      padding: 3rem 4rem 5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-label {
+      font-size: 0.56rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .section-count {
+      font-size: 0.52rem;
+      color: var(--text-dim);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(6,182,212,0.25), transparent);
+    }
+
+    /* ── CARDS ── */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(6,182,212,0.07);
+      padding: 2.5rem;
+      position: relative;
+      transition: border-color 0.35s, background 0.35s;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--cyan) 40%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .card:hover {
+      border-color: var(--cyan-border);
+      background: var(--bg-card2);
+    }
+    .card:hover::after { opacity: 1; }
+
+    /* Number column */
+    .num-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .card-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      color: rgba(6,182,212,0.12);
+      line-height: 1;
+      transition: color 0.35s;
+      letter-spacing: -0.04em;
+    }
+
+    .card:hover .card-num { color: rgba(6,182,212,0.3); }
+
+    .num-dash {
+      width: 1px;
+      height: 100%;
+      min-height: 30px;
+      background: linear-gradient(180deg, rgba(6,182,212,0.15) 0%, transparent 100%);
+      margin-top: 0.4rem;
+    }
+
+    /* Card body */
+    .card-body {}
+
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.48rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid rgba(6,182,212,0.14);
+      padding: 0.22rem 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--cyan);
+      opacity: 0.6;
+    }
+
+    .card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 1.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      white-space: nowrap;
+    }
+
+    .btn svg { flex-shrink: 0; }
+
+    .btn-cyan {
+      color: var(--cyan);
+      border-color: var(--cyan-border);
+      background: transparent;
+    }
+    .btn-cyan:hover {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      color: #7ee8f8;
+    }
+
+    .btn-emerald {
+      color: var(--emerald);
+      border-color: var(--emerald-border);
+      background: transparent;
+    }
+    .btn-emerald:hover {
+      background: var(--emerald-dim);
+      border-color: var(--emerald);
+      color: #6ee7b7;
+    }
+
+    .btn-amber {
+      color: var(--amber);
+      border-color: var(--amber-border);
+      background: transparent;
+    }
+    .btn-amber:hover {
+      background: var(--amber-dim);
+      border-color: var(--amber);
+      color: #fcd34d;
+    }
+
+    /* ── BB DIAGRAM LABELS ── */
+    .btn-sub {
+      font-size: 0.44rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding-top: 0.2rem;
+      align-self: flex-end;
+      margin-left: 0.1rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 10;
+      border-top: 1px solid rgba(6,182,212,0.14);
+      padding: 1.8rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+
+    .footer-right {
+      font-size: 0.52rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header { animation: fadeUp 0.55s ease both; }
+    .card  { animation: fadeUp 0.5s ease both; }
+    .card:nth-child(1) { animation-delay: 0.06s; }
+    .card:nth-child(2) { animation-delay: 0.14s; }
+    .card:nth-child(3) { animation-delay: 0.22s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header { flex-direction: column; padding: 2rem; gap: 1.5rem; }
+      .grade-btn-wrap { align-items: flex-start; }
+      main { padding: 2rem; }
+      .card { grid-template-columns: 1fr; }
+      .num-col { flex-direction: row; align-items: center; }
+      .num-dash { display: none; }
+      footer { flex-direction: column; gap: 0.5rem; padding: 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ DECORATIVE BACKGROUND DIAGRAM (Decision tree + LP graph) ═══ -->
+  <svg class="bg-diagram" viewBox="0 0 620 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Decision tree -->
+    <circle cx="310" cy="80"  r="14" stroke="#06b6d4" stroke-width="1"/>
+    <text x="310" y="85" text-anchor="middle" font-size="8" fill="#06b6d4" font-family="monospace">z≤4</text>
+    <line x1="296" y1="94" x2="175" y2="190" stroke="#06b6d4" stroke-width="0.6"/>
+    <line x1="324" y1="94" x2="445" y2="190" stroke="#06b6d4" stroke-width="0.6"/>
+    <rect x="155" y="190" width="40" height="22" rx="2" stroke="#06b6d4" stroke-width="0.8"/>
+    <text x="175" y="205" text-anchor="middle" font-size="7" fill="#06b6d4" font-family="monospace">x₁≤2</text>
+    <rect x="425" y="190" width="40" height="22" rx="2" stroke="#06b6d4" stroke-width="0.8"/>
+    <text x="445" y="205" text-anchor="middle" font-size="7" fill="#06b6d4" font-family="monospace">x₂≤1</text>
+    <line x1="163" y1="212" x2="105" y2="295" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="187" y1="212" x2="245" y2="295" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="433" y1="212" x2="375" y2="295" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="457" y1="212" x2="515" y2="295" stroke="#06b6d4" stroke-width="0.5"/>
+    <circle cx="105" cy="305" r="9" stroke="#10b981" stroke-width="0.8"/>
+    <circle cx="245" cy="305" r="9" stroke="#06b6d4" stroke-width="0.8"/>
+    <circle cx="375" cy="305" r="9" stroke="#10b981" stroke-width="0.8"/>
+    <circle cx="515" cy="305" r="9" stroke="#f59e0b" stroke-width="0.8"/>
+    <text x="105" y="309" text-anchor="middle" font-size="6" fill="#10b981" font-family="monospace">INT</text>
+    <text x="245" y="309" text-anchor="middle" font-size="6" fill="#06b6d4" font-family="monospace">BB</text>
+    <text x="375" y="309" text-anchor="middle" font-size="6" fill="#10b981" font-family="monospace">OPT</text>
+    <text x="515" y="309" text-anchor="middle" font-size="6" fill="#f59e0b" font-family="monospace">∞</text>
+    <!-- Sub-branches for center node -->
+    <line x1="237" y1="314" x2="205" y2="380" stroke="#06b6d4" stroke-width="0.4"/>
+    <line x1="253" y1="314" x2="285" y2="380" stroke="#06b6d4" stroke-width="0.4"/>
+    <circle cx="205" cy="388" r="7" stroke="#10b981" stroke-width="0.7"/>
+    <circle cx="285" cy="388" r="7" stroke="#10b981" stroke-width="0.7"/>
+    <text x="205" y="392" text-anchor="middle" font-size="5" fill="#10b981" font-family="monospace">OPT</text>
+    <text x="285" y="392" text-anchor="middle" font-size="5" fill="#10b981" font-family="monospace">OPT</text>
+    <!-- LP feasible region -->
+    <line x1="60"  y1="700" x2="560" y2="700" stroke="#06b6d4" stroke-width="0.6"/>
+    <line x1="60"  y1="700" x2="60"  y2="500" stroke="#06b6d4" stroke-width="0.6"/>
+    <polygon points="570,696 580,700 570,704" fill="#06b6d4"/>
+    <polygon points="56,492 60,482 64,492" fill="#06b6d4"/>
+    <text x="584" y="703" font-size="9" fill="#06b6d4" font-family="monospace">x₁</text>
+    <text x="48"  y="487" font-size="9" fill="#06b6d4" font-family="monospace">x₂</text>
+    <!-- Feasible region polygon -->
+    <polygon points="60,700 60,580 200,530 400,620 460,700" fill="#06b6d4" fill-opacity="0.04" stroke="#06b6d4" stroke-width="0.5"/>
+    <!-- Constraint lines -->
+    <line x1="60"  y1="560" x2="480" y2="680" stroke="#06b6d4" stroke-width="0.5" stroke-dasharray="5,5"/>
+    <line x1="80"  y1="510" x2="440" y2="700" stroke="#06b6d4" stroke-width="0.5" stroke-dasharray="5,5"/>
+    <line x1="60"  y1="620" x2="500" y2="700" stroke="#10b981" stroke-width="0.4" stroke-dasharray="3,6"/>
+    <!-- Optimal point z* -->
+    <circle cx="320" cy="618" r="6" fill="#10b981" fill-opacity="0.7"/>
+    <circle cx="320" cy="618" r="10" stroke="#10b981" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="330" y="612" font-size="8" fill="#10b981" font-family="monospace">z*</text>
+    <!-- Tick marks -->
+    <line x1="160" y1="697" x2="160" y2="703" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="260" y1="697" x2="260" y2="703" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="360" y1="697" x2="360" y2="703" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="460" y1="697" x2="460" y2="703" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="57"  y1="600" x2="63"  y2="600" stroke="#06b6d4" stroke-width="0.5"/>
+    <line x1="57"  y1="540" x2="63"  y2="540" stroke="#06b6d4" stroke-width="0.5"/>
+  </svg>
+
+  <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+  <header>
+    <div class="header-left">
+      <div class="eyebrow">Academic Portfolio &nbsp;·&nbsp; Trade &amp; Management Science</div>
+      <h1 class="site-title">
+        <span class="title-line-1">MANAGEMENT</span><br/>
+        <span class="title-line-2">SCIENCE</span>
+      </h1>
+      <div class="subtitle-line">
+        <span>Operations Research</span>
+        <div class="dot-sep"></div>
+        <span>Optimisation</span>
+        <div class="dot-sep"></div>
+        <span>2024 – 2025</span>
+      </div>
+      <div class="formula">min z = cᵀx &nbsp; s.t. Ax ≤ b, x ∈ ℤ⁺</div>
+    </div>
+
+    <div class="grade-btn-wrap">
+      <span class="grade-label">Academic Record</span>
+      <!-- REPLACE # WITH YOUR GRADE VIEWER URL -->
+      <a href="#" target="_blank" class="grade-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+        <span>Grade Viewer</span>
+        <svg class="arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 17L17 7M7 7h10v10"/>
+        </svg>
+      </a>
+      <div class="grade-subtext">Status &nbsp;<em>● Active</em></div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main>
+
+    <div class="section-header">
+      <span class="section-label">Assignments</span>
+      <span class="section-count">[ 03 ]</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="cards">
+
+      <!-- ─── 01 · Custom Optimization Problem ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">01</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Document File</div>
+          <h2>Custom Optimization<br/>Problem</h2>
+          <div class="btn-group">
+            <!-- REPLACE custom-optimization.docx WITH YOUR ACTUAL FILENAME -->
+            <a href="custom-optimization.docx" target="_blank" class="btn btn-cyan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              Open Document
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 02 · Branch and Bound ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">02</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Excalidraw &nbsp;·&nbsp; 3 Diagrams</div>
+          <h2>Branch and Bound</h2>
+          <div class="btn-group">
+            <!-- REPLACE # WITH YOUR EXCALIDRAW LINKS OR FILE PATHS -->
+            <a href="#" target="_blank" class="btn btn-cyan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+              </svg>
+              DT Team
+            </a>
+            <a href="#" target="_blank" class="btn btn-emerald">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+              Pizza Optimizer DT
+            </a>
+            <a href="#" target="_blank" class="btn btn-amber">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              Pizza Optimizer BB
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 03 · May the 4th Be With You ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">03</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Video &amp; Document</div>
+          <h2>May the 4th<br/>Be With You!</h2>
+          <div class="btn-group">
+            <!-- REPLACE may-4th-video.mp4 WITH YOUR ACTUAL VIDEO FILENAME -->
+            <a href="may-4th-video.mp4" target="_blank" class="btn btn-cyan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Watch Video
+            </a>
+            <!-- REPLACE # WITH YOUR GOOGLE DOCS OR DOC LINK -->
+            <a href="#" target="_blank" class="btn btn-emerald">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              Open Document
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer>
+    <span class="footer-name">Hasan Osiul &nbsp;—&nbsp; 2417921</span>
+    <span class="footer-right">Management Science &nbsp;·&nbsp; Portfolio</span>
+  </footer>
+
+</body>
+</html>
