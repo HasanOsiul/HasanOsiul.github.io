@@ -300,6 +300,39 @@
       position: relative;
     }
 
+    /* ── PROJECT CARD DESC ── */
+    .card-desc {
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-top: -1rem;
+      margin-bottom: 1.4rem;
+      position: relative;
+    }
+
+    /* ── PROJECT CARD VARIANT ── */
+    .card-project .card-number {
+      color: rgba(75, 200, 162, 0.07);
+    }
+
+    .card-project:hover .card-number {
+      color: rgba(75, 200, 162, 0.14);
+    }
+
+    .card-project::before {
+      background: var(--teal-accent);
+    }
+
+    .card-project .card-tag {
+      border-color: rgba(75, 200, 162, 0.25);
+      color: rgba(75, 200, 162, 0.6);
+    }
+
+    .card-project:hover {
+      border-color: rgba(75, 200, 162, 0.3);
+    }
+
     /* ── BUTTONS ── */
     .btn-group {
       display: flex;
@@ -469,6 +502,7 @@
     .card:nth-child(2)  { animation-delay: 0.10s; }
     .card:nth-child(3)  { animation-delay: 0.15s; }
     .card:nth-child(4)  { animation-delay: 0.20s; }
+    .card:nth-child(5)  { animation-delay: 0.25s; }
 
     .reading-card { animation: fadeInUp 0.5s ease both; }
     .reading-card:nth-child(1) { animation-delay: 0.25s; }
@@ -504,7 +538,6 @@
 
     <div class="grade-btn-wrap">
       <span class="grade-label">Academic Record</span>
-      <!-- REPLACE # WITH YOUR GRADE VIEWER URL -->
       <a href="https://josuedean.github.io/ibm/gradeviewer" target="_blank" class="grade-btn">
         <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -545,7 +578,6 @@
         <div class="card-tag">Google Doc</div>
         <h2>Ridiculous Tariffs</h2>
         <div class="btn-group">
-          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
           <a href="https://docs.google.com/document/d/1XHrUF3DSCHvJMh063DK97uUkQSk6j22Def6bTA83usM/edit?usp=sharing" target="_blank" class="btn btn-gold">
             <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -562,7 +594,6 @@
         <div class="card-tag">Google Doc</div>
         <h2>I Require a Story!</h2>
         <div class="btn-group">
-          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
           <a href="https://drive.google.com/drive/folders/1Z8R7ZOPr0hQ3pR0wtrBs_58QwA1QErZ4?usp=drive_link" target="_blank" class="btn btn-gold">
             <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -579,7 +610,6 @@
         <div class="card-tag">External Link</div>
         <h2>DAH‑Snarky</h2>
         <div class="btn-group">
-          <!-- REPLACE # WITH YOUR DAH-SNARKY LINK -->
           <a href="https://chatgpt.com/share/69f454d2-8128-8324-9082-71f56e2a4911" target="_blank" class="btn btn-teal">
             <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -597,14 +627,12 @@
         <div class="card-tag">Video &amp; Google Doc</div>
         <h2>May the 4th Be With You!</h2>
         <div class="btn-group">
-          <!-- REPLACE may-4th-video.mp4 WITH YOUR VIDEO FILENAME -->
           <a href="https://drive.google.com/file/d/1xzgQKMyw2XNNQ9CwExz5ClQqZ5eK9cnn/view?usp=sharing" target="_blank" class="btn btn-gold">
             <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
             Watch Video
           </a>
-          <!-- REPLACE # WITH YOUR GOOGLE DOCS LINK -->
           <a href="https://docs.google.com/document/d/14g9TNy6mb0vyTO2ddVFVxRJWQABpHaZ9Kj0xuXbC1F8/edit?usp=sharing" target="_blank" class="btn btn-teal">
             <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -616,6 +644,100 @@
       </div>
 
     </div><!-- /grid -->
+
+    <!-- ─── PROJECTS ─── -->
+    <div class="section-header" style="margin-top: 3.5rem;">
+      <span class="section-label">Projects</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="grid">
+
+      <!-- P1 · World Trade Explorer -->
+      <div class="card card-project">
+        <div class="card-number">P1</div>
+        <div class="card-tag">Interactive Simulation</div>
+        <h2>World Trade Explorer</h2>
+        <p class="card-desc">Global bilateral trade flows, network mapping &amp; comparative trade analysis</p>
+        <div class="btn-group">
+          <a href="world-trade-explorer.html" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            Open Project
+          </a>
+        </div>
+      </div>
+
+      <!-- P2 · The Bangladesh Tariff Puzzle -->
+      <div class="card card-project">
+        <div class="card-number">P2</div>
+        <div class="card-tag">Policy Analysis</div>
+        <h2>The Bangladesh Tariff Puzzle</h2>
+        <p class="card-desc">Trade protection strategies &amp; welfare implications in a developing economy</p>
+        <div class="btn-group">
+          <a href="bangladesh-tariffs-project.html" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+            Open Project
+          </a>
+        </div>
+      </div>
+
+      <!-- P3 · Economies of Scale & New Trade Theory -->
+      <div class="card card-project">
+        <div class="card-number">P3</div>
+        <div class="card-tag">New Trade Theory</div>
+        <h2>Economies of Scale &amp; Trade</h2>
+        <p class="card-desc">Internal &amp; external returns to scale, market structure, and intra-industry trade patterns</p>
+        <div class="btn-group">
+          <a href="economies-of-scale.html" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Open Project
+          </a>
+        </div>
+      </div>
+
+      <!-- P4 · Heckscher-Ohlin Model -->
+      <div class="card card-project">
+        <div class="card-number">P4</div>
+        <div class="card-tag">Factor Endowments</div>
+        <h2>Heckscher-Ohlin Model</h2>
+        <p class="card-desc">Factor proportions, factor intensity &amp; comparative advantage predictions</p>
+        <div class="btn-group">
+          <a href="heckscher-ohlin.html" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Open Project
+          </a>
+        </div>
+      </div>
+
+      <!-- P5 · Resource Abundance Trade Lab -->
+      <div class="card card-project">
+        <div class="card-number">P5</div>
+        <div class="card-tag">Interactive Lab</div>
+        <h2>Resource Abundance Trade Lab</h2>
+        <p class="card-desc">Factor-driven trade predictions, Leontief paradox &amp; empirical H-O testing</p>
+        <div class="btn-group">
+          <a href="resource-abundance-trade-lab.html" target="_blank" class="btn btn-teal">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/>
+            </svg>
+            Open Project
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /projects grid -->
 
     <!-- ─── READINGS SECTION ─── -->
     <div class="section-header" style="margin-top: 3.5rem;">
@@ -630,7 +752,6 @@
         <div class="reading-num">Reading · 01</div>
         <div class="reading-title">Reading 1</div>
         <div class="btn-group">
-          <!-- REPLACE reading1-p1.jpg WITH YOUR FILE NAME -->
           <a href="reading1-p1.JPG" target="_blank" class="btn btn-muted">
             <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -638,7 +759,6 @@
             </svg>
             Page 1
           </a>
-          <!-- REPLACE reading1-p2.jpg WITH YOUR FILE NAME -->
           <a href="reading1-p2.JPG" target="_blank" class="btn btn-muted">
             <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
