@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridiculous Tariffs: Bangladesh's High Import Taxes | Hasan Osiul</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #006A4E;
+    --green-light: #00875E;
+    --red: #F42A41;
+    --red-soft: #FF6B7A;
+    --gold: #F5C518;
+    --gold-soft: #FFD95A;
+    --dark: #0A0F0D;
+    --dark2: #111916;
+    --dark3: #182218;
+    --mid: #1E2D22;
+    --glass: rgba(255,255,255,0.04);
+    --glass2: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.10);
+    --text: #E8EDE9;
+    --text-muted: #8EA090;
+    --text-dim: #5A6E5E;
+    --accent: #00D68F;
+    --accent2: #F5C518;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:9999;
+    opacity:0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:1000;
+    background: rgba(10,15,13,0.88);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+    background: var(--glass2);
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 2rem 4rem;
+    text-align: center;
+  }
+
+  .hero-bg {
+    position:absolute;
+    inset:0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,106,78,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,42,65,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 20% 70%, rgba(245,197,24,0.08) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(0,214,143,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,214,143,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  .flag-accent {
+    width: 80px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 auto 2rem;
+    box-shadow: 0 0 40px rgba(0,214,143,0.3), 0 0 80px rgba(0,214,143,0.1);
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .flag-inner {
+    width:100%; height:100%;
+    background: #006A4E;
+    display:flex; align-items:center; justify-content:center;
+    padding-left: 6px;
+  }
+
+  .flag-circle {
+    width: 28px; height: 28px;
+    background: #F42A41;
+    border-radius: 50%;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.08;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-title .accent-word { color: var(--red); }
+  .hero-title .accent-word2 { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .hero-stat {
+    text-align: center;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 2rem;
+    backdrop-filter: blur(12px);
+    min-width: 130px;
+  }
+
+  .hero-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero-stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: bounceDown 2s infinite;
+  }
+
+  .scroll-hint svg { width:20px; height:20px; }
+
+  /* ── SECTIONS SHARED ── */
+  section {
+    padding: 6rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .full-bleed {
+    max-width: 100%;
+    padding: 6rem 0;
+  }
+
+  .full-bleed > .inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-tag::before {
+    content:'';
+    display:block;
+    width:24px; height:1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  /* ── GLASS CARD ── */
+  .glass-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+    transition: all 0.35s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(0,214,143,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(0,214,143,0.05);
+  }
+
+  /* ── BIG QUOTE ── */
+  .big-quote {
+    background: linear-gradient(135deg, rgba(0,106,78,0.2), rgba(244,42,65,0.1));
+    border: 1px solid rgba(0,214,143,0.2);
+    border-radius: 24px;
+    padding: 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin: 4rem 0;
+  }
+
+  .big-quote::before {
+    content: '"';
+    position: absolute;
+    top:-0.5rem; left:1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 12rem;
+    color: rgba(0,214,143,0.08);
+    line-height: 1;
+    pointer-events:none;
+  }
+
+  .big-quote p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.35;
+    position: relative;
+    z-index: 1;
+  }
+
+  .big-quote p span { color: var(--accent); }
+
+  .big-quote cite {
+    display: block;
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: normal;
+    letter-spacing: 0.08em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── OVERVIEW GRID ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ov-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .ov-card:hover { border-color: rgba(0,214,143,0.25); transform:translateY(-3px); }
+
+  .ov-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items:center; justify-content:center;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .ov-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .ov-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .ov-list li {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding-left: 1.1rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .ov-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.7rem;
+    top: 0.1rem;
+  }
+
+  /* ── DEMO SECTION BG ── */
+  #demo {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .demo-bg {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6rem 2rem;
+  }
+
+  .demo-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── CALCULATOR ── */
+  .calc-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .calc-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .calc-label {
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .calc-input {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.25rem;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .calc-input:focus { border-color: var(--accent); }
+
+  .calc-btn {
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    border: none;
+    border-radius: 12px;
+    padding: 0.9rem 2rem;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+  }
+
+  .calc-btn:hover { transform:scale(1.03); box-shadow:0 8px 30px rgba(0,214,143,0.3); }
+
+  .calc-result {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-content: start;
+  }
+
+  .result-item {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+
+  .result-item.highlight {
+    background: linear-gradient(135deg, rgba(0,106,78,0.3), rgba(0,214,143,0.1));
+    border: 1px solid rgba(0,214,143,0.3);
+    grid-column: 1/-1;
+  }
+
+  .result-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.35rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .result-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    transition: all 0.4s;
+  }
+
+  .result-value.red { color: var(--red-soft); }
+  .result-value.green { color: var(--accent); }
+  .result-value.gold { color: var(--gold); }
+
+  /* ── PRODUCT CARDS ── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .prod-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prod-card::after {
+    content:'';
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:3px;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .prod-card:hover, .prod-card.active {
+    border-color: rgba(0,214,143,0.35);
+    transform: translateY(-4px);
+  }
+
+  .prod-card.active::after, .prod-card:hover::after { transform: scaleX(1); }
+
+  .prod-emoji { font-size: 2rem; margin-bottom: 0.75rem; display:block; }
+
+  .prod-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .prod-rate {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--red-soft);
+  }
+
+  .prod-rate-label {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .prod-detail {
+    display: none;
+    grid-column: 1/-1;
+    background: var(--dark3);
+    border: 1px solid rgba(0,214,143,0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    animation: slideDown 0.3s ease;
+  }
+
+  .prod-detail.visible { display: block; }
+
+  .prod-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  .detail-block {
+    background: var(--glass);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+
+  .detail-block h4 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .detail-block p { font-size: 0.88rem; color: var(--text-muted); line-height:1.6; }
+
+  /* ── SCALES ── */
+  .scales-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+
+  .scale-side {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.5s;
+  }
+
+  .scale-side.winners {
+    border-color: rgba(0,214,143,0.3);
+    background: rgba(0,106,78,0.1);
+  }
+
+  .scale-side.losers {
+    border-color: rgba(244,42,65,0.3);
+    background: rgba(244,42,65,0.08);
+  }
+
+  .scale-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    margin-bottom: 1.25rem;
+    display:flex; align-items:center; gap:0.5rem;
+  }
+
+  .scale-list {
+    list-style:none;
+    display:flex; flex-direction:column; gap:0.6rem;
+  }
+
+  .scale-list li {
+    display:flex; align-items:center; gap:0.6rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    padding: 0.6rem 0.9rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: 8px;
+  }
+
+  .scale-center {
+    display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+    padding-top: 2rem;
+  }
+
+  .scale-pivot {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    animation: sway 3s ease-in-out infinite;
+  }
+
+  .scale-divider { width:1px; height:60px; background: var(--border); }
+
+  /* ── POLICY TOOL ── */
+  .policy-buttons {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .policy-btn {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    background: var(--glass);
+    cursor:pointer;
+    transition: all 0.3s;
+    text-align:center;
+    color: var(--text);
+    font-family:'DM Sans',sans-serif;
+  }
+
+  .policy-btn:hover { transform:scale(1.05); }
+  .policy-btn.remove:hover, .policy-btn.remove.selected { border-color: var(--accent); background: rgba(0,214,143,0.1); }
+  .policy-btn.reduce:hover, .policy-btn.reduce.selected { border-color: var(--gold); background: rgba(245,197,24,0.1); }
+  .policy-btn.keep:hover, .policy-btn.keep.selected { border-color: var(--text-muted); background: rgba(142,160,144,0.1); }
+  .policy-btn.increase:hover, .policy-btn.increase.selected { border-color: var(--red-soft); background: rgba(244,42,65,0.1); }
+
+  .policy-icon { font-size:2rem; margin-bottom:0.5rem; }
+  .policy-label { font-weight:600; font-size:0.9rem; margin-bottom:0.25rem; }
+  .policy-sub { font-size:0.72rem; color:var(--text-muted); }
+
+  .policy-outcome {
+    margin-top:1.5rem;
+    background: var(--glass);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.75rem;
+    display:none;
+    animation: fadeUp 0.4s forwards;
+  }
+
+  .policy-outcome.visible { display:block; }
+
+  .outcome-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:1rem;
+    margin-top:1.25rem;
+  }
+
+  .outcome-item {
+    background: rgba(0,0,0,0.2);
+    border-radius:12px;
+    padding:1rem;
+    font-size:0.82rem;
+    color:var(--text-muted);
+    line-height:1.6;
+  }
+
+  .outcome-item strong { display:block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.35rem; }
+
+  /* ── BAR CHART ── */
+  .chart-wrapper {
+    margin-top:2rem;
+  }
+
+  .chart-tabs {
+    display:flex;
+    gap:0.5rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .chart-tab {
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.45rem 0.9rem;
+    font-size:0.78rem;
+    color:var(--text-muted);
+    cursor:pointer;
+    transition:all 0.2s;
+    font-family:'DM Sans',sans-serif;
+  }
+
+  .chart-tab:hover, .chart-tab.active {
+    border-color: rgba(0,214,143,0.4);
+    color:var(--text);
+    background: rgba(0,214,143,0.08);
+  }
+
+  .chart-bars {
+    display:flex;
+    align-items:flex-end;
+    gap:0.75rem;
+    height:260px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:2rem 2rem 1rem;
+    position:relative;
+  }
+
+  .bar-group {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.35rem;
+    flex:1;
+  }
+
+  .bar-container {
+    width:100%;
+    display:flex;
+    gap:4px;
+    align-items:flex-end;
+    height:180px;
+  }
+
+  .bar {
+    flex:1;
+    border-radius:6px 6px 0 0;
+    position:relative;
+    transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    min-height:4px;
+  }
+
+  .bar.before { background: linear-gradient(to top, var(--green), rgba(0,106,78,0.5)); }
+  .bar.after { background: linear-gradient(to top, var(--red), rgba(244,42,65,0.5)); }
+
+  .bar:hover::after {
+    content: attr(data-val);
+    position:absolute;
+    top:-2rem; left:50%;
+    transform:translateX(-50%);
+    font-size:0.72rem;
+    background:var(--dark);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:0.2rem 0.5rem;
+    white-space:nowrap;
+    color:var(--text);
+    font-family:'DM Mono',monospace;
+    z-index:10;
+  }
+
+  .bar-label {
+    font-size:0.65rem;
+    color:var(--text-dim);
+    text-align:center;
+    line-height:1.3;
+  }
+
+  .chart-legend {
+    display:flex;
+    gap:1.5rem;
+    margin-top:1rem;
+    justify-content:center;
+  }
+
+  .legend-item {
+    display:flex; align-items:center; gap:0.5rem;
+    font-size:0.78rem;
+    color:var(--text-muted);
+  }
+
+  .legend-dot {
+    width:12px; height:12px;
+    border-radius:3px;
+  }
+
+  /* ── EVIDENCE ── */
+  #evidence { background: var(--dark); }
+
+  .evidence-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.5rem;
+    margin-top:2rem;
+  }
+
+  .ev-card {
+    background: var(--glass);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:2rem;
+    transition:all 0.3s;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .ev-card:hover { border-color: rgba(0,214,143,0.25); transform:translateY(-3px); }
+
+  .ev-card.wide { grid-column:1/-1; }
+
+  .ev-num {
+    font-family:'Playfair Display',serif;
+    font-size:5rem;
+    font-weight:900;
+    color:rgba(0,214,143,0.06);
+    position:absolute;
+    top:-1rem; right:1rem;
+    line-height:1;
+    pointer-events:none;
+  }
+
+  .ev-tag {
+    font-family:'DM Mono',monospace;
+    font-size:0.65rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:0.75rem;
+  }
+
+  .ev-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.2rem;
+    margin-bottom:1.25rem;
+  }
+
+  /* TABLE */
+  .tariff-table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.85rem;
+  }
+
+  .tariff-table th {
+    text-align:left;
+    padding:0.6rem 1rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.68rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    border-bottom:1px solid var(--border);
+  }
+
+  .tariff-table td {
+    padding:0.75rem 1rem;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    color:var(--text-muted);
+  }
+
+  .tariff-table tr:last-child td { border-bottom:none; }
+  .tariff-table tr:hover td { color:var(--text); background:rgba(0,214,143,0.03); }
+
+  .tariff-badge {
+    display:inline-block;
+    padding:0.2rem 0.6rem;
+    border-radius:6px;
+    font-family:'DM Mono',monospace;
+    font-size:0.8rem;
+    font-weight:600;
+  }
+
+  .tariff-badge.high { background:rgba(244,42,65,0.15); color:var(--red-soft); }
+  .tariff-badge.med { background:rgba(245,197,24,0.15); color:var(--gold-soft); }
+
+  /* RANKING BARS */
+  .rank-list {
+    display:flex;
+    flex-direction:column;
+    gap:0.75rem;
+    margin-top:0.5rem;
+  }
+
+  .rank-item {
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .rank-name {
+    font-size:0.8rem;
+    color:var(--text-muted);
+    min-width:160px;
+    flex-shrink:0;
+  }
+
+  .rank-bar-bg {
+    flex:1;
+    height:28px;
+    background:rgba(0,0,0,0.2);
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .rank-bar-fill {
+    height:100%;
+    border-radius:8px;
+    transition: width 1.5s cubic-bezier(0.34,1.56,0.64,1);
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    padding-right:0.6rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.72rem;
+    color:#fff;
+    font-weight:500;
+  }
+
+  .rank-bar-fill.r1 { background: linear-gradient(90deg, var(--red), rgba(244,42,65,0.6)); }
+  .rank-bar-fill.r2 { background: linear-gradient(90deg, #e05a00, rgba(224,90,0,0.6)); }
+  .rank-bar-fill.r3 { background: linear-gradient(90deg, var(--gold), rgba(245,197,24,0.6)); }
+  .rank-bar-fill.r4 { background: linear-gradient(90deg, #a0c050, rgba(160,192,80,0.5)); }
+  .rank-bar-fill.r5 { background: linear-gradient(90deg, var(--accent), rgba(0,214,143,0.5)); }
+  .rank-bar-fill.r6 { background: linear-gradient(90deg, #5086c0, rgba(80,134,192,0.5)); }
+
+  /* JUSTIFICATION INFOGRAPHIC */
+  .justif-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1rem;
+    margin-top:0.5rem;
+  }
+
+  .justif-item {
+    background:rgba(0,0,0,0.2);
+    border-radius:12px;
+    padding:1.1rem;
+    transition:all 0.3s;
+  }
+
+  .justif-item:hover { background:rgba(0,214,143,0.06); transform:scale(1.02); }
+
+  .justif-icon { font-size:1.5rem; margin-bottom:0.5rem; }
+  .justif-text { font-size:0.82rem; color:var(--text-muted); line-height:1.5; }
+  .justif-text strong { display:block; color:var(--text); font-size:0.88rem; margin-bottom:0.2rem; }
+
+  /* CONSUMER EFFECTS */
+  .effect-list {
+    display:flex;
+    flex-direction:column;
+    gap:0.6rem;
+    margin-top:0.5rem;
+  }
+
+  .effect-item {
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+    padding:0.75rem 1rem;
+    background:rgba(244,42,65,0.08);
+    border:1px solid rgba(244,42,65,0.15);
+    border-radius:10px;
+    font-size:0.85rem;
+    color:var(--text-muted);
+    transition:all 0.3s;
+  }
+
+  .effect-item:hover { background:rgba(244,42,65,0.13); color:var(--text); }
+
+  .effect-icon { font-size:1.1rem; flex-shrink:0; }
+
+  /* TIMELINE */
+  .timeline {
+    position:relative;
+    margin-top:1rem;
+  }
+
+  .timeline::before {
+    content:'';
+    position:absolute;
+    left:16px; top:0; bottom:0;
+    width:2px;
+    background:linear-gradient(to bottom, var(--accent), var(--red));
+  }
+
+  .tl-item {
+    display:flex;
+    gap:1.25rem;
+    align-items:flex-start;
+    margin-bottom:1.5rem;
+    padding-left:44px;
+    position:relative;
+  }
+
+  .tl-dot {
+    position:absolute;
+    left:8px;
+    top:4px;
+    width:16px; height:16px;
+    border-radius:50%;
+    border:2px solid var(--accent);
+    background:var(--dark2);
+    z-index:1;
+  }
+
+  .tl-content h4 {
+    font-size:0.88rem;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:0.3rem;
+  }
+
+  .tl-content p {
+    font-size:0.8rem;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+
+  .summary-box {
+    background:linear-gradient(135deg, rgba(0,106,78,0.15), rgba(0,214,143,0.05));
+    border:1px solid rgba(0,214,143,0.2);
+    border-radius:16px;
+    padding:2rem;
+    position:relative;
+  }
+
+  .summary-box p { color:var(--text-muted); line-height:1.8; font-size:0.9rem; }
+
+  /* ── LEARN SECTION ── */
+  #learn {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    max-width:100%;
+    padding: 6rem 2rem;
+  }
+
+  .learn-inner { max-width:1200px; margin:0 auto; }
+
+  .learn-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1.5rem;
+    margin-top:3rem;
+  }
+
+  .learn-card {
+    border-radius:24px;
+    padding:2.5rem;
+    position:relative;
+    overflow:hidden;
+    transition:all 0.35s;
+  }
+
+  .learn-card:hover { transform:translateY(-6px); }
+
+  .learn-card.knowledge {
+    background:linear-gradient(135deg, rgba(0,106,78,0.25), rgba(0,214,143,0.08));
+    border:1px solid rgba(0,214,143,0.25);
+  }
+
+  .learn-card.skills {
+    background:linear-gradient(135deg, rgba(245,197,24,0.15), rgba(245,197,24,0.04));
+    border:1px solid rgba(245,197,24,0.25);
+  }
+
+  .learn-card.reflection {
+    background:linear-gradient(135deg, rgba(244,42,65,0.15), rgba(244,42,65,0.04));
+    border:1px solid rgba(244,42,65,0.25);
+  }
+
+  .learn-icon {
+    font-size:2.5rem;
+    margin-bottom:1.25rem;
+    display:block;
+  }
+
+  .learn-card-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.4rem;
+    margin-bottom:1rem;
+  }
+
+  .learn-items {
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+  }
+
+  .learn-items li {
+    font-size:0.85rem;
+    color:var(--text-muted);
+    display:flex;
+    align-items:flex-start;
+    gap:0.5rem;
+    line-height:1.5;
+  }
+
+  .learn-items li::before {
+    content:'◆';
+    font-size:0.45rem;
+    color:var(--accent);
+    flex-shrink:0;
+    margin-top:0.4rem;
+  }
+
+  .learn-card.skills .learn-items li::before { color:var(--gold); }
+  .learn-card.reflection .learn-items li::before { color:var(--red-soft); }
+
+  /* ── FOOTER ── */
+  footer {
+    background:var(--dark);
+    border-top:1px solid var(--border);
+    padding:3rem 2rem;
+    text-align:center;
+  }
+
+  .footer-name {
+    font-family:'Playfair Display',serif;
+    font-size:1.5rem;
+    margin-bottom:0.35rem;
+  }
+
+  .footer-sub {
+    color:var(--text-dim);
+    font-size:0.82rem;
+    margin-bottom:1.5rem;
+  }
+
+  .footer-badges {
+    display:flex;
+    gap:0.75rem;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:1.5rem;
+  }
+
+  .footer-badge {
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:100px;
+    padding:0.4rem 1rem;
+    font-size:0.75rem;
+    color:var(--text-muted);
+  }
+
+  .footer-copy {
+    font-size:0.72rem;
+    color:var(--text-dim);
+    font-family:'DM Mono',monospace;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity:0;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.34,1.0,0.64,1);
+  }
+
+  .reveal.visible {
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(25px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity:0; transform:translateY(-10px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  @keyframes sway {
+    0%, 100% { transform:rotate(-5deg); }
+    50% { transform:rotate(5deg); }
+  }
+
+  @keyframes bounceDown {
+    0%, 100% { transform:translateX(-50%) translateY(0); }
+    50% { transform:translateX(-50%) translateY(8px); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity:1; }
+    50% { opacity:0.6; }
+  }
+
+  @keyframes countUp { from { opacity:0; } to { opacity:1; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:900px) {
+    .calc-wrapper, .overview-grid, .evidence-grid,
+    .learn-grid, .scales-container, .policy-buttons { grid-template-columns:1fr; }
+    .prod-detail-grid, .justif-grid, .outcome-grid { grid-template-columns:1fr; }
+    .product-grid { grid-template-columns:repeat(2,1fr); }
+    nav .nav-links { display:none; }
+  }
+
+  @media (max-width:600px) {
+    .product-grid { grid-template-columns:1fr; }
+    .hero-stats { gap:1rem; }
+    .hero-stat { padding:1rem 1.25rem; min-width:auto; flex:1 1 120px; }
+  }
+
+  /* sticky nav active state */
+  nav.scrolled { background:rgba(10,15,13,0.97); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-brand">🇧🇩 Hasan Osiul · Economics</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#demo">Demos</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#learn">Reflections</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="flag-accent">
+    <div class="flag-inner">
+      <div class="flag-circle"></div>
+    </div>
+  </div>
+
+  <div class="hero-label">Economics Project Portfolio · University of Bangladesh</div>
+
+  <h1 class="hero-title">
+    <span class="accent-word">Ridiculous</span> Tariffs<br>
+    <span style="font-size:0.65em; font-weight:400; color:var(--text-muted);">Exploring Bangladesh's</span>
+    <br><span class="accent-word2">High Import Taxes</span>
+  </h1>
+
+  <p class="hero-sub">
+    An interactive case study examining Bangladesh's unusually high import tariffs — who they protect, who they hurt, and what they mean for everyday consumers.
+  </p>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="6">0</div>
+      <div class="hero-stat-label">Products Studied</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="89" data-suffix="%">0%</div>
+      <div class="hero-stat-label">Max Tariff Rate</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="4">0</div>
+      <div class="hero-stat-label">Policy Outcomes</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="5">0</div>
+      <div class="hero-stat-label">Live Simulations</div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ═══ SECTION 1: OVERVIEW ═══ -->
+<section id="overview">
+
+  <div class="section-tag">01 / Project Overview</div>
+  <h2 class="section-title">What is This Project About?</h2>
+  <p class="section-desc">
+    A classroom investigation into Bangladesh's unusually high import tariffs — examining which products face the highest taxes, why those tariffs exist, and the real economic consequences for consumers and industries.
+  </p>
+
+  <div class="overview-grid reveal">
+    <div class="ov-card">
+      <div class="ov-icon" style="background:rgba(0,214,143,0.1);">📋</div>
+      <h3>Activity Requirements</h3>
+      <ul class="ov-list">
+        <li>Identify products with extremely high tariffs</li>
+        <li>Investigate why those tariffs exist</li>
+        <li>Analyze economic consequences</li>
+        <li>Evaluate whether the tariffs are reasonable</li>
+      </ul>
+    </div>
+    <div class="ov-card">
+      <div class="ov-icon" style="background:rgba(245,197,24,0.1);">🏛️</div>
+      <h3>Why Governments Use Tariffs</h3>
+      <ul class="ov-list">
+        <li>Protect domestic industries from foreign competition</li>
+        <li>Encourage local production</li>
+        <li>Generate government tax revenue</li>
+        <li>Reduce dependence on imports</li>
+      </ul>
+    </div>
+    <div class="ov-card">
+      <div class="ov-icon" style="background:rgba(244,42,65,0.1);">⚠️</div>
+      <h3>The Downsides of Tariffs</h3>
+      <ul class="ov-list">
+        <li>Increase prices for consumers</li>
+        <li>Reduce consumer choice in the market</li>
+        <li>Create economic inefficiencies</li>
+        <li>Can slow innovation and slow competition</li>
+      </ul>
+    </div>
+    <div class="ov-card">
+      <div class="ov-icon" style="background:rgba(80,134,192,0.1);">🌍</div>
+      <h3>Why This Concept Matters</h3>
+      <ul class="ov-list">
+        <li>Affects everyday food and consumer prices</li>
+        <li>Shapes international trade relationships</li>
+        <li>Impacts business growth and competition</li>
+        <li>Influences national economic development</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="big-quote reveal">
+    <p>Every tariff creates <span>winners</span> and losers.</p>
+    <cite>— Core Principle of Trade Policy Economics</cite>
+  </div>
+
+  <div class="glass-card reveal" style="background:linear-gradient(135deg, rgba(0,106,78,0.12),rgba(0,0,0,0));">
+    <div class="section-tag" style="margin-bottom:0.5rem;">Concept Being Demonstrated</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:1rem;">Tariffs and Protectionism</h3>
+    <p style="color:var(--text-muted);line-height:1.8;font-size:0.92rem;max-width:800px;">
+      A tariff is a tax placed on imported goods at the border. When Bangladesh imposes a tariff on frozen sheep meat or imported coffee, the importing company must pay that tax — and those costs are almost always passed on to consumers in the form of higher prices. This project explores how trade policy decisions made in government offices ripple down to affect everyday shopping and living costs.
+    </p>
+  </div>
+
+</section>
+
+<!-- ═══ SECTION 2: DEMONSTRATIONS ═══ -->
+<div id="demo">
+<div class="demo-bg">
+<div class="demo-inner">
+
+  <div class="section-tag">02 / Demonstration</div>
+  <h2 class="section-title">Interactive Simulations</h2>
+  <p class="section-desc">Explore the real mechanics of tariffs through hands-on tools and visualizations.</p>
+
+  <!-- DEMO 1: Calculator -->
+  <div class="glass-card reveal" style="margin-bottom:2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+      <span style="background:rgba(0,214,143,0.1);border:1px solid rgba(0,214,143,0.2);border-radius:8px;padding:0.3rem 0.65rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);">DEMO 01</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Tariff Impact Calculator</h3>
+    </div>
+    <div class="calc-wrapper">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="calc-input-group">
+          <label class="calc-label">Original Product Price ($)</label>
+          <input class="calc-input" type="number" id="calcPrice" placeholder="e.g. 100" value="100">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Tariff Rate (%)</label>
+          <input class="calc-input" type="number" id="calcTariff" placeholder="e.g. 80" value="80">
+        </div>
+        <button class="calc-btn" onclick="calculateTariff()">⚡ Calculate Impact</button>
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:var(--text-dim);">
+          💡 Try: Price = $100, Tariff = 89% (Fresh Salmon rate in Bangladesh)
+        </div>
+      </div>
+      <div class="calc-result" id="calcResult">
+        <div class="result-item">
+          <div class="result-label">Original Price</div>
+          <div class="result-value green" id="rOriginal">$100</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Tax Amount</div>
+          <div class="result-value red" id="rTax">$80</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Final Consumer Price</div>
+          <div class="result-value gold" id="rFinal">$180</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Price Increase</div>
+          <div class="result-value" id="rIncrease" style="color:var(--red-soft);">+80%</div>
+        </div>
+        <div class="result-item highlight">
+          <div class="result-label">Impact Summary</div>
+          <div id="rSummary" style="font-size:0.85rem;color:var(--text-muted);margin-top:0.4rem;line-height:1.6;">
+            A product originally worth <strong style="color:var(--text);">$100</strong> costs consumers <strong style="color:var(--gold);">$180</strong> after an 80% tariff — nearly double the original price.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 2: Product Explorer -->
+  <div class="glass-card reveal" style="margin-bottom:2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+      <span style="background:rgba(245,197,24,0.1);border:1px solid rgba(245,197,24,0.2);border-radius:8px;padding:0.3rem 0.65rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--gold);">DEMO 02</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Product Tariff Explorer</h3>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Click any product card to reveal its tariff details, government rationale, and economic effects.</p>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <!-- DEMO 3: Winners & Losers -->
+  <div class="glass-card reveal" style="margin-bottom:2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+      <span style="background:rgba(244,42,65,0.1);border:1px solid rgba(244,42,65,0.2);border-radius:8px;padding:0.3rem 0.65rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--red-soft);">DEMO 03</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Winners & Losers Simulator</h3>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem;">When tariffs increase, the economic effects fall on very different groups.</p>
+    <div class="scales-container">
+      <div class="scale-side winners">
+        <div class="scale-title">🏆 Who Benefits</div>
+        <ul class="scale-list" id="winnersList">
+          <li>🏛️ Government (tax revenue)</li>
+          <li>🌾 Local farmers</li>
+          <li>🏭 Domestic producers</li>
+          <li>🔒 Protected industries</li>
+          <li>🇧🇩 National self-sufficiency</li>
+        </ul>
+      </div>
+      <div class="scale-center">
+        <div class="scale-pivot" id="scalePivot">⚖️</div>
+        <div class="scale-divider"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-dim);text-align:center;letter-spacing:0.1em;">BALANCE<br>OF POWER</div>
+      </div>
+      <div class="scale-side losers">
+        <div class="scale-title">💔 Who Loses</div>
+        <ul class="scale-list">
+          <li>🛒 Everyday consumers</li>
+          <li>☕ Cafes & restaurants</li>
+          <li>📦 Importers</li>
+          <li>🏪 Small businesses</li>
+          <li>💸 Low-income households</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 4: Policy Decision -->
+  <div class="glass-card reveal" style="margin-bottom:2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+      <span style="background:rgba(80,134,192,0.1);border:1px solid rgba(80,134,192,0.2);border-radius:8px;padding:0.3rem 0.65rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:#7aaaf0;">DEMO 04</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Policy Decision Tool</h3>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.92rem;margin-bottom:1.25rem;">
+      🤔 <strong style="color:var(--text);">If you were Bangladesh's Trade Minister</strong>, what would you do with these high tariffs?
+    </p>
+    <div class="policy-buttons">
+      <button class="policy-btn remove" onclick="selectPolicy('remove')">
+        <div class="policy-icon">🗑️</div>
+        <div class="policy-label">Remove</div>
+        <div class="policy-sub">Eliminate the tariff entirely</div>
+      </button>
+      <button class="policy-btn reduce" onclick="selectPolicy('reduce')">
+        <div class="policy-icon">📉</div>
+        <div class="policy-label">Reduce</div>
+        <div class="policy-sub">Lower to a moderate level</div>
+      </button>
+      <button class="policy-btn keep" onclick="selectPolicy('keep')">
+        <div class="policy-icon">📌</div>
+        <div class="policy-label">Keep</div>
+        <div class="policy-sub">Maintain current rate</div>
+      </button>
+      <button class="policy-btn increase" onclick="selectPolicy('increase')">
+        <div class="policy-icon">📈</div>
+        <div class="policy-label">Increase</div>
+        <div class="policy-sub">Raise to discourage imports</div>
+      </button>
+    </div>
+    <div class="policy-outcome" id="policyOutcome"></div>
+  </div>
+
+  <!-- DEMO 5: Bar Chart -->
+  <div class="glass-card reveal">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+      <span style="background:rgba(0,214,143,0.1);border:1px solid rgba(0,214,143,0.2);border-radius:8px;padding:0.3rem 0.65rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);">DEMO 05</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Before vs After Tariff Visualization</h3>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Select a product to see the price comparison before and after Bangladesh's tariff is applied.</p>
+    <div class="chart-tabs" id="chartTabs"></div>
+    <div class="chart-wrapper">
+      <div class="chart-bars" id="chartBars"></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> Before Tariff</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div> After Tariff</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<!-- ═══ SECTION 3: EVIDENCE ═══ -->
+<section id="evidence">
+
+  <div class="section-tag">03 / Evidence From Course Activity</div>
+  <h2 class="section-title">Classroom Research Findings</h2>
+  <p class="section-desc">Data and analysis gathered during the classroom investigation into Bangladesh's tariff structure.</p>
+
+  <div class="evidence-grid">
+
+    <!-- Card 1: Table -->
+    <div class="ev-card reveal">
+      <div class="ev-num">01</div>
+      <div class="ev-tag">Evidence Card 01</div>
+      <div class="ev-title">Products Investigated & Tariff Rates</div>
+      <table class="tariff-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Tariff Rate</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🥩 Frozen Sheep Meat</td><td><span class="tariff-badge high">63%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Livestock</td></tr>
+          <tr><td>🫀 Frozen Bovine Liver</td><td><span class="tariff-badge high">58%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Livestock</td></tr>
+          <tr><td>🥫 Canned Goat Meat</td><td><span class="tariff-badge high">72%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Processed</td></tr>
+          <tr><td>🐟 Fresh Salmon</td><td><span class="tariff-badge high">89%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Seafood</td></tr>
+          <tr><td>🥛 Milk Powder</td><td><span class="tariff-badge med">45%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Dairy</td></tr>
+          <tr><td>☕ Imported Coffee</td><td><span class="tariff-badge high">67%</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Beverage</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Card 2: Ranking -->
+    <div class="ev-card reveal">
+      <div class="ev-num">02</div>
+      <div class="ev-tag">Evidence Card 02</div>
+      <div class="ev-title">Tariff Ranking — Highest to Lowest</div>
+      <div class="rank-list" id="rankList"></div>
+    </div>
+
+    <!-- Card 3: Justifications -->
+    <div class="ev-card wide reveal">
+      <div class="ev-num">03</div>
+      <div class="ev-tag">Evidence Card 03</div>
+      <div class="ev-title">Government Justifications</div>
+      <div class="justif-grid">
+        <div class="justif-item">
+          <div class="justif-icon">🌾</div>
+          <div class="justif-text"><strong>Protect Local Farmers</strong>High tariffs shield domestic livestock and agriculture from cheaper foreign competition.</div>
+        </div>
+        <div class="justif-item">
+          <div class="justif-icon">🏭</div>
+          <div class="justif-text"><strong>Protect Domestic Industries</strong>Encourages development of local food processing and production industries.</div>
+        </div>
+        <div class="justif-item">
+          <div class="justif-icon">💰</div>
+          <div class="justif-text"><strong>Generate Tax Revenue</strong>Import taxes are a major source of government income in developing economies.</div>
+        </div>
+        <div class="justif-item">
+          <div class="justif-icon">🏠</div>
+          <div class="justif-text"><strong>Reduce Import Dependence</strong>Promotes national self-reliance and reduces vulnerability to global supply chains.</div>
+        </div>
+        <div class="justif-item">
+          <div class="justif-icon">💱</div>
+          <div class="justif-text"><strong>Preserve Foreign Currency</strong>Fewer imports means less foreign currency (USD) leaves the country, stabilizing reserves.</div>
+        </div>
+        <div class="justif-item">
+          <div class="justif-icon">🇧🇩</div>
+          <div class="justif-text"><strong>National Strategy</strong>Part of Bangladesh's broader industrialization and economic development strategy.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Consumer Effects -->
+    <div class="ev-card reveal">
+      <div class="ev-num">04</div>
+      <div class="ev-tag">Evidence Card 04</div>
+      <div class="ev-title">Consumer Effects Identified</div>
+      <div class="effect-list">
+        <div class="effect-item"><span class="effect-icon">💸</span>Higher prices for everyday food products</div>
+        <div class="effect-item"><span class="effect-icon">❌</span>Less affordability for imported goods</div>
+        <div class="effect-item"><span class="effect-icon">📦</span>Reduced variety of available products</div>
+        <div class="effect-item"><span class="effect-icon">🐌</span>Slower market competition and innovation</div>
+        <div class="effect-item"><span class="effect-icon">🚫</span>Limited access to global food standards</div>
+      </div>
+    </div>
+
+    <!-- Card 5: Coffee Case Study -->
+    <div class="ev-card reveal">
+      <div class="ev-num">05</div>
+      <div class="ev-tag">Evidence Card 05 · Case Study</div>
+      <div class="ev-title">☕ The Coffee Tariff Problem</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <h4>The Problem</h4>
+            <p>Imported specialty coffee faces a <strong style="color:var(--red-soft);">67% tariff</strong> in Bangladesh, making a $10 bag of quality coffee cost $16.70 before retailer markups.</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="border-color:var(--gold);"></div>
+          <div class="tl-content">
+            <h4>Government Rationale</h4>
+            <p>Bangladesh aims to protect its small but growing domestic coffee cultivation industry, particularly in Chittagong hill areas.</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="border-color:var(--red-soft);"></div>
+          <div class="tl-content">
+            <h4>The Consequence</h4>
+            <p>Specialty café culture is stunted. High-quality global coffee brands remain inaccessible to most consumers. Café businesses face higher operating costs, limiting growth of the food service sector.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6: Summary -->
+    <div class="ev-card wide reveal">
+      <div class="ev-num">06</div>
+      <div class="ev-tag">Evidence Card 06</div>
+      <div class="ev-title">Class Activity Summary</div>
+      <div class="summary-box">
+        <p>
+          During our classroom investigation, our group evaluated several of Bangladesh's import tariffs — spanning livestock products, seafood, dairy, and beverages. We examined official trade data, discussed government justifications, and debated whether the economic benefits of these tariffs outweigh the costs imposed on consumers.
+          <br><br>
+          Our central finding was that <strong style="color:var(--text);">while these tariffs serve legitimate policy purposes</strong> — protecting domestic industries, generating revenue, and preserving foreign currency — the <strong style="color:var(--accent);">burden falls disproportionately on consumers</strong>, particularly for essential food products like milk powder and meat. We concluded that some tariffs may be reasonable for strategic industries, but others — particularly on basic foodstuffs — may warrant reconsideration given their impact on household affordability.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ SECTION 4: WHAT DID I LEARN ═══ -->
+<div id="learn">
+<div class="learn-inner">
+
+  <div class="section-tag">04 / Reflection</div>
+  <h2 class="section-title">What Did I Learn?</h2>
+  <p class="section-desc">Reflections on knowledge gained, skills developed, and the surprising insights from this economics project.</p>
+
+  <div class="learn-grid">
+    <div class="learn-card knowledge reveal">
+      <span class="learn-icon">🧠</span>
+      <div class="learn-card-title">Knowledge Gained</div>
+      <ul class="learn-items">
+        <li>What tariffs are and how they function as a trade tool</li>
+        <li>Why governments use protectionist trade policies</li>
+        <li>The concept of protectionism and trade barriers</li>
+        <li>How consumer welfare is measured in economics</li>
+        <li>The relationship between tariffs and market competition</li>
+        <li>Bangladesh's specific trade policy environment</li>
+      </ul>
+    </div>
+
+    <div class="learn-card skills reveal" style="--delay:0.2s;">
+      <span class="learn-icon">⚡</span>
+      <div class="learn-card-title">Skills Developed</div>
+      <ul class="learn-items">
+        <li>Economic analysis and interpretation of trade data</li>
+        <li>Critical thinking about government policy decisions</li>
+        <li>Policy evaluation — weighing costs vs benefits</li>
+        <li>Data interpretation and visualization of findings</li>
+        <li>Research skills using trade and economic sources</li>
+        <li>Team collaboration and group discussion</li>
+      </ul>
+    </div>
+
+    <div class="learn-card reflection reveal" style="--delay:0.4s;">
+      <span class="learn-icon">💡</span>
+      <div class="learn-card-title">Surprises & Insights</div>
+      <ul class="learn-items">
+        <li>Some essential food products face extremely high tariffs — over 80%</li>
+        <li>Government policy can dramatically reshape what consumers can afford</li>
+        <li>Trade policy involves complex trade-offs with no simple answers</li>
+        <li>Bangladesh's tariff structure reflects broader development goals</li>
+        <li>Real-world economic decisions affect international relations</li>
+        <li>Food security and import taxes are deeply intertwined</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="glass-card reveal" style="margin-top:2rem;background:linear-gradient(135deg, rgba(0,106,78,0.1), rgba(0,0,0,0));">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem;">Real-World Applications</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;">
+      <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:0.35rem;">🌐</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">International Trade</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:0.35rem;">🏛️</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">Government Policy</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:0.35rem;">📜</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">Import Regulations</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:0.35rem;">🌾</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">Food Security</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:0.35rem;">📈</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">Economic Development</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="width:48px;height:30px;border-radius:5px;overflow:hidden;margin:0 auto 1.25rem;box-shadow:0 0 20px rgba(0,214,143,0.2);">
+    <div style="width:100%;height:100%;background:#006A4E;display:flex;align-items:center;justify-content:center;padding-left:4px;">
+      <div style="width:14px;height:14px;background:#F42A41;border-radius:50%;"></div>
+    </div>
+  </div>
+  <div class="footer-name">Hasan Osiul</div>
+  <div class="footer-sub">Economics Project Portfolio</div>
+  <div class="footer-badges">
+    <span class="footer-badge">🎓 University Economics</span>
+    <span class="footer-badge">🏦 Trade Policy</span>
+    <span class="footer-badge">🇧🇩 Bangladesh</span>
+    <span class="footer-badge">📊 Interactive Case Study</span>
+  </div>
+  <div class="footer-copy">Ridiculous Tariffs: Exploring Bangladesh's High Import Taxes</div>
+</footer>
+
+<script>
+// ── DATA ──
+const products = [
+  {
+    emoji: '🐟', name: 'Fresh Salmon', rate: '89%',
+    why: 'Bangladesh levies 89% on imported salmon to protect its massive local fishing and aquaculture sector, one of the country\'s largest industries.',
+    govt: 'Protecting domestic fishing communities and incentivizing local aquaculture development.',
+    effect: 'A $10 piece of salmon costs around $18.90 after tariff. Luxury seafood becomes entirely inaccessible to most consumers.',
+    before: 10, after: 18.9
+  },
+  {
+    emoji: '🥫', name: 'Canned Goat Meat', rate: '72%',
+    why: 'A 72% tariff on canned goat imports shields domestic meat processors from cheaper, more efficient foreign manufacturers.',
+    govt: 'Encouraging development of Bangladesh\'s local food processing and canning industry.',
+    effect: 'Processed meat products become expensive. Consumers who prefer convenience foods face significantly higher costs.',
+    before: 8, after: 13.76
+  },
+  {
+    emoji: '☕', name: 'Imported Coffee', rate: '67%',
+    why: 'Coffee faces a 67% tariff despite Bangladesh having limited domestic production, making specialty coffee a luxury item.',
+    govt: 'Promoting domestic tea culture and protecting the small emerging domestic coffee sector.',
+    effect: 'Café culture and specialty coffee industry growth is stunted. High-quality global coffee brands remain inaccessible.',
+    before: 12, after: 20.04
+  },
+  {
+    emoji: '🥩', name: 'Frozen Sheep Meat', rate: '63%',
+    why: 'A 63% import tariff protects local sheep farmers and the domestic livestock sector from cheaper imports, particularly from Australia and New Zealand.',
+    govt: 'Protecting rural farming communities and reducing reliance on imported meat products.',
+    effect: 'Mutton prices are driven up significantly, impacting families who rely on affordable protein sources.',
+    before: 15, after: 24.45
+  },
+  {
+    emoji: '🫀', name: 'Frozen Bovine Liver', rate: '58%',
+    why: 'Despite bovine liver being a common, affordable protein, it faces a 58% tariff to encourage domestic cattle farming.',
+    govt: 'Supporting the domestic cattle and beef industry, which is important to Bangladesh\'s rural economy.',
+    effect: 'A protein source that should be affordable becomes significantly more expensive, hitting lower-income households hardest.',
+    before: 6, after: 9.48
+  },
+  {
+    emoji: '🥛', name: 'Milk Powder', rate: '45%',
+    why: 'Milk powder is a critical nutritional product for many Bangladeshis, yet it faces a 45% tariff, raising prices on an essential item.',
+    govt: 'Protecting domestic dairy farmers and encouraging growth of a local dairy processing industry.',
+    effect: 'Infant formula and dairy products become more expensive. Nutritional access is reduced for lower-income families.',
+    before: 9, after: 13.05
+  }
+];
+
+const rankData = [
+  { name: 'Fresh Salmon', rate: 89, cls: 'r1' },
+  { name: 'Canned Goat Meat', rate: 72, cls: 'r2' },
+  { name: 'Imported Coffee', rate: 67, cls: 'r3' },
+  { name: 'Frozen Sheep Meat', rate: 63, cls: 'r4' },
+  { name: 'Frozen Bovine Liver', rate: 58, cls: 'r5' },
+  { name: 'Milk Powder', rate: 45, cls: 'r6' }
+];
+
+const policyData = {
+  remove: {
+    title: '✅ Remove Tariff — Outcome',
+    color: 'var(--accent)',
+    items: [
+      { label: 'Consumer Impact', text: 'Prices drop significantly. Consumers enjoy lower food prices and greater variety of imported goods.' },
+      { label: 'Industry Impact', text: 'Domestic producers face intense foreign competition. Some industries may shrink or need to modernize.' },
+      { label: 'Government Revenue', text: 'Import tax revenue falls. Government must find alternative revenue sources to compensate.' }
+    ]
+  },
+  reduce: {
+    title: '📉 Reduce Tariff — Outcome',
+    color: 'var(--gold)',
+    items: [
+      { label: 'Consumer Impact', text: 'Moderate price reductions. Consumers benefit from lower prices without a full market shock.' },
+      { label: 'Industry Impact', text: 'Domestic industries face some new competition but have time to adapt and improve efficiency.' },
+      { label: 'Government Revenue', text: 'Revenue reduces slightly but remains stable. A politically balanced compromise.' }
+    ]
+  },
+  keep: {
+    title: '📌 Keep Tariff — Outcome',
+    color: 'var(--text-muted)',
+    items: [
+      { label: 'Consumer Impact', text: 'High prices continue. Consumers remain constrained in their choices and affordability of imports.' },
+      { label: 'Industry Impact', text: 'Domestic producers remain protected. Status quo maintained; no efficiency pressure.' },
+      { label: 'Government Revenue', text: 'Stable tax revenue from imports continues. Fiscal certainty in the short term.' }
+    ]
+  },
+  increase: {
+    title: '📈 Increase Tariff — Outcome',
+    color: 'var(--red-soft)',
+    items: [
+      { label: 'Consumer Impact', text: 'Prices rise further. Imported goods become luxuries. Consumer welfare significantly reduced.' },
+      { label: 'Industry Impact', text: 'Domestic industries experience maximum protection. Risk of complacency and reduced innovation.' },
+      { label: 'Government Revenue', text: 'Revenue may paradoxically fall if imports decline sharply due to prohibitive costs.' }
+    ]
+  }
+};
+
+// ── CALCULATOR ──
+function calculateTariff() {
+  const price = parseFloat(document.getElementById('calcPrice').value) || 0;
+  const tariff = parseFloat(document.getElementById('calcTariff').value) || 0;
+  const tax = (price * tariff / 100);
+  const final = price + tax;
+  const pct = tariff;
+
+  animateValue('rOriginal', 0, price, '$', '');
+  animateValue('rTax', 0, tax, '$', '');
+  animateValue('rFinal', 0, final, '$', '');
+  document.getElementById('rIncrease').textContent = '+' + pct.toFixed(1) + '%';
+  document.getElementById('rSummary').innerHTML =
+    `A product originally worth <strong style="color:var(--text);">$${price.toFixed(2)}</strong> costs consumers <strong style="color:var(--gold);">$${final.toFixed(2)}</strong> after a ${pct}% tariff — that's <strong style="color:var(--red-soft);">$${tax.toFixed(2)} extra</strong> in government tax.`;
+}
+
+function animateValue(id, start, end, prefix, suffix) {
+  const el = document.getElementById(id);
+  const duration = 600;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = start + (end - start) * ease;
+    el.textContent = prefix + val.toFixed(2) + suffix;
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ── PRODUCTS ──
+function buildProducts() {
+  const grid = document.getElementById('productGrid');
+  products.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'prod-card';
+    card.innerHTML = `
+      <span class="prod-emoji">${p.emoji}</span>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-rate">${p.rate}</div>
+      <div class="prod-rate-label">tariff rate</div>
+    `;
+    card.onclick = () => toggleProduct(i);
+    grid.appendChild(card);
+  });
+
+  const detail = document.createElement('div');
+  detail.className = 'prod-detail';
+  detail.id = 'prodDetail';
+  grid.appendChild(detail);
+}
+
+let activeProduct = -1;
+function toggleProduct(i) {
+  const cards = document.querySelectorAll('.prod-card');
+  const detail = document.getElementById('prodDetail');
+  if (activeProduct === i) {
+    detail.classList.remove('visible');
+    cards[i].classList.remove('active');
+    activeProduct = -1;
+    return;
+  }
+  cards.forEach(c => c.classList.remove('active'));
+  cards[i].classList.add('active');
+  activeProduct = i;
+  const p = products[i];
+  detail.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+      <span style="font-size:2rem;">${p.emoji}</span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.25rem;">${p.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.5rem;color:var(--red-soft);font-weight:700;">${p.rate} Tariff</div>
+      </div>
+    </div>
+    <div class="prod-detail-grid">
+      <div class="detail-block">
+        <h4>Why It Seems Excessive</h4>
+        <p>${p.why}</p>
+      </div>
+      <div class="detail-block">
+        <h4>Government Rationale</h4>
+        <p>${p.govt}</p>
+      </div>
+      <div class="detail-block">
+        <h4>Economic Effects</h4>
+        <p>${p.effect}</p>
+      </div>
+    </div>
+  `;
+  detail.classList.add('visible');
+}
+
+// ── POLICY ──
+function selectPolicy(choice) {
+  document.querySelectorAll('.policy-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.policy-btn.' + choice).classList.add('selected');
+  const d = policyData[choice];
+  const out = document.getElementById('policyOutcome');
+  out.innerHTML = `
+    <div style="font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:1.25rem;color:${d.color};">${d.title}</div>
+    <div class="outcome-grid">
+      ${d.items.map(item => `
+        <div class="outcome-item">
+          <strong>${item.label}</strong>
+          ${item.text}
+        </div>
+      `).join('')}
+    </div>
+  `;
+  out.classList.add('visible');
+}
+
+// ── CHART ──
+let activeChart = 0;
+function buildChart() {
+  const tabs = document.getElementById('chartTabs');
+  const bars = document.getElementById('chartBars');
+
+  products.forEach((p, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'chart-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = p.emoji + ' ' + p.name;
+    tab.onclick = () => switchChart(i);
+    tabs.appendChild(tab);
+  });
+
+  renderChart(0);
+}
+
+function switchChart(i) {
+  activeChart = i;
+  document.querySelectorAll('.chart-tab').forEach((t, j) => {
+    t.classList.toggle('active', j === i);
+  });
+  renderChart(i);
+}
+
+function renderChart(i) {
+  const bars = document.getElementById('chartBars');
+  const p = products[i];
+  const maxVal = p.after * 1.2;
+
+  bars.innerHTML = `
+    <div style="position:absolute;left:0;right:0;bottom:1rem;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:1.5rem 2rem 0.5rem;pointer-events:none;">
+      ${[0,25,50,75,100].reverse().map(v => `
+        <div style="display:flex;align-items:center;gap:0.5rem;flex:1;align-items:flex-start;">
+          <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text-dim);width:30px;text-align:right;">$${Math.round(v * maxVal / 100)}</span>
+          <div style="flex:1;border-top:1px dashed rgba(255,255,255,0.05);margin-top:0.4rem;"></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="bar-group" style="z-index:1;position:relative;">
+      <div class="bar-container">
+        <div class="bar before" data-val="Before: $${p.before}" style="height:${(p.before/maxVal)*180}px;"></div>
+        <div class="bar after" data-val="After: $${p.after}" style="height:${(p.after/maxVal)*180}px;"></div>
+      </div>
+      <div class="bar-label">${p.emoji} ${p.name}<br><span style="color:var(--red-soft);font-weight:600;">${p.rate}</span></div>
+    </div>
+  `;
+
+  // add price labels
+  const beforeBar = bars.querySelector('.bar.before');
+  const afterBar = bars.querySelector('.bar.after');
+  [beforeBar, afterBar].forEach((bar, j) => {
+    const label = document.createElement('div');
+    label.style.cssText = 'position:absolute;top:-1.5rem;left:50%;transform:translateX(-50%);font-family:DM Mono,monospace;font-size:0.68rem;white-space:nowrap;color:var(--text-muted);';
+    label.textContent = '$' + (j === 0 ? p.before : p.after);
+    bar.style.position = 'relative';
+    bar.appendChild(label);
+  });
+}
+
+// ── RANK LIST ──
+function buildRankList() {
+  const list = document.getElementById('rankList');
+  rankData.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'rank-item';
+    item.innerHTML = `
+      <div class="rank-name">${r.name}</div>
+      <div class="rank-bar-bg">
+        <div class="rank-bar-fill ${r.cls}" style="width:0%">${r.rate}%</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.rank-bar-fill').forEach((bar, i) => {
+      bar.style.width = (rankData[i].rate / 89 * 100) + '%';
+    });
+  }, 400);
+}
+
+// ── HERO COUNTER ──
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const prefix = el.dataset.prefix || '';
+    let current = 0;
+    const step = target / 60;
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = prefix + Math.round(current) + suffix;
+      if (current >= target) clearInterval(interval);
+    }, 16);
+  });
+}
+
+// ── SCROLL REVEAL ──
+function setupReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+// ── STICKY NAV ──
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── RANK BARS SCROLL TRIGGER ──
+const rankObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.rank-bar-fill').forEach((bar, i) => {
+        bar.style.width = (rankData[i].rate / 89 * 100) + '%';
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  buildProducts();
+  buildChart();
+  buildRankList();
+  setupReveal();
+  animateCounters();
+
+  const rl = document.getElementById('rankList');
+  if (rl) rankObserver.observe(rl);
+});
+</script>
+</body>
+</html>

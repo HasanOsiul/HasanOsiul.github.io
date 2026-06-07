@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Trade Explorer – Hasan Osiul</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --deep: #0d1f3c;
+    --blue: #1a4080;
+    --mid: #2563b0;
+    --accent: #3b9eff;
+    --gold: #f0b429;
+    --teal: #0ecad4;
+    --white: #f8faff;
+    --muted: #a0b4cc;
+    --card-bg: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.09);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,22,40,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-size: 0.82rem; color: var(--muted); text-decoration: none;
+    letter-spacing: 0.06em; text-transform: uppercase; transition: color .25s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+
+  .globe-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(37,99,176,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(14,202,212,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 20%, rgba(59,158,255,0.1) 0%, transparent 60%);
+  }
+
+  /* SVG trade-route lines */
+  .trade-lines {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0.18; z-index: 0; pointer-events: none;
+  }
+
+  /* animated dots on the paths */
+  .route-dot {
+    animation: moveDot 6s linear infinite;
+    opacity: 0.9;
+  }
+  @keyframes moveDot {
+    0%   { offset-distance: 0%; }
+    100% { offset-distance: 100%; }
+  }
+
+  .hero-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid rgba(59,158,255,0.4);
+    padding: 0.35rem 1rem; border-radius: 2rem;
+    margin-bottom: 1.8rem; display: inline-block;
+    background: rgba(59,158,255,0.07);
+    animation: fadeDown 0.7s ease both;
+  }
+
+  h1.hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 80%, var(--teal) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.2rem;
+    animation: fadeDown 0.8s ease 0.1s both;
+    position: relative; z-index: 1;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.22rem);
+    color: var(--muted); max-width: 640px;
+    margin: 0 auto 2.5rem;
+    animation: fadeDown 0.8s ease 0.2s both;
+    position: relative; z-index: 1;
+  }
+
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: linear-gradient(135deg, var(--mid), var(--accent));
+    color: #fff; font-size: 0.95rem; font-weight: 600;
+    padding: 0.9rem 2.2rem; border-radius: 2rem;
+    text-decoration: none; border: none; cursor: pointer;
+    box-shadow: 0 8px 32px rgba(59,158,255,0.28);
+    transition: transform .25s, box-shadow .25s;
+    animation: fadeDown 0.8s ease 0.35s both;
+    position: relative; z-index: 1;
+  }
+  .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(59,158,255,0.4); }
+  .cta-btn svg { width: 18px; height: 18px; }
+
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 4rem; justify-content: center;
+    flex-wrap: wrap; position: relative; z-index: 1;
+    animation: fadeDown 0.8s ease 0.5s both;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem; color: var(--accent);
+  }
+  .hero-stat .lbl { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    margin-bottom: 0.5rem; line-height: 1.15;
+  }
+  .section-sub {
+    color: var(--muted); font-size: 1.02rem;
+    max-width: 640px; margin-bottom: 2.5rem;
+  }
+
+  hr.divider {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0;
+  }
+
+  /* ── OVERVIEW ── */
+  .overview-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;
+  }
+  .overview-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem;
+    padding: 2rem;
+    transition: border-color .3s, transform .3s;
+  }
+  .overview-block:hover { border-color: rgba(59,158,255,0.3); transform: translateY(-4px); }
+  .overview-block h3 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--accent); }
+  .overview-block p { color: var(--muted); font-size: 0.95rem; }
+
+  .factor-pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(59,158,255,0.1); border: 1px solid rgba(59,158,255,0.2);
+    border-radius: 2rem; padding: 0.3rem 0.9rem;
+    font-size: 0.82rem; color: var(--accent); margin: 0.3rem 0.2rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .why-matters {
+    margin-top: 2rem;
+    background: linear-gradient(135deg, rgba(37,99,176,0.15), rgba(14,202,212,0.07));
+    border: 1px solid rgba(14,202,212,0.2);
+    border-radius: 1.2rem; padding: 1.8rem;
+  }
+  .why-matters h3 { font-family: 'DM Serif Display', serif; color: var(--teal); margin-bottom: 0.5rem; }
+  .why-matters p { color: var(--muted); font-size: 0.95rem; }
+
+  /* ── CALCULATOR ── */
+  .calc-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem; padding: 2.5rem;
+    margin-top: 2rem;
+  }
+
+  .calc-inputs {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem; margin-bottom: 2rem;
+  }
+  .input-group label {
+    display: block; font-size: 0.78rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+    font-family: 'Space Mono', monospace; margin-bottom: 0.5rem;
+  }
+  .input-group input {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); border-radius: 0.7rem;
+    padding: 0.85rem 1rem; color: var(--white);
+    font-size: 1rem; font-family: 'DM Sans', sans-serif;
+    transition: border-color .25s, box-shadow .25s; outline: none;
+  }
+  .input-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,158,255,0.15);
+  }
+  .input-group input::placeholder { color: rgba(160,180,204,0.45); }
+
+  .calc-btn {
+    display: block; width: 100%;
+    background: linear-gradient(135deg, var(--mid), var(--accent));
+    color: #fff; font-size: 1rem; font-weight: 600;
+    padding: 1rem; border-radius: 0.8rem;
+    border: none; cursor: pointer;
+    box-shadow: 0 6px 24px rgba(59,158,255,0.25);
+    transition: transform .25s, box-shadow .25s;
+    font-family: 'DM Sans', sans-serif; letter-spacing: 0.04em;
+  }
+  .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(59,158,255,0.4); }
+
+  .calc-result {
+    margin-top: 2rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem; padding: 2rem;
+    text-align: center;
+    display: none;
+    animation: resultIn 0.5s ease both;
+  }
+  @keyframes resultIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .calc-result.show { display: block; }
+  .result-score {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem; color: var(--accent); margin-bottom: 0.3rem;
+  }
+  .result-label {
+    font-size: 1.15rem; font-weight: 600; margin-bottom: 0.8rem;
+  }
+  .result-label.very-high { color: #4ade80; }
+  .result-label.high      { color: #a3e635; }
+  .result-label.moderate  { color: var(--gold); }
+  .result-label.low       { color: #fb7185; }
+  .result-explain { font-size: 0.92rem; color: var(--muted); max-width: 480px; margin: 0 auto; }
+
+  .formula-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem; color: var(--teal);
+    background: rgba(14,202,212,0.07); border: 1px solid rgba(14,202,212,0.2);
+    border-radius: 0.5rem; padding: 0.5rem 1rem;
+    display: inline-block; margin-bottom: 1.5rem;
+  }
+
+  /* ── CHART ── */
+  .chart-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem; padding: 2.5rem; margin-top: 2rem;
+  }
+  .chart-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .chart-sub   { font-size: 0.88rem; color: var(--muted); margin-bottom: 2rem; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 1rem; }
+  .bar-row { display: flex; align-items: center; gap: 1rem; }
+  .bar-label { font-size: 0.85rem; color: var(--muted); width: 110px; text-align: right; flex-shrink: 0; }
+  .bar-track {
+    flex: 1; height: 36px; background: rgba(255,255,255,0.04);
+    border-radius: 0.5rem; overflow: hidden; position: relative;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 0.5rem;
+    background: linear-gradient(90deg, var(--mid), var(--accent));
+    width: 0; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 0.7rem;
+    font-size: 0.8rem; font-family: 'Space Mono', monospace; color: #fff;
+  }
+  .bar-fill.teal-fill {
+    background: linear-gradient(90deg, #0d9baa, var(--teal));
+  }
+  .chart-note { margin-top: 2rem; color: var(--muted); font-size: 0.92rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto; margin-top: 2rem;
+    border-radius: 1.2rem;
+    border: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr {
+    background: rgba(37,99,176,0.2);
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);
+  }
+  th, td { padding: 1rem 1.2rem; text-align: left; }
+  td { font-size: 0.92rem; color: var(--muted); }
+  tbody tr { border-top: 1px solid var(--border); transition: background .2s; }
+  tbody tr:hover { background: rgba(59,158,255,0.06); }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.65rem;
+    border-radius: 2rem; font-size: 0.75rem; font-weight: 600;
+    font-family: 'Space Mono', monospace;
+  }
+  .badge.very-high { background: rgba(74,222,128,0.12); color: #4ade80; }
+  .badge.high      { background: rgba(163,230,53,0.12);  color: #a3e635; }
+  .badge.moderate  { background: rgba(240,180,41,0.12);  color: var(--gold); }
+  .table-note { margin-top: 1.5rem; color: var(--muted); font-size: 0.9rem; font-style: italic; }
+
+  /* ── KEY CONCEPTS ── */
+  .concepts-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; margin-top: 2rem;
+  }
+  .concept-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 1.2rem; padding: 1.8rem;
+    transition: transform .3s, border-color .3s;
+    position: relative; overflow: hidden;
+  }
+  .concept-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(59,158,255,0.06), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .concept-card:hover { transform: translateY(-5px); border-color: rgba(59,158,255,0.3); }
+  .concept-card:hover::before { opacity: 1; }
+  .concept-icon {
+    width: 44px; height: 44px; border-radius: 0.8rem;
+    background: rgba(59,158,255,0.12); border: 1px solid rgba(59,158,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem; font-size: 1.3rem;
+  }
+  .concept-card h3 { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .concept-card p  { font-size: 0.88rem; color: var(--muted); }
+
+  /* ── REFLECTION ── */
+  .reflection-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem; margin-top: 2rem;
+  }
+  .reflection-card {
+    border-radius: 1.2rem; padding: 2rem;
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: transform .3s;
+  }
+  .reflection-card:hover { transform: translateY(-4px); }
+  .r-knowledge { background: linear-gradient(135deg, rgba(37,99,176,0.18), rgba(59,158,255,0.06)); border-color: rgba(59,158,255,0.2); }
+  .r-skills    { background: linear-gradient(135deg, rgba(14,202,212,0.12), rgba(59,158,255,0.04)); border-color: rgba(14,202,212,0.2); }
+  .r-reflect   { background: linear-gradient(135deg, rgba(240,180,41,0.1), rgba(59,158,255,0.04)); border-color: rgba(240,180,41,0.2); }
+  .r-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 0.7rem; display: block;
+  }
+  .r-knowledge .r-tag { color: var(--accent); }
+  .r-skills    .r-tag { color: var(--teal); }
+  .r-reflect   .r-tag { color: var(--gold); }
+  .reflection-card h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 0.75rem; }
+  .reflection-card p  { font-size: 0.9rem; color: var(--muted); }
+
+  /* ── CONCLUSION ── */
+  .conclusion-wrap {
+    background: linear-gradient(135deg, rgba(26,64,128,0.3), rgba(14,202,212,0.08));
+    border: 1px solid rgba(59,158,255,0.2);
+    border-radius: 1.5rem; padding: 3rem; text-align: center; margin-top: 2rem;
+  }
+  .conclusion-wrap p { color: var(--muted); font-size: 1rem; max-width: 640px; margin: 1rem auto 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    background: rgba(0,0,0,0.15);
+  }
+  .footer-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem; margin-bottom: 0.3rem;
+  }
+  .footer-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 2rem; }
+  .footer-nav { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .footer-btn {
+    padding: 0.65rem 1.5rem; border-radius: 2rem;
+    font-size: 0.85rem; font-weight: 500; text-decoration: none;
+    transition: transform .2s, box-shadow .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .footer-btn.ghost {
+    border: 1px solid var(--border); color: var(--muted);
+    background: transparent;
+  }
+  .footer-btn.ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .footer-btn.primary {
+    background: linear-gradient(135deg, var(--mid), var(--accent));
+    color: #fff; border: none;
+    box-shadow: 0 4px 16px rgba(59,158,255,0.25);
+  }
+  .footer-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,158,255,0.4); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .hero-stats { gap: 1.5rem; }
+    section { padding: 3.5rem 1.2rem; }
+  }
+
+  /* ── ANIMATED GLOBE DOTS ── */
+  .globe-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none; opacity: 0.22;
+  }
+
+  /* number counter animation */
+  @keyframes countUp {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">✦ World Trade Explorer</span>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#demo">Demo</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#learn">Learning</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="max-width:100%; padding-top:6rem;">
+  <div class="globe-bg"></div>
+  <canvas class="globe-canvas" id="globeCanvas"></canvas>
+
+  <div class="hero-badge">International Trade · Portfolio Project 1</div>
+  <h1 class="hero-title">World Trade<br>Explorer</h1>
+  <p class="hero-subtitle">Discover how economic size and geographic distance shape international trade between nations through the Gravity Model.</p>
+  <a href="#demo" class="cta-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Explore Trade Patterns
+  </a>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num" data-target="195">0</div><div class="lbl">Countries Trading</div></div>
+    <div class="hero-stat"><div class="num" data-target="32">0</div><div class="lbl">Trillion USD Global Trade</div></div>
+    <div class="hero-stat"><div class="num" data-target="2">0</div><div class="lbl">Core Gravity Factors</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <p class="section-label reveal">Section 01</p>
+  <h2 class="section-title reveal">Project Overview</h2>
+  <p class="section-sub reveal">How and why countries trade — through the lens of the Gravity Model.</p>
+
+  <div class="overview-grid reveal">
+    <div class="overview-block">
+      <h3>What Is the Gravity Model?</h3>
+      <p>This project explores one of the most important concepts in international trade: the <strong>Gravity Model of Trade</strong>. Like gravitational force between planets, trade between two countries depends on their "mass" (economic size) and distance from each other.</p>
+      <div style="margin-top:1rem;">
+        <span class="factor-pill">⚖️ Economic Size</span>
+        <span class="factor-pill">📍 Geographic Distance</span>
+      </div>
+    </div>
+    <div class="overview-block">
+      <h3>How Does It Work?</h3>
+      <p>Countries with <strong>large economies</strong> tend to trade more because they produce and consume more goods and services. Countries that are <strong>geographically closer</strong> trade more because transportation costs are lower and business relationships are easier to maintain.</p>
+      <p style="margin-top:0.8rem;">This explains why neighboring countries often become major trading partners and why large economies dominate global trade networks.</p>
+    </div>
+  </div>
+
+  <div class="why-matters reveal">
+    <h3>🌍 Why This Matters</h3>
+    <p>Understanding trade patterns helps governments, businesses, and economists make better decisions about international commerce, investment, and economic development. The Gravity Model provides a reliable framework for predicting and analyzing real-world trade flows.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DEMO: CALCULATOR -->
+<section id="demo">
+  <p class="section-label reveal">Section 02 — Demonstration</p>
+  <h2 class="section-title reveal">Gravity Model Trade Calculator</h2>
+  <p class="section-sub reveal">Experiment with economic size and distance to see how trade potential changes between countries.</p>
+
+  <div class="calc-wrap reveal">
+    <div style="text-align:center; margin-bottom:1.5rem;">
+      <span class="formula-tag">Trade Score = (GDP_A × GDP_B) ÷ Distance</span>
+    </div>
+
+    <div class="calc-inputs">
+      <div class="input-group">
+        <label>Country A – GDP (Billions USD)</label>
+        <input type="number" id="gdpA" placeholder="e.g. 25000" min="1">
+      </div>
+      <div class="input-group">
+        <label>Country B – GDP (Billions USD)</label>
+        <input type="number" id="gdpB" placeholder="e.g. 14000" min="1">
+      </div>
+      <div class="input-group">
+        <label>Distance Between Countries (km)</label>
+        <input type="number" id="dist" placeholder="e.g. 800" min="1">
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculateTrade()">Calculate Trade Potential →</button>
+
+    <div class="calc-result" id="calcResult">
+      <div class="result-score" id="resultScore">—</div>
+      <div class="result-label" id="resultLabel">—</div>
+      <p class="result-explain" id="resultExplain">—</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- EVIDENCE: CHART + TABLE -->
+<section id="evidence">
+  <p class="section-label reveal">Section 03 — Evidence</p>
+  <h2 class="section-title reveal">Global Trade Patterns</h2>
+  <p class="section-sub reveal">Visualizing how major economies rank by trade influence score — based on GDP and global connectivity.</p>
+
+  <div class="chart-section reveal">
+    <div class="chart-title">Trade Influence Score by Country</div>
+    <div class="chart-sub">Scores reflect relative participation in global trade flows (scale: 0–100)</div>
+
+    <div class="bar-chart" id="barChart">
+      <div class="bar-row"><span class="bar-label">🇺🇸 United States</span><div class="bar-track"><div class="bar-fill" data-width="95">95</div></div></div>
+      <div class="bar-row"><span class="bar-label">🇨🇳 China</span><div class="bar-track"><div class="bar-fill" data-width="92">92</div></div></div>
+      <div class="bar-row"><span class="bar-label">🇩🇪 Germany</span><div class="bar-track"><div class="bar-fill" data-width="85">85</div></div></div>
+      <div class="bar-row"><span class="bar-label">🇨🇦 Canada</span><div class="bar-track"><div class="bar-fill teal-fill" data-width="80">80</div></div></div>
+      <div class="bar-row"><span class="bar-label">🇲🇽 Mexico</span><div class="bar-track"><div class="bar-fill teal-fill" data-width="78">78</div></div></div>
+      <div class="bar-row"><span class="bar-label">🇯🇵 Japan</span><div class="bar-track"><div class="bar-fill" data-width="75">75</div></div></div>
+    </div>
+
+    <p class="chart-note">The chart demonstrates how large economies play major roles in global trade. Countries with larger economic output and strategic geographic positions generally participate in more international trade.</p>
+  </div>
+
+  <div style="margin-top:3rem;">
+    <p class="section-label reveal">Evidence Table</p>
+    <h3 class="section-title reveal" style="font-size:1.7rem;">Gravity Model in Action</h3>
+
+    <div class="table-wrap reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Economic Size</th>
+            <th>Distance to US</th>
+            <th>Expected Trade Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🇨🇦 Canada</td><td>Large</td><td>Very Close</td><td><span class="badge very-high">Very High</span></td></tr>
+          <tr><td>🇲🇽 Mexico</td><td>Large</td><td>Very Close</td><td><span class="badge very-high">Very High</span></td></tr>
+          <tr><td>🇩🇪 Germany</td><td>Large</td><td>Medium Distance</td><td><span class="badge high">High</span></td></tr>
+          <tr><td>🇯🇵 Japan</td><td>Large</td><td>Medium Distance</td><td><span class="badge high">High</span></td></tr>
+          <tr><td>🇧🇷 Brazil</td><td>Large</td><td>Far</td><td><span class="badge moderate">Moderate</span></td></tr>
+          <tr><td>🇦🇺 Australia</td><td>Medium</td><td>Very Far</td><td><span class="badge moderate">Moderate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note reveal">This evidence demonstrates the core principle of the Gravity Model: larger economies and shorter distances generally result in higher levels of international trade between nations.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- KEY CONCEPTS -->
+<section>
+  <p class="section-label reveal">Section 04</p>
+  <h2 class="section-title reveal">Key Concepts</h2>
+  <p class="section-sub reveal">The four pillars that underpin the Gravity Model of Trade.</p>
+
+  <div class="concepts-grid">
+    <div class="concept-card reveal">
+      <div class="concept-icon">⚖️</div>
+      <h3>Economic Size</h3>
+      <p>Larger economies generate greater demand and production, creating more opportunities for exports and imports with partner nations.</p>
+    </div>
+    <div class="concept-card reveal">
+      <div class="concept-icon">📍</div>
+      <h3>Distance</h3>
+      <p>Greater geographic distance increases transportation and logistics costs, acting as a natural barrier that reduces trade volumes between countries.</p>
+    </div>
+    <div class="concept-card reveal">
+      <div class="concept-icon">🤝</div>
+      <h3>Trade Relationships</h3>
+      <p>Neighboring countries naturally develop deeper trade ties due to shared cultural connections, established logistics routes, and lower transaction costs.</p>
+    </div>
+    <div class="concept-card reveal">
+      <div class="concept-icon">🌐</div>
+      <h3>Globalization</h3>
+      <p>Advances in technology and transportation have reduced the friction of distance, expanding trade networks — though geographic proximity still matters significantly.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHAT DID I LEARN -->
+<section id="learn">
+  <p class="section-label reveal">Section 05 — Reflection</p>
+  <h2 class="section-title reveal">What Did I Learn?</h2>
+  <p class="section-sub reveal">Reflecting across knowledge, skills, and personal insight gained through this project.</p>
+
+  <div class="reflection-grid">
+    <div class="reflection-card r-knowledge reveal">
+      <span class="r-tag">Knowledge</span>
+      <h3>What I Discovered</h3>
+      <p>I learned that trade flows are systematically influenced by both economic size and geographic distance. The Gravity Model provides a quantitative framework that helps explain why some countries trade far more than others — and predicts future trade patterns with remarkable accuracy.</p>
+    </div>
+    <div class="reflection-card r-skills reveal">
+      <span class="r-tag">Skills</span>
+      <h3>What I Developed</h3>
+      <p>I developed skills in economic analysis, interpreting trade data, and understanding international market relationships. I also practiced creating visual and interactive representations of economic concepts to make complex ideas more accessible.</p>
+    </div>
+    <div class="reflection-card r-reflect reveal">
+      <span class="r-tag">Reflection</span>
+      <h3>Surprising Insights</h3>
+      <p>Before studying international trade, I assumed globalization had made geographic distance largely irrelevant. This project revealed that physical location still plays a major role in shaping trade relationships — even in our hyper-connected world.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CONCLUSION -->
+<section>
+  <p class="section-label reveal" style="text-align:center;">Conclusion</p>
+  <div class="conclusion-wrap reveal">
+    <h2 class="section-title" style="font-size:2.2rem;">Why the Gravity Model Matters</h2>
+    <p>The Gravity Model remains one of the most powerful and empirically validated tools for explaining real-world trade patterns. By combining just two variables — economic size and distance — it provides extraordinary predictive power about how countries interact within the global economy. As trade policies evolve and new economic powers emerge, this model continues to guide economists, policymakers, and businesses worldwide.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Hasan Osiul</div>
+  <div class="footer-sub">International Trade Portfolio &nbsp;·&nbsp; Project 1 – World Trade Explorer</div>
+  <div class="footer-nav">
+    <a class="footer-btn ghost" href="#">← Previous Page</a>
+    <a class="footer-btn primary" href="#">Portfolio Home</a>
+    <a class="footer-btn ghost" href="#">Next Project →</a>
+  </div>
+</footer>
+
+<script>
+  /* ── GLOBE CANVAS ── */
+  const canvas = document.getElementById('globeCanvas');
+  const ctx = canvas.getContext('2d');
+  let dots = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = document.getElementById('hero').offsetHeight;
+  }
+
+  function initDots() {
+    dots = [];
+    for (let i = 0; i < 60; i++) {
+      dots.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2.5 + 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.7 + 0.2
+      });
+    }
+  }
+
+  function drawGlobe() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // draw connections
+    for (let i = 0; i < dots.length; i++) {
+      for (let j = i + 1; j < dots.length; j++) {
+        const dx = dots[i].x - dots[j].x;
+        const dy = dots[i].y - dots[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 130) {
+          ctx.beginPath();
+          ctx.moveTo(dots[i].x, dots[i].y);
+          ctx.lineTo(dots[j].x, dots[j].y);
+          ctx.strokeStyle = `rgba(59,158,255,${0.18 * (1 - d / 130)})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+    // draw dots
+    dots.forEach(d => {
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(59,158,255,${d.opacity})`;
+      ctx.fill();
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 0 || d.x > canvas.width)  d.vx *= -1;
+      if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+    });
+    requestAnimationFrame(drawGlobe);
+  }
+
+  resizeCanvas(); initDots(); drawGlobe();
+  window.addEventListener('resize', () => { resizeCanvas(); initDots(); });
+
+  /* ── SCROLL REVEAL ── */
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounters() {
+    document.querySelectorAll('[data-target]').forEach(el => {
+      const target = +el.dataset.target;
+      let current = 0;
+      const step = target / 60;
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = Math.floor(current) + (el.dataset.target === '32' ? 'T+' : '+');
+      }, 20);
+    });
+  }
+  setTimeout(animateCounters, 800);
+
+  /* ── BAR CHART ANIMATION ── */
+  const chartObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.bar-fill').forEach(bar => {
+          const w = bar.dataset.width;
+          setTimeout(() => { bar.style.width = w + '%'; }, 200);
+        });
+        chartObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  const chartEl = document.getElementById('barChart');
+  if (chartEl) chartObserver.observe(chartEl);
+
+  /* ── CALCULATOR ── */
+  function calculateTrade() {
+    const gdpA = parseFloat(document.getElementById('gdpA').value);
+    const gdpB = parseFloat(document.getElementById('gdpB').value);
+    const dist = parseFloat(document.getElementById('dist').value);
+
+    if (!gdpA || !gdpB || !dist || dist <= 0) {
+      alert('Please enter valid values for all three fields.');
+      return;
+    }
+
+    const score = (gdpA * gdpB) / dist;
+    const rounded = Math.round(score).toLocaleString();
+
+    let label = '', cls = '', explain = '';
+    if (score > 50000) {
+      label = '🟢 Very High Trade Potential'; cls = 'very-high';
+      explain = 'These countries are likely to trade heavily because their economies are large and/or they are geographically close to each other.';
+    } else if (score > 10000) {
+      label = '🟡 High Trade Potential'; cls = 'high';
+      explain = 'Strong trade is expected between these countries, driven by significant economic output and manageable geographic distance.';
+    } else if (score > 1000) {
+      label = '🟠 Moderate Trade Potential'; cls = 'moderate';
+      explain = 'Some trade exists, but either distance or economic size limits the full potential of commercial exchange between these countries.';
+    } else {
+      label = '🔴 Low Trade Potential'; cls = 'low';
+      explain = 'Trade between these countries is limited, likely due to large distances, small economies, or both. Special agreements might help boost commercial activity.';
+    }
+
+    const result = document.getElementById('calcResult');
+    const scoreEl = document.getElementById('resultScore');
+    const labelEl = document.getElementById('resultLabel');
+    const explainEl = document.getElementById('resultExplain');
+
+    result.classList.remove('show');
+    void result.offsetWidth; // reflow
+
+    scoreEl.textContent = rounded;
+    labelEl.textContent = label;
+    labelEl.className = 'result-label ' + cls;
+    explainEl.textContent = explain;
+
+    result.classList.add('show');
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Allow Enter key to trigger calculation
+  ['gdpA','gdpB','dist'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') calculateTrade();
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>External Economies of Scale & International Production</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0e12;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --gold: #c8922a;
+  --gold-light: #e8b84b;
+  --teal: #1a6b6b;
+  --teal-light: #2a9090;
+  --rust: #9b3a1c;
+  --slate: #3a4555;
+  --mist: #8a95a8;
+  --border: rgba(13,14,18,0.12);
+  --shadow: 0 4px 32px rgba(13,14,18,0.10);
+  --shadow-lg: 0 12px 60px rgba(13,14,18,0.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.7;
+  font-size: 17px;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(13,14,18,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--gold);
+  padding: 0 2rem;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.nav-logo {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--gold); font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.nav-links {
+  display: flex; gap: 0; list-style: none;
+}
+.nav-links a {
+  color: rgba(245,240,232,0.7); text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 1rem; height: 60px; display: flex; align-items: center;
+  transition: color 0.2s, border-bottom 0.2s;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.nav-hamburger span { width: 24px; height: 2px; background: var(--gold); display: block; transition: 0.3s; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  background: var(--ink);
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+  padding: 6rem 2rem 4rem;
+}
+.hero-grid {
+  position: absolute; inset: 0; opacity: 0.04;
+  background-image: linear-gradient(var(--gold) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gold) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero-accent {
+  position: absolute; top: -100px; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(200,146,42,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-accent2 {
+  position: absolute; bottom: -150px; left: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(26,107,107,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.hero-label {
+  font-family: 'IBM Plex Mono', monospace; color: var(--gold);
+  font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+  font-weight: 900; color: var(--paper);
+  line-height: 1.1; margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+}
+.hero h1 em { color: var(--gold); font-style: italic; }
+.hero-sub {
+  color: rgba(245,240,232,0.6); font-size: 1.1rem;
+  max-width: 600px; margin-bottom: 3rem;
+  opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
+}
+.hero-stats {
+  display: flex; gap: 3rem; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Playfair Display', serif; font-size: 2.4rem;
+  font-weight: 700; color: var(--gold); display: block; line-height: 1;
+}
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+  color: rgba(245,240,232,0.5); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.hero-scroll {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  color: rgba(245,240,232,0.3); font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+.scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, rgba(200,146,42,0.5), transparent); }
+
+/* ── SECTION WRAPPERS ── */
+section { padding: 5rem 2rem; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+  color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em;
+  margin-bottom: 0.75rem;
+}
+.section-title {
+  font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700; line-height: 1.2; margin-bottom: 1rem;
+}
+.section-lead {
+  color: var(--slate); font-size: 1.05rem; max-width: 700px;
+  margin-bottom: 3rem; font-style: italic;
+}
+.divider {
+  width: 60px; height: 3px;
+  background: linear-gradient(to right, var(--gold), var(--teal));
+  margin-bottom: 1.5rem;
+}
+
+/* ── OVERVIEW ── */
+#overview { background: var(--paper); }
+.overview-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  margin-bottom: 3rem;
+}
+.overview-card {
+  background: white; border: 1px solid var(--border);
+  border-top: 3px solid var(--gold); padding: 2rem;
+  border-radius: 2px; box-shadow: var(--shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.overview-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.overview-card.teal { border-top-color: var(--teal); }
+.overview-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  font-weight: 700; margin-bottom: 0.75rem; color: var(--ink);
+}
+.overview-card p { color: var(--slate); font-size: 0.95rem; margin-bottom: 0.5rem; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+.tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem;
+  padding: 0.25rem 0.65rem; border-radius: 20px;
+  background: var(--cream); color: var(--slate); letter-spacing: 0.05em;
+}
+.tag.gold { background: rgba(200,146,42,0.12); color: var(--gold); }
+.tag.teal { background: rgba(26,107,107,0.1); color: var(--teal); }
+.quote-block {
+  background: var(--ink); color: var(--paper); padding: 2.5rem 3rem;
+  border-left: 4px solid var(--gold); margin: 2rem 0; position: relative;
+}
+.quote-block::before {
+  content: '\201C'; font-family: 'Playfair Display', serif;
+  font-size: 8rem; color: var(--gold); opacity: 0.2;
+  position: absolute; top: -1rem; left: 1.5rem; line-height: 1;
+}
+.quote-block p {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 1.3rem; line-height: 1.6; position: relative; z-index: 1;
+}
+.quote-block cite {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+  color: var(--gold); display: block; margin-top: 1rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ── DEMOS ── */
+#demos { background: var(--cream); }
+.demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.demo-card {
+  background: white; border: 1px solid var(--border);
+  padding: 2rem; border-radius: 2px; box-shadow: var(--shadow);
+}
+.demo-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 1.15rem;
+  font-weight: 700; margin-bottom: 1rem; color: var(--ink);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.demo-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  background: var(--ink); color: var(--gold); padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+}
+.demo-full { grid-column: 1 / -1; }
+
+/* Sliders */
+.slider-wrap { margin: 1rem 0; }
+.slider-label {
+  display: flex; justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+  color: var(--slate); margin-bottom: 0.4rem;
+}
+input[type=range] {
+  width: 100%; height: 4px; appearance: none;
+  background: linear-gradient(to right, var(--gold) var(--pct, 50%), var(--cream) var(--pct, 50%));
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  appearance: none; width: 16px; height: 16px;
+  background: var(--gold); border-radius: 50%;
+  border: 2px solid white; box-shadow: 0 0 6px rgba(200,146,42,0.4);
+}
+
+/* Stats row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin: 1rem 0;
+}
+.stat-box {
+  background: var(--cream); padding: 1rem;
+  text-align: center; border-radius: 2px;
+}
+.stat-box .val {
+  font-family: 'Playfair Display', serif; font-size: 1.6rem;
+  font-weight: 700; color: var(--gold); display: block;
+}
+.stat-box .lbl {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+/* Canvas */
+canvas { width: 100%; height: 200px; display: block; margin: 1rem 0; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+.tab-btn {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+  padding: 0.6rem 1.2rem; background: none; border: none; cursor: pointer;
+  color: var(--mist); text-transform: uppercase; letter-spacing: 0.08em;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: 0.2s;
+}
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Cluster viz */
+.cluster-viz {
+  height: 220px; background: var(--cream); border-radius: 2px;
+  position: relative; overflow: hidden; margin: 1rem 0;
+}
+.firm-dot {
+  position: absolute; width: 12px; height: 12px;
+  background: var(--teal); border-radius: 50%;
+  transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(26,107,107,0.4);
+}
+.firm-dot.gold { background: var(--gold); }
+.cluster-center {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px; height: 80px; border-radius: 50%;
+  border: 2px dashed var(--gold);
+  opacity: 0; transition: opacity 1s;
+  display: flex; align-items: center; justify-content: center;
+}
+.cluster-center span {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  color: var(--gold); text-align: center;
+}
+
+/* Buttons */
+.btn {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+  padding: 0.6rem 1.4rem; border: none; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.1em; transition: 0.2s;
+  border-radius: 2px;
+}
+.btn-primary { background: var(--ink); color: var(--gold); }
+.btn-primary:hover { background: var(--gold); color: var(--ink); }
+.btn-teal { background: var(--teal); color: white; }
+.btn-teal:hover { background: var(--teal-light); }
+
+/* Select */
+select {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+  padding: 0.5rem 1rem; border: 1px solid var(--border);
+  background: white; color: var(--ink); border-radius: 2px;
+  cursor: pointer; outline: none;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 8px; background: var(--cream); border-radius: 4px; overflow: hidden;
+  margin: 0.5rem 0;
+}
+.progress-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(to right, var(--teal), var(--gold));
+  transition: width 0.8s ease; width: 0%;
+}
+
+/* Quiz */
+.quiz-q { margin-bottom: 1.5rem; }
+.quiz-q p {
+  font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem;
+}
+.quiz-opts { display: flex; flex-direction: column; gap: 0.4rem; }
+.quiz-opt {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.75rem; background: var(--cream);
+  border-radius: 2px; cursor: pointer; font-size: 0.9rem;
+  transition: background 0.2s; border: 1px solid transparent;
+}
+.quiz-opt:hover { background: rgba(200,146,42,0.08); border-color: var(--gold); }
+.quiz-opt.correct { background: rgba(26,107,107,0.12); border-color: var(--teal); }
+.quiz-opt.wrong { background: rgba(155,58,28,0.08); border-color: var(--rust); }
+.quiz-opt input { margin: 0; }
+.quiz-score {
+  font-family: 'Playfair Display', serif; font-size: 2rem;
+  font-weight: 700; color: var(--gold); text-align: center; padding: 1.5rem;
+}
+
+/* ── EVIDENCE ── */
+#evidence { background: var(--paper); }
+.evidence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.ev-card {
+  background: white; border: 1px solid var(--border);
+  padding: 1.75rem; border-radius: 2px; box-shadow: var(--shadow);
+  transition: transform 0.3s;
+}
+.ev-card:hover { transform: translateY(-3px); }
+.ev-icon {
+  font-size: 2rem; margin-bottom: 0.75rem; display: block;
+}
+.ev-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 1.05rem;
+  font-weight: 700; margin-bottom: 0.5rem;
+}
+.ev-card p { font-size: 0.88rem; color: var(--slate); line-height: 1.65; }
+.ev-card.wide { grid-column: span 2; }
+.ev-card.full { grid-column: 1 / -1; }
+
+/* Comparison table */
+.compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.compare-table th {
+  background: var(--ink); color: var(--gold); padding: 0.75rem 1rem;
+  text-align: left; font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.compare-table td {
+  padding: 0.65rem 1rem; border-bottom: 1px solid var(--border);
+  color: var(--slate);
+}
+.compare-table tr:nth-child(even) td { background: var(--cream); }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+.timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(to bottom, var(--gold), var(--teal));
+}
+.tl-item { position: relative; margin-bottom: 1.2rem; padding-left: 1.5rem; }
+.tl-item::before {
+  content: ''; position: absolute; left: -1.7rem; top: 0.4rem;
+  width: 10px; height: 10px; background: var(--gold); border-radius: 50%;
+  border: 2px solid white; box-shadow: 0 0 6px rgba(200,146,42,0.4);
+}
+.tl-year {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.tl-item p { font-size: 0.88rem; color: var(--slate); margin-top: 0.2rem; }
+
+/* Map */
+.world-map {
+  background: var(--ink); border-radius: 2px; padding: 1.5rem;
+  position: relative; min-height: 200px;
+}
+.hub-point {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(200,146,42,0.15); border: 1px solid rgba(200,146,42,0.4);
+  padding: 0.4rem 0.8rem; border-radius: 20px; margin: 0.3rem;
+  cursor: pointer; transition: 0.2s;
+}
+.hub-point:hover { background: rgba(200,146,42,0.25); transform: scale(1.05); }
+.hub-point .dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+.hub-point span { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--gold); }
+.hub-info {
+  background: rgba(245,240,232,0.05); border: 1px solid rgba(200,146,42,0.2);
+  padding: 1rem; border-radius: 2px; margin-top: 1rem;
+  font-size: 0.88rem; color: rgba(245,240,232,0.7);
+}
+
+/* Qiaotou infographic */
+.qiaotou-box {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  background: var(--ink); color: var(--paper); padding: 2rem; border-radius: 2px;
+}
+.qiaotou-stat {
+  text-align: center; padding: 1.5rem;
+  border: 1px solid rgba(200,146,42,0.3); border-radius: 2px;
+}
+.qiaotou-stat .big {
+  font-family: 'Playfair Display', serif; font-size: 3rem;
+  font-weight: 900; color: var(--gold); line-height: 1;
+}
+.qiaotou-stat p {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  color: rgba(245,240,232,0.6); text-transform: uppercase;
+  letter-spacing: 0.1em; margin-top: 0.5rem;
+}
+
+/* Flowchart */
+.flowchart {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+.fc-node {
+  background: var(--ink); color: var(--paper); padding: 0.75rem 1.5rem;
+  border-radius: 2px; font-size: 0.85rem; text-align: center;
+  border: 1px solid rgba(200,146,42,0.3); min-width: 200px;
+  position: relative;
+}
+.fc-node.gold { border-color: var(--gold); background: rgba(200,146,42,0.15); color: var(--gold); }
+.fc-node.teal { border-color: var(--teal); background: rgba(26,107,107,0.15); color: var(--teal-light); }
+.fc-arrow {
+  width: 2px; height: 24px; background: var(--gold);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.fc-arrow::after {
+  content: '▼'; color: var(--gold); font-size: 0.7rem;
+  margin-bottom: -0.5rem;
+}
+
+/* ── LEARN ── */
+#learn { background: var(--ink); }
+#learn .section-title { color: var(--paper); }
+#learn .section-lead { color: rgba(245,240,232,0.5); }
+#learn .section-tag { color: var(--gold); }
+.learn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.learn-card {
+  background: rgba(245,240,232,0.05); border: 1px solid rgba(245,240,232,0.1);
+  padding: 2rem; border-radius: 2px; transition: 0.3s;
+  border-top: 3px solid transparent;
+}
+.learn-card:nth-child(1) { border-top-color: var(--gold); }
+.learn-card:nth-child(2) { border-top-color: var(--teal); }
+.learn-card:nth-child(3) { border-top-color: var(--rust); }
+.learn-card:hover { background: rgba(245,240,232,0.08); transform: translateY(-3px); }
+.learn-card h3 {
+  font-family: 'Playfair Display', serif; color: var(--paper);
+  font-size: 1.2rem; margin-bottom: 1rem;
+}
+.learn-list { list-style: none; }
+.learn-list li {
+  color: rgba(245,240,232,0.7); font-size: 0.9rem; padding: 0.4rem 0;
+  padding-left: 1rem; position: relative; border-bottom: 1px solid rgba(245,240,232,0.06);
+}
+.learn-list li::before {
+  content: '—'; position: absolute; left: 0; color: var(--gold);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: #07080a; padding: 2.5rem 2rem;
+  border-top: 1px solid rgba(200,146,42,0.2);
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-brand {
+  font-family: 'IBM Plex Mono', monospace; color: var(--gold);
+  font-size: 0.75rem; letter-spacing: 0.15em;
+}
+.footer-note {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+  color: rgba(245,240,232,0.25); text-align: right;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .overview-grid { grid-template-columns: 1fr; }
+  .demo-grid { grid-template-columns: 1fr; }
+  .evidence-grid { grid-template-columns: 1fr; }
+  .ev-card.wide { grid-column: span 1; }
+  .learn-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .nav-links.open { display: flex; flex-direction: column; gap: 0; }
+  .nav-hamburger { display: flex; }
+  .qiaotou-box { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+/* ── SVG MAP ── */
+.svg-map-wrap { overflow-x: auto; }
+.map-svg { max-width: 100%; height: auto; }
+.map-dot { cursor: pointer; transition: r 0.2s; }
+.map-dot:hover { filter: brightness(1.3); }
+.map-label { font-family: 'IBM Plex Mono', monospace; fill: var(--gold); font-size: 9px; }
+
+/* Trade scenario */
+.country-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+.country-panel { background: var(--cream); padding: 1rem; border-radius: 2px; }
+.country-panel h4 {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate);
+  margin-bottom: 0.75rem;
+}
+.country-result {
+  text-align: center; padding: 1rem; background: var(--ink); color: var(--paper);
+  margin-top: 1rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+  border-left: 3px solid var(--gold);
+}
+
+/* Location game */
+.loc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0; }
+.loc-btn {
+  padding: 1rem; background: var(--cream); border: 1px solid var(--border);
+  cursor: pointer; text-align: left; border-radius: 2px; transition: 0.2s;
+}
+.loc-btn:hover { border-color: var(--gold); background: rgba(200,146,42,0.05); }
+.loc-btn.selected { border-color: var(--gold); background: rgba(200,146,42,0.1); }
+.loc-btn h4 { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; margin-bottom: 0.3rem; }
+.loc-btn p { font-size: 0.8rem; color: var(--slate); }
+.score-bars { margin-top: 1rem; }
+.score-row {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+}
+.score-row span:first-child { width: 130px; color: var(--slate); }
+.score-bar { flex: 1; height: 6px; background: var(--cream); border-radius: 3px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.score-val { width: 30px; text-align: right; color: var(--gold); }
+
+/* hover tooltip */
+.tooltip-wrap { position: relative; display: inline-block; }
+.tooltip-tip {
+  display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); font-size: 0.75rem;
+  padding: 0.4rem 0.75rem; border-radius: 2px; white-space: nowrap;
+  border: 1px solid rgba(200,146,42,0.3); z-index: 10;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.tooltip-wrap:hover .tooltip-tip { display: block; }
+
+/* Learning curve canvas */
+#lcCanvas { border: 1px solid var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Econ 301 · External Economies of Scale</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#demos">Demos</a></li>
+      <li><a href="#evidence">Evidence</a></li>
+      <li><a href="#learn">Reflection</a></li>
+    </ul>
+    <div class="nav-hamburger" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-accent"></div>
+  <div class="hero-accent2"></div>
+  <div class="hero-inner">
+    <p class="hero-label">University Economics · Course Project</p>
+    <h1>External Economies of Scale<br>& the <em>International Location</em><br>of Production</h1>
+    <p class="hero-sub">How industrial clustering, knowledge spillovers, and geographic concentration shape global trade patterns and economic geography.</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">7</span>
+        <span class="stat-label">Interactive Demos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">10</span>
+        <span class="stat-label">Evidence Cards</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">60%</span>
+        <span class="stat-label">World Buttons from Qiaotou</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Explore</span>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-inner">
+    <p class="section-tag reveal">Section 01 · Project Overview</p>
+    <div class="divider reveal"></div>
+    <h2 class="section-title reveal">What is This Page About?</h2>
+    <p class="section-lead reveal">Based on the chapter "External Economies of Scale and the International Location of Production," this project explores why industries concentrate geographically — and how that shapes global trade.</p>
+
+    <div class="overview-grid">
+      <div class="overview-card reveal">
+        <h3>What Inspired This Page</h3>
+        <p>This project is based on a course reading that examines why industries — from Silicon Valley tech firms to Qiaotou button makers — cluster together in specific locations around the world.</p>
+        <p>The reading challenges our intuition: trade patterns aren't always driven by natural resources or comparative advantage. Sometimes, history and chance determine which country dominates an industry.</p>
+        <div class="tag-list">
+          <span class="tag gold">Krugman & Obstfeld</span>
+          <span class="tag teal">International Economics</span>
+          <span class="tag">Trade Theory</span>
+        </div>
+      </div>
+      <div class="overview-card teal reveal">
+        <h3>The Core Concept</h3>
+        <p><strong>External economies of scale</strong> occur when an entire industry's concentration in one location makes all firms more efficient — not because any single firm is large, but because the <em>industry</em> is large there.</p>
+        <p>Three mechanisms drive this: specialized suppliers, labor market pooling, and knowledge spillovers.</p>
+        <div class="tag-list">
+          <span class="tag teal">Alfred Marshall (1890)</span>
+          <span class="tag">Industrial Districts</span>
+          <span class="tag gold">Self-Reinforcing</span>
+        </div>
+      </div>
+      <div class="overview-card reveal">
+        <h3>Internal Economies of Scale</h3>
+        <p>When a <em>single firm</em> grows larger, its per-unit costs fall. Large factories, mass production systems, and corporate specialization create efficiency through firm size alone.</p>
+        <p>Internal economies often lead to <strong>monopolies or oligopolies</strong>, since one large firm undercuts smaller competitors.</p>
+        <div class="tag-list">
+          <span class="tag">Firm-Level</span>
+          <span class="tag gold">Imperfect Competition</span>
+          <span class="tag">Monopoly Risk</span>
+        </div>
+      </div>
+      <div class="overview-card teal reveal">
+        <h3>External Economies of Scale</h3>
+        <p>When an <em>entire industry</em> concentrates in one location, all firms benefit — even small ones. The cluster as a whole drives efficiency through shared infrastructure, talent pools, and idea exchange.</p>
+        <p>External economies allow <strong>perfectly competitive markets</strong> to persist alongside increasing returns.</p>
+        <div class="tag-list">
+          <span class="tag teal">Industry-Level</span>
+          <span class="tag">All Firms Benefit</span>
+          <span class="tag gold">Competitive Markets</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      <p>Countries may specialize not because they are naturally best, but because industries become more efficient when concentrated in one location.</p>
+      <cite>— Based on Krugman, Obstfeld & Melitz, International Economics: Theory and Policy</cite>
+    </div>
+  </div>
+</section>
+
+<!-- DEMOS -->
+<section id="demos">
+  <div class="section-inner">
+    <p class="section-tag reveal">Section 02 · Interactive Demonstrations</p>
+    <div class="divider reveal"></div>
+    <h2 class="section-title reveal">Explore the Concepts</h2>
+    <p class="section-lead reveal">Seven interactive tools to help you understand economies of scale, industrial clustering, and global trade specialization.</p>
+
+    <div class="demo-grid">
+
+      <!-- DEMO 1: EoS Simulator -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">01</span> Economies of Scale Simulator</h3>
+        <div class="slider-wrap">
+          <div class="slider-label"><span>Production Quantity</span><span id="qtyVal">500 units</span></div>
+          <input type="range" id="qtySlider" min="10" max="1000" value="500"
+            oninput="updateEoS(this.value)">
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="val" id="totalCost">$12,500</span>
+            <span class="lbl">Total Cost</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" id="avgCost">$25.00</span>
+            <span class="lbl">Avg Cost / Unit</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" id="efficiency">68%</span>
+            <span class="lbl">Efficiency</span>
+          </div>
+        </div>
+        <canvas id="eosCanvas"></canvas>
+      </div>
+
+      <!-- DEMO 2: Internal vs External -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">02</span> Internal vs External Explorer</h3>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'internal')">Internal</button>
+          <button class="tab-btn" onclick="switchTab(this,'external')">External</button>
+        </div>
+        <div id="internal" class="tab-panel active">
+          <p style="font-size:0.88rem;color:var(--slate);margin-bottom:0.75rem">One firm grows larger → per-unit costs fall:</p>
+          <div class="slider-wrap">
+            <div class="slider-label"><span>Firm Size</span><span id="firmSizeVal">Medium</span></div>
+            <input type="range" id="firmSlider" min="1" max="10" value="5"
+              oninput="updateInternal(this.value)">
+          </div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <span class="val" id="intWorkers">500</span>
+              <span class="lbl">Workers</span>
+            </div>
+            <div class="stat-box">
+              <span class="val" id="intCost">$45</span>
+              <span class="lbl">Unit Cost</span>
+            </div>
+          </div>
+          <div class="progress-bar" style="height:12px">
+            <div class="progress-fill" id="intBar" style="width:50%"></div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--mist);margin-top:0.5rem">Firm size ↑ → specialization, bulk purchasing, mass production</p>
+        </div>
+        <div id="external" class="tab-panel">
+          <p style="font-size:0.88rem;color:var(--slate);margin-bottom:0.75rem">Many firms cluster together → shared benefits:</p>
+          <div class="slider-wrap">
+            <div class="slider-label"><span>Number of Firms</span><span id="numFirmsVal">25 firms</span></div>
+            <input type="range" id="extSlider" min="1" max="50" value="25"
+              oninput="updateExternal(this.value)">
+          </div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <span class="val" id="extSuppliers">8</span>
+              <span class="lbl">Suppliers</span>
+            </div>
+            <div class="stat-box">
+              <span class="val" id="extKnow">62%</span>
+              <span class="lbl">Knowledge Share</span>
+            </div>
+          </div>
+          <div class="progress-bar" style="height:12px">
+            <div class="progress-fill" id="extBar" style="background:linear-gradient(to right,var(--teal),var(--teal-light));width:50%"></div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--mist);margin-top:0.5rem">Cluster size ↑ → more suppliers, deeper labor pool, faster knowledge spread</p>
+        </div>
+      </div>
+
+      <!-- DEMO 3: Cluster Simulator -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">03</span> Industrial Cluster Simulator</h3>
+        <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;">
+          <select id="industrySelect">
+            <option value="tech">Technology</option>
+            <option value="banking">Banking</option>
+            <option value="film">Film Industry</option>
+            <option value="software">Software</option>
+            <option value="manufacturing">Manufacturing</option>
+          </select>
+          <button class="btn btn-primary" onclick="runCluster()">Simulate Clustering</button>
+        </div>
+        <div class="cluster-viz" id="clusterViz">
+          <div class="cluster-center" id="clusterCenter"><span>CLUSTER<br>HUB</span></div>
+        </div>
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-box"><span class="val" id="clSuppliers">—</span><span class="lbl">Suppliers</span></div>
+          <div class="stat-box"><span class="val" id="clLabor">—</span><span class="lbl">Labor Pool</span></div>
+          <div class="stat-box"><span class="val" id="clEfficiency">—</span><span class="lbl">Efficiency</span></div>
+        </div>
+      </div>
+
+      <!-- DEMO 4: Trade Specialization -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">04</span> Trade Specialization Simulator</h3>
+        <div class="country-bars">
+          <div class="country-panel">
+            <h4>Country A</h4>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Labor Cost</span><span id="aLabor">50</span></div>
+              <input type="range" id="aLaborR" min="10" max="100" value="50" oninput="runTrade()">
+            </div>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Industry Size</span><span id="aSize">60</span></div>
+              <input type="range" id="aSizeR" min="10" max="100" value="60" oninput="runTrade()">
+            </div>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Experience</span><span id="aExp">70</span></div>
+              <input type="range" id="aExpR" min="10" max="100" value="70" oninput="runTrade()">
+            </div>
+          </div>
+          <div class="country-panel">
+            <h4>Country B</h4>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Labor Cost</span><span id="bLabor">40</span></div>
+              <input type="range" id="bLaborR" min="10" max="100" value="40" oninput="runTrade()">
+            </div>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Industry Size</span><span id="bSize">30</span></div>
+              <input type="range" id="bSizeR" min="10" max="100" value="30" oninput="runTrade()">
+            </div>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Experience</span><span id="bExp">35</span></div>
+              <input type="range" id="bExpR" min="10" max="100" value="35" oninput="runTrade()">
+            </div>
+          </div>
+        </div>
+        <div class="country-result" id="tradeResult">
+          Adjust sliders to simulate trade specialization →
+        </div>
+      </div>
+
+      <!-- DEMO 5: Learning Curve -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">05</span> Learning Curve Simulation</h3>
+        <p style="font-size:0.85rem;color:var(--slate);margin-bottom:0.75rem">Dynamic increasing returns: as cumulative production grows, cost per unit falls due to accumulated experience.</p>
+        <canvas id="lcCanvas"></canvas>
+        <div style="display:flex;gap:0.75rem;align-items:center;margin-top:0.75rem;flex-wrap:wrap;">
+          <div class="slider-wrap" style="flex:1">
+            <div class="slider-label"><span>Learning Rate</span><span id="lrVal">80%</span></div>
+            <input type="range" id="lrSlider" min="60" max="95" value="80" oninput="drawLC()">
+          </div>
+          <button class="btn btn-teal" onclick="animateLC()">Animate</button>
+        </div>
+      </div>
+
+      <!-- DEMO 6: Location Game -->
+      <div class="demo-card reveal">
+        <h3><span class="demo-num">06</span> Industrial Location Game</h3>
+        <p style="font-size:0.85rem;color:var(--slate);margin-bottom:0.75rem">Where would you build your company? Choose a location and see how it scores.</p>
+        <div class="loc-grid" id="locGrid">
+          <div class="loc-btn" onclick="pickLocation(this,'silicon')">
+            <h4>🌉 Silicon Valley</h4>
+            <p>Tech hub, high costs, deep talent</p>
+          </div>
+          <div class="loc-btn" onclick="pickLocation(this,'newyork')">
+            <h4>🗽 New York</h4>
+            <p>Finance & media cluster</p>
+          </div>
+          <div class="loc-btn" onclick="pickLocation(this,'bangalore')">
+            <h4>🇮🇳 Bangalore</h4>
+            <p>IT hub, lower costs, growing</p>
+          </div>
+          <div class="loc-btn" onclick="pickLocation(this,'random')">
+            <h4>🌍 Random New City</h4>
+            <p>Low cost, no network yet</p>
+          </div>
+        </div>
+        <div class="score-bars" id="scoreBars" style="display:none">
+          <div class="score-row"><span>Supplier Access</span><div class="score-bar"><div class="score-fill" id="suppFill" style="background:var(--gold)"></div></div><span class="score-val" id="suppVal"></span></div>
+          <div class="score-row"><span>Skilled Labor</span><div class="score-bar"><div class="score-fill" id="laborFill" style="background:var(--teal)"></div></div><span class="score-val" id="laborVal"></span></div>
+          <div class="score-row"><span>Knowledge Sharing</span><div class="score-bar"><div class="score-fill" id="knowFill" style="background:var(--rust)"></div></div><span class="score-val" id="knowVal"></span></div>
+          <div class="score-row"><span>Overall Score</span><div class="score-bar"><div class="score-fill" id="totalFill" style="background:linear-gradient(to right,var(--gold),var(--teal))"></div></div><span class="score-val" id="totalGameVal" style="color:var(--gold)"></span></div>
+        </div>
+      </div>
+
+      <!-- DEMO 7: Quiz (full width) -->
+      <div class="demo-card demo-full reveal">
+        <h3><span class="demo-num">07</span> Interactive Quiz — Test Your Knowledge</h3>
+        <div id="quizContainer"></div>
+        <div style="margin-top:1.5rem;display:flex;gap:1rem;align-items:center;">
+          <button class="btn btn-primary" onclick="submitQuiz()">Submit Answers</button>
+          <button class="btn btn-teal" onclick="resetQuiz()" style="display:none" id="resetBtn">Try Again</button>
+          <div class="quiz-score" id="quizScore" style="display:none"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EVIDENCE -->
+<section id="evidence">
+  <div class="section-inner">
+    <p class="section-tag reveal">Section 03 · Course Evidence</p>
+    <div class="divider reveal"></div>
+    <h2 class="section-title reveal">Evidence from Course Work</h2>
+    <p class="section-lead reveal">Ten evidence cards connecting the interactive demonstrations to key concepts from the course reading.</p>
+
+    <div class="evidence-grid">
+
+      <!-- EV1 -->
+      <div class="ev-card reveal">
+        <span class="ev-icon">📉</span>
+        <h3>Economies of Scale Defined</h3>
+        <p>When production increases, average costs fall. This core relationship underpins why large-scale production — whether by one firm or by an entire industry — creates efficiency gains unavailable to small, isolated producers.</p>
+        <div class="tag-list" style="margin-top:0.75rem">
+          <span class="tag gold">Increasing Returns</span>
+          <span class="tag">Falling AC Curve</span>
+        </div>
+      </div>
+
+      <!-- EV2: Comparison table -->
+      <div class="ev-card wide reveal">
+        <span class="ev-icon">⚖️</span>
+        <h3>Internal vs External Economies — Comparison</h3>
+        <table class="compare-table">
+          <thead>
+            <tr><th>Dimension</th><th>Internal Economies</th><th>External Economies</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Level of analysis</td><td>Individual firm</td><td>Entire industry</td></tr>
+            <tr><td>Who benefits?</td><td>Large firms primarily</td><td>All firms in cluster</td></tr>
+            <tr><td>Market structure</td><td>Monopoly / oligopoly</td><td>Competitive markets possible</td></tr>
+            <tr><td>Firm size needed?</td><td>Yes — firm must be large</td><td>No — cluster must be large</td></tr>
+            <tr><td>Historical example</td><td>Ford Assembly Line</td><td>Silicon Valley</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EV3: Marshall's 3 sources -->
+      <div class="ev-card reveal">
+        <span class="ev-icon">🏭</span>
+        <h3>Specialized Suppliers</h3>
+        <p>Industrial clusters support dedicated suppliers serving many firms — creating a thick input market. Silicon Valley's semiconductor supply chain is a textbook example: chip designers, fabrication labs, and testing firms all co-locate, reducing input costs for everyone.</p>
+      </div>
+
+      <div class="ev-card reveal">
+        <span class="ev-icon">👷</span>
+        <h3>Labor Market Pooling</h3>
+        <p>When many firms share a large pool of skilled workers, both sides benefit. Workers enjoy more job opportunities and lower unemployment risk. Firms can hire quickly when expanding and release workers during downturns without those workers becoming idle — a mutual insurance mechanism.</p>
+      </div>
+
+      <div class="ev-card reveal">
+        <span class="ev-icon">💡</span>
+        <h3>Knowledge Spillovers</h3>
+        <p>Ideas spread informally between co-located firms — through casual conversation, worker mobility, and shared technical culture. This informal diffusion of knowledge accelerates innovation and learning, allowing all firms to benefit from each other's discoveries without formal contracts.</p>
+      </div>
+
+      <!-- EV4: Silicon Valley Timeline -->
+      <div class="ev-card wide reveal">
+        <span class="ev-icon">🌉</span>
+        <h3>Silicon Valley Case Study — Historical Timeline</h3>
+        <div class="timeline">
+          <div class="tl-item">
+            <span class="tl-year">1950s</span>
+            <p>Stanford University's engineering programs attract talent; Shockley Semiconductor established.</p>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">1960s</span>
+            <p>Fairchild Semiconductor spinoffs multiply, creating a culture of entrepreneurship and knowledge transfer.</p>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">1970s–80s</span>
+            <p>Intel, Apple, and venture capital firms concentrate. Specialized suppliers and recruiters emerge around them.</p>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">1990s–2000s</span>
+            <p>Internet boom draws global talent. Network effects compound — being in Silicon Valley becomes self-reinforcing.</p>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2010s–Present</span>
+            <p>Despite high costs, the cluster persists because accumulated knowledge, networks, and suppliers cannot be easily replicated elsewhere.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EV5: Qiaotou -->
+      <div class="ev-card full reveal">
+        <span class="ev-icon">🧵</span>
+        <h3>Qiaotou, China — The World's Button Capital</h3>
+        <div class="qiaotou-box">
+          <div class="qiaotou-stat">
+            <div class="big">60%</div>
+            <p>of world's buttons<br>produced here</p>
+          </div>
+          <div class="qiaotou-stat">
+            <div class="big">15bn+</div>
+            <p>buttons exported<br>annually</p>
+          </div>
+          <div style="grid-column:1/-1;padding-top:0.5rem">
+            <p style="color:rgba(245,240,232,0.7);font-size:0.9rem;line-height:1.8">
+              Qiaotou is a small town of fewer than 100,000 people that produces over 60% of the world's buttons and much of its zippers. Starting in the 1980s when several families began trading leftover foreign buttons, the industry grew through classic external economies: specialized button molds and plastics suppliers emerged, workers developed button-specific skills, and knowledge about designs, materials, and markets spread freely. Today it is cheaper to produce buttons in Qiaotou than anywhere else in the world — not because of natural advantages, but because of the self-reinforcing efficiency of the cluster.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EV6: Global map -->
+      <div class="ev-card full reveal">
+        <span class="ev-icon">🗺️</span>
+        <h3>Global Industry Clusters — Interactive Map</h3>
+        <div class="world-map">
+          <div style="display:flex;flex-wrap:wrap;gap:0.25rem;margin-bottom:1rem;">
+            <div class="hub-point tooltip-wrap" onclick="showHub('sv')">
+              <div class="dot"></div><span>Silicon Valley</span>
+              <div class="tooltip-tip">Technology / Software</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('hw')">
+              <div class="dot"></div><span>Hollywood</span>
+              <div class="tooltip-tip">Film & Entertainment</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('ws')">
+              <div class="dot"></div><span>Wall Street</span>
+              <div class="tooltip-tip">Finance & Banking</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('bl')">
+              <div class="dot"></div><span>Bangalore</span>
+              <div class="tooltip-tip">IT Services & Software</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('qt')">
+              <div class="dot"></div><span>Qiaotou</span>
+              <div class="tooltip-tip">Buttons & Fasteners</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('ld')">
+              <div class="dot"></div><span>London City</span>
+              <div class="tooltip-tip">Global Finance</div>
+            </div>
+            <div class="hub-point tooltip-wrap" onclick="showHub('dt')">
+              <div class="dot"></div><span>Detroit</span>
+              <div class="tooltip-tip">Automotive Manufacturing</div>
+            </div>
+          </div>
+          <div class="hub-info" id="hubInfo">
+            Click a cluster above to learn why it formed and what keeps it dominant.
+          </div>
+        </div>
+      </div>
+
+      <!-- EV7: Historical Lock-in Flowchart -->
+      <div class="ev-card wide reveal">
+        <span class="ev-icon">🔒</span>
+        <h3>Historical Lock-In Effect</h3>
+        <p style="font-size:0.88rem;color:var(--slate);margin-bottom:1.25rem">A country may dominate an industry simply because it started first — even if another country could eventually produce more cheaply.</p>
+        <div class="flowchart">
+          <div class="fc-node">Industry begins in Country A (historical accident)</div>
+          <div class="fc-arrow"></div>
+          <div class="fc-node gold">External economies develop: suppliers, labor pool, knowledge spillovers</div>
+          <div class="fc-arrow"></div>
+          <div class="fc-node">Country A's costs fall below Country B's potential costs</div>
+          <div class="fc-arrow"></div>
+          <div class="fc-node teal">Even if Country B has "natural" advantages, it cannot enter profitably</div>
+          <div class="fc-arrow"></div>
+          <div class="fc-node">Country A retains dominance — trade pattern is locked in by history</div>
+        </div>
+      </div>
+
+      <!-- EV8: Trade & Prices -->
+      <div class="ev-card reveal">
+        <span class="ev-icon">📊</span>
+        <h3>Trade Reduces Prices via Concentration</h3>
+        <p style="font-size:0.88rem;color:var(--slate);margin-bottom:1rem">When trade opens, production concentrates in one location. The resulting scale drives average costs — and therefore prices — down for all consumers.</p>
+        <canvas id="tradePriceCanvas" style="height:160px"></canvas>
+      </div>
+
+      <!-- EV9: Dynamic returns -->
+      <div class="ev-card reveal">
+        <span class="ev-icon">📈</span>
+        <h3>Dynamic Increasing Returns</h3>
+        <p style="font-size:0.88rem;color:var(--slate);margin-bottom:0.75rem">Learning-by-doing: accumulated production experience lowers future costs. Industries like electronics and semiconductors show dramatic learning curves over decades.</p>
+        <div class="tag-list">
+          <span class="tag gold">Electronics: ~80% curve</span>
+          <span class="tag teal">Solar Panels</span>
+          <span class="tag">Semiconductors</span>
+        </div>
+      </div>
+
+      <!-- EV10: Infant industry -->
+      <div class="ev-card reveal">
+        <span class="ev-icon">🛡️</span>
+        <h3>The Infant Industry Argument</h3>
+        <p style="font-size:0.88rem;color:var(--slate);margin-bottom:0.75rem">Governments may temporarily protect emerging industries through tariffs or subsidies — allowing them to accumulate the experience needed to compete internationally.</p>
+        <div class="flowchart" style="margin-top:0.75rem">
+          <div class="fc-node" style="font-size:0.78rem;padding:0.5rem 1rem;min-width:160px">New industry, high costs</div>
+          <div class="fc-arrow" style="height:16px"></div>
+          <div class="fc-node gold" style="font-size:0.78rem;padding:0.5rem 1rem;min-width:160px">Government protection</div>
+          <div class="fc-arrow" style="height:16px"></div>
+          <div class="fc-node teal" style="font-size:0.78rem;padding:0.5rem 1rem;min-width:160px">Experience + scale achieved</div>
+          <div class="fc-arrow" style="height:16px"></div>
+          <div class="fc-node" style="font-size:0.78rem;padding:0.5rem 1rem;min-width:160px">Protection removed — compete globally</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LEARN -->
+<section id="learn">
+  <div class="section-inner">
+    <p class="section-tag reveal">Section 04 · Reflection</p>
+    <div class="divider reveal"></div>
+    <h2 class="section-title reveal">What Did I Learn?</h2>
+    <p class="section-lead reveal">Reflecting across three dimensions: knowledge gained, skills developed, and what surprised me about this topic.</p>
+    <div class="learn-grid">
+      <div class="learn-card reveal">
+        <h3>📚 Knowledge</h3>
+        <p style="color:rgba(245,240,232,0.5);font-size:0.82rem;margin-bottom:1rem;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.08em">Concepts Learned</p>
+        <ul class="learn-list">
+          <li>Economies of scale — internal and external</li>
+          <li>Marshall's three sources of external economies</li>
+          <li>Why industries form geographic clusters</li>
+          <li>Learning curves and dynamic increasing returns</li>
+          <li>Knowledge spillovers as an economic mechanism</li>
+          <li>The infant industry argument for trade policy</li>
+          <li>How historical accidents create lasting trade patterns</li>
+        </ul>
+      </div>
+      <div class="learn-card reveal">
+        <h3>🛠️ Skills</h3>
+        <p style="color:rgba(245,240,232,0.5);font-size:0.82rem;margin-bottom:1rem;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.08em">Capabilities Developed</p>
+        <ul class="learn-list">
+          <li>Economic reasoning with multiple causality</li>
+          <li>Trade-off analysis between competing models</li>
+          <li>Reading and interpreting supply/demand diagrams</li>
+          <li>Applying abstract theory to real-world cases</li>
+          <li>Evaluating trade and industrial policy arguments</li>
+          <li>Systems thinking — feedback loops and path dependence</li>
+          <li>Data interpretation through learning curve analysis</li>
+        </ul>
+      </div>
+      <div class="learn-card reveal">
+        <h3>💭 Reflection</h3>
+        <p style="color:rgba(245,240,232,0.5);font-size:0.82rem;margin-bottom:1rem;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.08em">Surprises & Applications</p>
+        <ul class="learn-list">
+          <li>History can permanently determine trade patterns</li>
+          <li>Industries stay in costly locations due to network lock-in</li>
+          <li>Trade is shaped by knowledge, not just resources</li>
+          <li>Small towns like Qiaotou can dominate global markets</li>
+          <li>Chance events — not just policy — drive specialization</li>
+          <li>Applied to: startup ecosystems, supply chain strategy</li>
+          <li>Relevant to: trade policy, regional economic development</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">ECON 301 · External Economies of Scale & International Production</div>
+    <div class="footer-note">
+      Based on Krugman, Obstfeld & Melitz · International Economics<br>
+      Interactive educational project
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── NAV ──────────────────────────────────────────────────────────────────────
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+// ── SCROLL REVEAL ─────────────────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── RANGE SLIDER FILL ──────────────────────────────────────────────────────────
+document.querySelectorAll('input[type=range]').forEach(r => {
+  const update = () => {
+    const pct = ((r.value - r.min) / (r.max - r.min)) * 100;
+    r.style.setProperty('--pct', pct + '%');
+  };
+  r.addEventListener('input', update);
+  update();
+});
+
+// ── DEMO 1: EOS SIMULATOR ─────────────────────────────────────────────────────
+const eosCanvas = document.getElementById('eosCanvas');
+const eosCtx = eosCanvas.getContext('2d');
+eosCanvas.width = eosCanvas.offsetWidth * (window.devicePixelRatio || 1);
+eosCanvas.height = 200 * (window.devicePixelRatio || 1);
+eosCtx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+function avgCostFn(q) {
+  return 200 / Math.pow(q / 100, 0.55) + 5;
+}
+
+function updateEoS(q) {
+  q = parseInt(q);
+  document.getElementById('qtyVal').textContent = q + ' units';
+  const tc = q * avgCostFn(q);
+  const ac = avgCostFn(q);
+  const eff = Math.round(Math.min(99, (1 - ac / 205) * 100 + 30));
+  document.getElementById('totalCost').textContent = '$' + Math.round(tc).toLocaleString();
+  document.getElementById('avgCost').textContent = '$' + ac.toFixed(2);
+  document.getElementById('efficiency').textContent = eff + '%';
+  drawEoSChart(q);
+}
+
+function drawEoSChart(highlight) {
+  const w = eosCanvas.offsetWidth, h = 200;
+  eosCtx.clearRect(0, 0, w, h);
+  const pad = { top: 20, right: 20, bottom: 30, left: 50 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+
+  // Axes
+  eosCtx.strokeStyle = 'rgba(13,14,18,0.15)'; eosCtx.lineWidth = 1;
+  eosCtx.beginPath(); eosCtx.moveTo(pad.left, pad.top); eosCtx.lineTo(pad.left, pad.top+ch);
+  eosCtx.lineTo(pad.left+cw, pad.top+ch); eosCtx.stroke();
+
+  // Grid lines
+  eosCtx.strokeStyle = 'rgba(13,14,18,0.06)'; eosCtx.setLineDash([4,4]);
+  for (let i=1; i<=4; i++) {
+    const y = pad.top + ch - (i/4)*ch;
+    eosCtx.beginPath(); eosCtx.moveTo(pad.left, y); eosCtx.lineTo(pad.left+cw, y); eosCtx.stroke();
+  }
+  eosCtx.setLineDash([]);
+
+  // Labels
+  eosCtx.fillStyle = 'rgba(58,69,85,0.7)'; eosCtx.font = '10px IBM Plex Mono,monospace'; eosCtx.textAlign = 'right';
+  eosCtx.fillText('AC', pad.left-6, pad.top+4);
+  eosCtx.textAlign = 'center';
+  eosCtx.fillText('0', pad.left, pad.top+ch+14);
+  eosCtx.fillText('Qty →', pad.left+cw, pad.top+ch+14);
+
+  const maxAC = avgCostFn(10);
+  const minAC = avgCostFn(1000);
+
+  // Curve
+  const grad = eosCtx.createLinearGradient(pad.left, 0, pad.left+cw, 0);
+  grad.addColorStop(0, '#c8922a'); grad.addColorStop(1, '#1a6b6b');
+  eosCtx.strokeStyle = grad; eosCtx.lineWidth = 2.5;
+  eosCtx.beginPath();
+  for (let q=10; q<=1000; q+=5) {
+    const x = pad.left + ((q-10)/990) * cw;
+    const ac = avgCostFn(q);
+    const y = pad.top + ch - ((ac-minAC)/(maxAC-minAC)) * ch;
+    q===10 ? eosCtx.moveTo(x,y) : eosCtx.lineTo(x,y);
+  }
+  eosCtx.stroke();
+
+  // Highlight point
+  if (highlight) {
+    const x = pad.left + ((highlight-10)/990)*cw;
+    const ac = avgCostFn(highlight);
+    const y = pad.top + ch - ((ac-minAC)/(maxAC-minAC))*ch;
+    eosCtx.fillStyle = '#c8922a';
+    eosCtx.beginPath(); eosCtx.arc(x,y,5,0,Math.PI*2); eosCtx.fill();
+    // Dashed drop
+    eosCtx.strokeStyle = 'rgba(200,146,42,0.4)'; eosCtx.setLineDash([3,3]); eosCtx.lineWidth=1;
+    eosCtx.beginPath(); eosCtx.moveTo(x,y); eosCtx.lineTo(x,pad.top+ch); eosCtx.stroke();
+    eosCtx.setLineDash([]);
+  }
+}
+updateEoS(500);
+
+// ── DEMO 2: INTERNAL VS EXTERNAL ───────────────────────────────────────────────
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+const sizeLabels = ['Micro','Small','Small-Med','Medium','Med-Large','Large','Corp','Big Corp','Multinational','Giant'];
+function updateInternal(v) {
+  v = parseInt(v);
+  document.getElementById('firmSizeVal').textContent = sizeLabels[v-1];
+  document.getElementById('intWorkers').textContent = (v*v*10).toLocaleString();
+  document.getElementById('intCost').textContent = '$'+Math.round(100-v*8);
+  document.getElementById('intBar').style.width = Math.min(95,v*10)+'%';
+}
+updateInternal(5);
+
+function updateExternal(v) {
+  v = parseInt(v);
+  document.getElementById('numFirmsVal').textContent = v+' firms';
+  document.getElementById('extSuppliers').textContent = Math.round(Math.sqrt(v)*1.8);
+  document.getElementById('extKnow').textContent = Math.round(Math.min(95,v*1.9))+'%';
+  document.getElementById('extBar').style.width = Math.min(95,v*1.9)+'%';
+}
+updateExternal(25);
+
+// ── DEMO 3: CLUSTER SIMULATOR ──────────────────────────────────────────────────
+const industryData = {
+  tech:          { suppliers:48, labor:92, efficiency:94, color:'#c8922a' },
+  banking:       { suppliers:35, labor:85, efficiency:88, color:'#2a9090' },
+  film:          { suppliers:30, labor:78, efficiency:82, color:'#9b3a1c' },
+  software:      { suppliers:42, labor:88, efficiency:91, color:'#3a4555' },
+  manufacturing: { suppliers:55, labor:70, efficiency:85, color:'#6b4a1a' }
+};
+let firmsCreated = false;
+
+function runCluster() {
+  const ind = document.getElementById('industrySelect').value;
+  const d = industryData[ind];
+  const viz = document.getElementById('clusterViz');
+  const center = document.getElementById('clusterCenter');
+
+  // Clear old dots
+  viz.querySelectorAll('.firm-dot').forEach(f=>f.remove());
+  center.style.opacity = '0';
+
+  // Create scattered firms
+  const dots = [];
+  for (let i=0; i<16; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'firm-dot' + (i%3===0?' gold':'');
+    dot.style.left = (Math.random()*90+2)+'%';
+    dot.style.top  = (Math.random()*85+2)+'%';
+    dot.style.background = d.color;
+    viz.appendChild(dot);
+    dots.push(dot);
+  }
+
+  // Animate to cluster
+  setTimeout(() => {
+    center.style.opacity = '1';
+    dots.forEach((dot,i) => {
+      const angle = (i/dots.length)*Math.PI*2;
+      const r = 25+Math.random()*20;
+      const cx = 50+r*Math.cos(angle);
+      const cy = 50+r*Math.sin(angle);
+      dot.style.left = cx+'%';
+      dot.style.top = cy+'%';
+    });
+    document.getElementById('clSuppliers').textContent = d.suppliers;
+    document.getElementById('clLabor').textContent = d.labor+'%';
+    document.getElementById('clEfficiency').textContent = d.efficiency+'%';
+  }, 200);
+}
+
+// ── DEMO 4: TRADE SPECIALIZATION ───────────────────────────────────────────────
+function runTrade() {
+  const aL=+document.getElementById('aLaborR').value,
+        aS=+document.getElementById('aSizeR').value,
+        aE=+document.getElementById('aExpR').value;
+  const bL=+document.getElementById('bLaborR').value,
+        bS=+document.getElementById('bSizeR').value,
+        bE=+document.getElementById('bExpR').value;
+
+  document.getElementById('aLabor').textContent=aL;
+  document.getElementById('aSize').textContent=aS;
+  document.getElementById('aExp').textContent=aE;
+  document.getElementById('bLabor').textContent=bL;
+  document.getElementById('bSize').textContent=bS;
+  document.getElementById('bExp').textContent=bE;
+
+  // Cost score: lower labor cost + higher size + higher experience = lower production cost
+  const aScore = (100-aL)*0.35 + aS*0.4 + aE*0.25;
+  const bScore = (100-bL)*0.35 + bS*0.4 + bE*0.25;
+
+  const el = document.getElementById('tradeResult');
+  if (Math.abs(aScore-bScore) < 3) {
+    el.textContent = '⚖️ Both countries are evenly matched — trade pattern is indeterminate. History may decide.';
+  } else if (aScore > bScore) {
+    const adv = Math.round((aScore-bScore)*0.8);
+    el.textContent = `🏆 Country A dominates — external economies give it a ${adv}% cost advantage despite labor differences.`;
+  } else {
+    const adv = Math.round((bScore-aScore)*0.8);
+    el.textContent = `🏆 Country B dominates — lower costs + growing cluster yield a ${adv}% advantage. A's experience can't compensate.`;
+  }
+}
+runTrade();
+
+// ── DEMO 5: LEARNING CURVE ─────────────────────────────────────────────────────
+const lcCanvas = document.getElementById('lcCanvas');
+const lcCtx = lcCanvas.getContext('2d');
+lcCanvas.width = 500; lcCanvas.height = 200;
+
+function learningCostFn(q, lr) {
+  const doublings = Math.log2(q);
+  return 100 * Math.pow(lr/100, doublings);
+}
+
+let lcAnimFrame = null;
+function drawLC(animQ) {
+  const lr = parseInt(document.getElementById('lrSlider').value);
+  document.getElementById('lrVal').textContent = lr+'%';
+  const w = lcCanvas.width, h = lcCanvas.height;
+  const pad = { top:20, right:20, bottom:30, left:50 };
+  const cw = w-pad.left-pad.right, ch = h-pad.top-pad.bottom;
+
+  lcCtx.clearRect(0,0,w,h);
+
+  // Axes
+  lcCtx.strokeStyle='rgba(13,14,18,0.2)'; lcCtx.lineWidth=1;
+  lcCtx.beginPath(); lcCtx.moveTo(pad.left,pad.top); lcCtx.lineTo(pad.left,pad.top+ch);
+  lcCtx.lineTo(pad.left+cw,pad.top+ch); lcCtx.stroke();
+
+  // Labels
+  lcCtx.fillStyle='rgba(58,69,85,0.7)'; lcCtx.font='10px IBM Plex Mono,monospace';
+  lcCtx.textAlign='right'; lcCtx.fillText('Cost',pad.left-6,pad.top+4);
+  lcCtx.textAlign='center'; lcCtx.fillText('Cumulative Production →',pad.left+cw/2,pad.top+ch+18);
+
+  const maxQ = animQ || 1024;
+  const grad = lcCtx.createLinearGradient(pad.left,0,pad.left+cw,0);
+  grad.addColorStop(0,'#c8922a'); grad.addColorStop(1,'#1a6b6b');
+  lcCtx.strokeStyle=grad; lcCtx.lineWidth=2.5;
+  lcCtx.beginPath();
+  for (let q=1; q<=maxQ; q+=4) {
+    const x = pad.left + (Math.log2(q)/Math.log2(1024))*cw;
+    const cost = learningCostFn(q,lr);
+    const y = pad.top + ch - (cost/100)*ch;
+    q===1 ? lcCtx.moveTo(x,y) : lcCtx.lineTo(x,y);
+  }
+  lcCtx.stroke();
+
+  // Fill under curve
+  lcCtx.strokeStyle='none';
+  const grad2 = lcCtx.createLinearGradient(0,pad.top,0,pad.top+ch);
+  grad2.addColorStop(0,'rgba(200,146,42,0.12)'); grad2.addColorStop(1,'rgba(200,146,42,0)');
+  lcCtx.fillStyle=grad2;
+  lcCtx.beginPath();
+  lcCtx.moveTo(pad.left,pad.top+ch);
+  for (let q=1; q<=maxQ; q+=4) {
+    const x = pad.left + (Math.log2(q)/Math.log2(1024))*cw;
+    const cost = learningCostFn(q,lr);
+    const y = pad.top + ch - (cost/100)*ch;
+    lcCtx.lineTo(x,y);
+  }
+  lcCtx.lineTo(pad.left+(Math.log2(maxQ)/Math.log2(1024))*cw, pad.top+ch);
+  lcCtx.closePath(); lcCtx.fill();
+}
+drawLC();
+
+function animateLC() {
+  if (lcAnimFrame) cancelAnimationFrame(lcAnimFrame);
+  let q=1;
+  function step() {
+    drawLC(q);
+    q = Math.min(1024, q*1.08);
+    if (q<1024) lcAnimFrame = requestAnimationFrame(step);
+    else drawLC(1024);
+  }
+  step();
+}
+
+// ── DEMO 6: LOCATION GAME ──────────────────────────────────────────────────────
+const locationScores = {
+  silicon:  { supp:92, labor:95, know:97, desc:'Silicon Valley is the gold standard — unmatched supplier networks, world-class engineering talent, and the densest knowledge spillovers on Earth. But real estate costs are extreme.' },
+  newyork:  { supp:78, labor:85, know:82, desc:'New York excels for finance and media. Deep talent pools and excellent infrastructure, but tech ecosystem is less specialized than Silicon Valley.' },
+  bangalore:{ supp:68, labor:80, know:72, desc:'Bangalore\'s IT cluster is rapidly maturing. Lower costs, strong engineering graduates, and growing knowledge networks make it increasingly attractive.' },
+  random:   { supp:20, labor:30, know:15, desc:'Starting from scratch: you save on costs but sacrifice the network benefits that make clusters so valuable. Building takes decades.' }
+};
+
+function pickLocation(btn, loc) {
+  document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const s = locationScores[loc];
+  const total = Math.round((s.supp+s.labor+s.know)/3);
+  document.getElementById('scoreBars').style.display='block';
+  setTimeout(()=>{
+    document.getElementById('suppFill').style.width=s.supp+'%';
+    document.getElementById('laborFill').style.width=s.labor+'%';
+    document.getElementById('knowFill').style.width=s.know+'%';
+    document.getElementById('totalFill').style.width=total+'%';
+  },100);
+  document.getElementById('suppVal').textContent=s.supp;
+  document.getElementById('laborVal').textContent=s.labor;
+  document.getElementById('knowVal').textContent=s.know;
+  document.getElementById('totalGameVal').textContent=total;
+}
+
+// ── DEMO 7: QUIZ ───────────────────────────────────────────────────────────────
+const quizData = [
+  {
+    q: "What are external economies of scale?",
+    opts: [
+      "Cost reductions when a single firm grows larger",
+      "Cost reductions when an entire industry concentrates in one location",
+      "Savings from exporting goods internationally",
+      "Government subsidies for new industries"
+    ],
+    ans: 1
+  },
+  {
+    q: "What is labor market pooling?",
+    opts: [
+      "Training workers to perform multiple tasks",
+      "A government program to reduce unemployment",
+      "A shared pool of specialized workers benefiting both workers and firms in a cluster",
+      "The merger of two competing firms"
+    ],
+    ans: 2
+  },
+  {
+    q: "What are knowledge spillovers?",
+    opts: [
+      "Corporate espionage between competing firms",
+      "The informal spread of ideas and innovations between co-located firms",
+      "Publishing academic research in journals",
+      "Technology transfers through international trade agreements"
+    ],
+    ans: 1
+  },
+  {
+    q: "Why is Silicon Valley a dominant technology hub?",
+    opts: [
+      "It has the cheapest labor costs in the world",
+      "The US government mandates technology companies locate there",
+      "It benefits from specialized suppliers, deep talent pools, and decades of accumulated knowledge spillovers",
+      "California has unique natural resources needed for electronics"
+    ],
+    ans: 2
+  },
+  {
+    q: "What is the infant industry argument?",
+    opts: [
+      "Children should learn economics from a young age",
+      "Small firms are always more innovative than large ones",
+      "Temporary government protection to allow new industries to accumulate experience and scale before facing global competition",
+      "New industries should never receive government support"
+    ],
+    ans: 2
+  },
+  {
+    q: "Which of the following best describes Marshall's specialized suppliers?",
+    opts: [
+      "Firms that produce only for government contracts",
+      "Dedicated suppliers serving many clustered firms, reducing input costs for all",
+      "Multinational corporations that control supply chains globally",
+      "Small family businesses that resist industrial change"
+    ],
+    ans: 1
+  },
+  {
+    q: "What does the 'historical lock-in effect' mean in trade?",
+    opts: [
+      "Countries sign permanent trade treaties that cannot be changed",
+      "A country may permanently dominate an industry simply because it started producing first, even if others could theoretically do it cheaper",
+      "Industries always locate where labor is cheapest",
+      "Technology prevents countries from switching industries"
+    ],
+    ans: 1
+  }
+];
+
+function buildQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = quizData.map((q,i)=>`
+    <div class="quiz-q">
+      <p>${i+1}. ${q.q}</p>
+      <div class="quiz-opts">
+        ${q.opts.map((o,j)=>`
+          <label class="quiz-opt" id="qopt-${i}-${j}">
+            <input type="radio" name="q${i}" value="${j}"> ${o}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+buildQuiz();
+
+function submitQuiz() {
+  let score = 0;
+  quizData.forEach((q,i)=>{
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    q.opts.forEach((_,j)=>{
+      const el = document.getElementById(`qopt-${i}-${j}`);
+      el.classList.remove('correct','wrong');
+    });
+    if (selected) {
+      const v = parseInt(selected.value);
+      if (v===q.ans) {
+        score++;
+        document.getElementById(`qopt-${i}-${v}`).classList.add('correct');
+      } else {
+        document.getElementById(`qopt-${i}-${v}`).classList.add('wrong');
+        document.getElementById(`qopt-${i}-${q.ans}`).classList.add('correct');
+      }
+    } else {
+      document.getElementById(`qopt-${i}-${q.ans}`).classList.add('correct');
+    }
+  });
+  const pct = Math.round((score/quizData.length)*100);
+  const msg = pct===100?'🏆 Perfect!':pct>=70?'✅ Well done!':pct>=50?'📚 Keep studying!':'💡 Review the material!';
+  document.getElementById('quizScore').style.display='block';
+  document.getElementById('quizScore').textContent = `${msg} ${score}/${quizData.length} (${pct}%)`;
+  document.getElementById('resetBtn').style.display='inline-block';
+}
+
+function resetQuiz() {
+  buildQuiz();
+  document.getElementById('quizScore').style.display='none';
+  document.getElementById('resetBtn').style.display='none';
+}
+
+// ── TRADE PRICE CANVAS ─────────────────────────────────────────────────────────
+const tpc = document.getElementById('tradePriceCanvas');
+const tpCtx = tpc.getContext('2d');
+tpc.width=300; tpc.height=160;
+(function drawTradePrice(){
+  const w=300,h=160,pad={top:15,right:20,bottom:30,left:45};
+  const cw=w-pad.left-pad.right,ch=h-pad.top-pad.bottom;
+  tpCtx.clearRect(0,0,w,h);
+  tpCtx.strokeStyle='rgba(13,14,18,0.15)'; tpCtx.lineWidth=1;
+  tpCtx.beginPath(); tpCtx.moveTo(pad.left,pad.top); tpCtx.lineTo(pad.left,pad.top+ch);
+  tpCtx.lineTo(pad.left+cw,pad.top+ch); tpCtx.stroke();
+  tpCtx.fillStyle='rgba(58,69,85,0.6)'; tpCtx.font='9px IBM Plex Mono,monospace';
+  tpCtx.textAlign='center';
+  ['No Trade','Trade Opens','Concentrated','Mature Cluster'].forEach((l,i)=>{
+    tpCtx.fillText(l,pad.left+(i/(3))*cw,pad.top+ch+16);
+  });
+  const prices=[85,70,45,28];
+  tpCtx.strokeStyle='#c8922a'; tpCtx.lineWidth=2.5;
+  tpCtx.beginPath();
+  prices.forEach((p,i)=>{
+    const x=pad.left+(i/3)*cw, y=pad.top+ch-(p/100)*ch;
+    i===0?tpCtx.moveTo(x,y):tpCtx.lineTo(x,y);
+    tpCtx.fillStyle='#c8922a';
+    tpCtx.beginPath(); tpCtx.arc(x,y,4,0,Math.PI*2); tpCtx.fill();
+    tpCtx.fillStyle='rgba(58,69,85,0.8)'; tpCtx.textAlign='center';
+    tpCtx.fillText('$'+p,x,y-8);
+    tpCtx.strokeStyle='#c8922a'; tpCtx.lineWidth=2.5;
+    tpCtx.beginPath();
+    prices.forEach((p2,j)=>{
+      const x2=pad.left+(j/3)*cw, y2=pad.top+ch-(p2/100)*ch;
+      j===0?tpCtx.moveTo(x2,y2):tpCtx.lineTo(x2,y2);
+    });
+    tpCtx.stroke();
+  });
+  tpCtx.fillStyle='rgba(200,146,42,0.08)';
+  tpCtx.beginPath();
+  tpCtx.moveTo(pad.left,pad.top+ch);
+  prices.forEach((p,i)=>{tpCtx.lineTo(pad.left+(i/3)*cw,pad.top+ch-(p/100)*ch);});
+  tpCtx.lineTo(pad.left+cw,pad.top+ch); tpCtx.closePath(); tpCtx.fill();
+})();
+
+// ── HUB INFO MAP ────────────────────────────────────────────────────────────────
+const hubData = {
+  sv: { name:'Silicon Valley', desc:'Founded on Stanford engineering talent in the 1950s. Decades of knowledge spillovers, venture capital, and specialized hardware/software suppliers have created an unrivalled technology cluster. Costs are extremely high yet firms still locate here — the network is worth it.' },
+  hw: { name:'Hollywood, Los Angeles', desc:'The US film industry concentrated in Hollywood due to early studio system choices. Today, specialized crews, casting agencies, post-production facilities, and distributors all locate here. Moving the industry would require rebuilding these networks from scratch elsewhere.' },
+  ws: { name:'Wall Street, New York', desc:'Financial clustering since the 18th century. Specialized legal firms, accountants, regulators, and talent pools make Wall Street a self-reinforcing hub. London City performs a similar role for European finance.' },
+  bl: { name:'Bangalore, India', desc:"India's \"Silicon Valley\" emerged in the 1990s when outsourcing boomed. Engineering graduates from IIT and REC institutions, combined with lower costs, attracted global IT firms. Knowledge spillovers and supplier networks are now creating true external economies." },
+  qt: { name:'Qiaotou, China', desc:'Producing over 60% of the world\'s buttons, Qiaotou is the most striking example of external economies in action. Specialized dye makers, mold manufacturers, and logistics firms all cluster here, making global competition virtually impossible.' },
+  ld: { name:'City of London', desc:'London\'s financial district rivals Wall Street in global reach. Centuries of accumulated legal expertise, financial infrastructure, and regulatory frameworks create massive barriers to relocation — even post-Brexit.' },
+  dt: { name:'Detroit, Michigan', desc:'The automobile industry clustered in Detroit through Ford\'s innovation and early first-mover advantage. Despite decades of decline, specialized auto suppliers, engineers, and testing facilities still concentrate here due to historical lock-in.' }
+};
+
+function showHub(id) {
+  const d = hubData[id];
+  document.getElementById('hubInfo').innerHTML = `<strong style="color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:0.8rem">${d.name}</strong><br><br>${d.desc}`;
+}
+</script>
+</body>
+</html>

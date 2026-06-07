@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources & Trade — The Heckscher-Ohlin Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1117;
+    --paper: #faf8f3;
+    --cream: #f2eed8;
+    --amber: #d4841a;
+    --amber-light: #f0ab42;
+    --teal: #1a6b6b;
+    --teal-light: #2a9d8f;
+    --rust: #c1440e;
+    --mist: #e8e4d8;
+    --ghost: #6b6455;
+    --rule: rgba(15,17,23,0.12);
+    --shadow: 0 4px 24px rgba(15,17,23,0.08);
+    --shadow-lg: 0 12px 48px rgba(15,17,23,0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250,248,243,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 1rem;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .nav-brand span { color: var(--amber); }
+  .nav-links {
+    display: flex; gap: 0.25rem; list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ghost);
+    text-decoration: none; padding: 0.4rem 0.75rem;
+    border-radius: 4px; transition: all 0.2s;
+  }
+  .nav-links a:hover { background: var(--cream); color: var(--ink); }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+
+  /* ─── HERO ────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6rem 2rem 4rem;
+    position: relative; overflow: hidden;
+    background: var(--ink);
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, #1a3a3a 0%, var(--ink) 70%);
+    z-index: 0;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 1;
+    background-image:
+      linear-gradient(rgba(212,132,26,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,132,26,0.07) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 860px; }
+  .hero-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--amber); border: 1px solid rgba(212,132,26,0.4);
+    padding: 0.35rem 0.85rem; border-radius: 2px; margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 900; line-height: 1.05;
+    color: var(--paper); letter-spacing: -0.025em;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 em { color: var(--amber); font-style: italic; }
+  .hero-sub {
+    font-size: 1.1rem; font-weight: 300;
+    color: rgba(250,248,243,0.65); max-width: 560px;
+    line-height: 1.7; margin-bottom: 2.5rem;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--amber); color: var(--ink);
+    font-weight: 600; font-size: 0.9rem;
+    padding: 0.85rem 1.75rem; border-radius: 4px;
+    text-decoration: none; transition: all 0.25s;
+    border: 2px solid var(--amber);
+  }
+  .hero-cta:hover { background: transparent; color: var(--amber); }
+  .hero-theorem {
+    position: absolute; right: 4rem; bottom: 4rem; z-index: 2;
+    width: 280px;
+    background: rgba(26,107,107,0.18);
+    border: 1px solid rgba(42,157,143,0.35);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem; border-radius: 8px;
+  }
+  .hero-theorem p {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 0.95rem; color: rgba(250,248,243,0.9);
+    line-height: 1.6;
+  }
+  .hero-theorem cite {
+    display: block; margin-top: 0.75rem;
+    font-family: 'DM Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--teal-light);
+  }
+  @media (max-width: 900px) { .hero-theorem { display: none; } }
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2.4rem; }
+    .hero { padding: 5rem 1.25rem 3rem; }
+  }
+
+  /* ─── SECTIONS ─────────────────────────────────────────── */
+  section { padding: 5rem 2rem; }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--amber); margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .section-label::before {
+    content: ''; display: block; width: 28px; height: 1px; background: var(--amber);
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700; letter-spacing: -0.02em;
+    color: var(--ink); line-height: 1.15; margin-bottom: 1rem;
+  }
+  .section-lead {
+    font-size: 1.05rem; color: var(--ghost);
+    max-width: 620px; line-height: 1.75; margin-bottom: 3rem;
+  }
+
+  /* ─── OVERVIEW ─────────────────────────────────────────── */
+  #overview { background: var(--paper); }
+  .overview-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2rem; margin-top: 2rem;
+  }
+  @media (max-width: 700px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #fff; border-radius: 8px;
+    border: 1px solid var(--rule);
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem; font-size: 1.3rem;
+  }
+  .card-icon.amber { background: rgba(212,132,26,0.1); }
+  .card-icon.teal { background: rgba(26,107,107,0.1); }
+  .card-icon.rust { background: rgba(193,68,14,0.1); }
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .card p { font-size: 0.9rem; color: var(--ghost); line-height: 1.65; }
+
+  .theorem-banner {
+    margin-top: 2rem;
+    background: var(--ink);
+    border-radius: 8px;
+    padding: 2rem 2.5rem;
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .theorem-banner .icon { font-size: 2.5rem; flex-shrink: 0; }
+  .theorem-banner p {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.2rem; color: var(--paper); line-height: 1.55;
+  }
+  .theorem-banner strong { color: var(--amber); font-style: normal; }
+
+  /* ─── DEMOS ─────────────────────────────────────────────── */
+  #demo { background: var(--cream); }
+  .demo-tabs {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+  }
+  .tab-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.55rem 1rem; border-radius: 4px;
+    border: 1px solid var(--rule); background: #fff;
+    cursor: pointer; transition: all 0.2s; color: var(--ghost);
+  }
+  .tab-btn.active {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .tab-btn:hover:not(.active) { border-color: var(--amber); color: var(--amber); }
+
+  .demo-panel { display: none; }
+  .demo-panel.active { display: block; }
+
+  .demo-box {
+    background: #fff; border-radius: 10px;
+    border: 1px solid var(--rule); padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+  .demo-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; margin-bottom: 0.5rem;
+  }
+  .demo-box .demo-desc {
+    font-size: 0.88rem; color: var(--ghost);
+    margin-bottom: 1.75rem; line-height: 1.6;
+  }
+
+  /* Sliders */
+  .slider-group { margin-bottom: 1.25rem; }
+  .slider-group label {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem;
+  }
+  .slider-group label span {
+    font-family: 'DM Mono', monospace; color: var(--amber);
+  }
+  input[type="range"] {
+    width: 100%; height: 6px; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    background: var(--mist); border-radius: 3px; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--amber); cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(212,132,26,0.2);
+    transition: box-shadow 0.2s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(212,132,26,0.2);
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .country-panel {
+    background: var(--cream); border-radius: 8px; padding: 1.25rem;
+  }
+  .country-panel h4 {
+    font-weight: 600; font-size: 0.9rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 1rem; color: var(--ghost);
+  }
+  .country-panel h4 span { color: var(--ink); }
+
+  .result-box {
+    margin-top: 1.5rem;
+    background: var(--ink); border-radius: 8px; padding: 1.5rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  }
+  .result-item { text-align: center; }
+  .result-item .label {
+    font-family: 'DM Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(250,248,243,0.45); margin-bottom: 0.35rem;
+  }
+  .result-item .value {
+    font-family: 'Playfair Display', serif; font-size: 1rem;
+    font-weight: 700; color: var(--paper);
+  }
+  .result-item .export {
+    font-size: 1.3rem; margin-top: 0.25rem;
+    color: var(--amber-light);
+  }
+
+  /* Bar Charts */
+  .bar-chart { margin-top: 1rem; }
+  .bar-row {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+  }
+  .bar-label { font-size: 0.8rem; width: 90px; font-weight: 500; }
+  .bar-track {
+    flex: 1; height: 28px; background: var(--mist); border-radius: 4px; overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px;
+  }
+  .bar-fill span { font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500; color: #fff; }
+  .bar-fill.amber { background: linear-gradient(90deg, var(--amber), var(--amber-light)); }
+  .bar-fill.teal { background: linear-gradient(90deg, var(--teal), var(--teal-light)); }
+  .bar-fill.rust { background: linear-gradient(90deg, var(--rust), #e86b38); }
+  .bar-fill.ink { background: linear-gradient(90deg, #3a4055, #5a6080); }
+
+  .chart-legend { display: flex; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.78rem; color: var(--ghost);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Price Simulator */
+  .price-meter {
+    background: var(--ink); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem;
+  }
+  .price-display {
+    text-align: center; margin-bottom: 1.5rem;
+  }
+  .price-display .val {
+    font-family: 'Playfair Display', serif; font-size: 3rem;
+    font-weight: 700; color: var(--amber);
+  }
+  .price-display .unit {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    color: rgba(250,248,243,0.4); letter-spacing: 0.08em;
+  }
+  .income-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .income-bar-item .title {
+    font-size: 0.78rem; color: rgba(250,248,243,0.6); margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  .income-bar-item .fill-track {
+    height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;
+  }
+  .income-bar-item .fill-bar {
+    height: 100%; border-radius: 5px;
+    transition: width 0.5s ease;
+  }
+  .income-bar-item .fill-val {
+    font-family: 'DM Mono', monospace; font-size: 0.8rem;
+    margin-top: 0.3rem; font-weight: 500;
+  }
+  .note-tag {
+    display: inline-block; margin-top: 0.75rem;
+    background: rgba(212,132,26,0.15); border: 1px solid rgba(212,132,26,0.3);
+    padding: 0.4rem 0.85rem; border-radius: 4px;
+    font-size: 0.78rem; color: var(--amber-light);
+  }
+
+  /* Trade Decision */
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  @media (max-width: 500px) { .decision-grid { grid-template-columns: 1fr; } }
+  .select-group label {
+    display: block; font-size: 0.8rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ghost); margin-bottom: 0.4rem;
+  }
+  select {
+    width: 100%; padding: 0.65rem 1rem;
+    border-radius: 5px; border: 1px solid var(--rule);
+    background: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; color: var(--ink); cursor: pointer; outline: none;
+    transition: border-color 0.2s;
+  }
+  select:focus { border-color: var(--amber); }
+
+  .predict-btn {
+    width: 100%; padding: 0.9rem;
+    background: var(--teal); color: #fff;
+    border: none; border-radius: 6px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    letter-spacing: 0.02em; transition: all 0.25s;
+  }
+  .predict-btn:hover { background: var(--teal-light); transform: translateY(-1px); }
+
+  .prediction-result {
+    margin-top: 1.25rem; display: none;
+    background: linear-gradient(135deg, var(--teal) 0%, #0d4d4d 100%);
+    border-radius: 8px; padding: 1.5rem; color: #fff;
+  }
+  .prediction-result.show { display: block; animation: fadeIn 0.4s ease; }
+  .prediction-result .verdict {
+    font-family: 'Playfair Display', serif; font-size: 1.25rem;
+    font-weight: 700; margin-bottom: 0.5rem;
+  }
+  .prediction-result p { font-size: 0.88rem; opacity: 0.85; line-height: 1.6; }
+
+  /* Quiz */
+  .quiz-question { margin-bottom: 1.5rem; }
+  .quiz-question p {
+    font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.4rem; }
+  .quiz-opt {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.9rem; border-radius: 5px;
+    border: 1px solid var(--rule); cursor: pointer;
+    font-size: 0.88rem; background: #fff;
+    transition: all 0.2s;
+  }
+  .quiz-opt:hover { border-color: var(--amber); background: rgba(212,132,26,0.04); }
+  .quiz-opt input { cursor: pointer; }
+  .quiz-opt.correct { background: rgba(26,107,107,0.1); border-color: var(--teal); color: var(--teal); }
+  .quiz-opt.wrong { background: rgba(193,68,14,0.08); border-color: var(--rust); color: var(--rust); }
+
+  .quiz-submit {
+    margin-top: 1.5rem; padding: 0.8rem 2rem;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 5px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .quiz-submit:hover { background: var(--amber); color: var(--ink); }
+  .quiz-score-display {
+    display: none; margin-top: 1.5rem;
+    background: var(--ink); border-radius: 8px; padding: 1.5rem;
+    text-align: center;
+  }
+  .quiz-score-display.show { display: block; animation: fadeIn 0.4s; }
+  .quiz-score-display .big-num {
+    font-family: 'Playfair Display', serif; font-size: 3.5rem;
+    font-weight: 900; color: var(--amber);
+  }
+  .quiz-score-display p { color: rgba(250,248,243,0.7); font-size: 0.9rem; margin-top: 0.4rem; }
+  .quiz-score-display .grade { font-size: 1.1rem; color: var(--paper); font-weight: 600; }
+
+  /* ─── EVIDENCE ──────────────────────────────────────────── */
+  #evidence { background: var(--paper); }
+  .evidence-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 1.5rem;
+  }
+  .ev-card {
+    border-radius: 8px; border: 1px solid var(--rule);
+    overflow: hidden; box-shadow: var(--shadow);
+    background: #fff;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .ev-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .ev-header {
+    padding: 1rem 1.25rem;
+    background: var(--ink); color: var(--paper);
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .ev-num {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: var(--amber); letter-spacing: 0.1em;
+  }
+  .ev-header h4 { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.02em; }
+  .ev-body { padding: 1.25rem; }
+  .ev-body p { font-size: 0.88rem; color: var(--ghost); line-height: 1.65; margin-bottom: 0.75rem; }
+  .ev-body p:last-child { margin-bottom: 0; }
+
+  /* Table */
+  .ev-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  .ev-table th {
+    background: var(--cream); padding: 0.6rem 0.8rem;
+    text-align: left; font-weight: 600; font-size: 0.78rem;
+    letter-spacing: 0.04em; border-bottom: 2px solid var(--rule);
+  }
+  .ev-table td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--rule); }
+  .ev-table tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 0.2rem 0.55rem; border-radius: 3px;
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge.labor { background: rgba(26,107,107,0.1); color: var(--teal); }
+  .badge.capital { background: rgba(212,132,26,0.12); color: var(--amber); }
+
+  /* Factor cards */
+  .factor-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+  .factor-card {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.7rem 0.9rem; border-radius: 6px; border: 1px solid var(--rule);
+  }
+  .factor-card .factor-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .factor-card .factor-text strong { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
+  .factor-card .factor-text span { font-size: 0.8rem; color: var(--ghost); }
+
+  /* Flow diagram */
+  .flow-diagram { display: flex; flex-direction: column; gap: 0.5rem; }
+  .flow-step {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .flow-node {
+    background: var(--ink); color: var(--paper);
+    padding: 0.5rem 0.9rem; border-radius: 5px;
+    font-size: 0.82rem; font-weight: 500; flex: 1; text-align: center;
+  }
+  .flow-node.highlight { background: var(--teal); }
+  .flow-arrow {
+    text-align: center; color: var(--amber); font-size: 1rem; padding: 0 0.25rem;
+  }
+
+  /* Winners/Losers */
+  .two-side { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .side-card { border-radius: 6px; padding: 0.85rem; }
+  .side-card.winners { background: rgba(26,107,107,0.08); border: 1px solid rgba(26,107,107,0.25); }
+  .side-card.losers { background: rgba(193,68,14,0.06); border: 1px solid rgba(193,68,14,0.2); }
+  .side-card h5 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+  .side-card.winners h5 { color: var(--teal); }
+  .side-card.losers h5 { color: var(--rust); }
+  .side-card li { font-size: 0.8rem; color: var(--ghost); list-style: none; padding: 0.15rem 0; }
+  .side-card li::before { content: '→ '; color: inherit; opacity: 0.6; }
+
+  /* Rybczynski */
+  .ryb-diagram { position: relative; }
+  .ryb-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+  .ryb-row { display: flex; align-items: center; gap: 0.6rem; }
+  .ryb-label { font-size: 0.78rem; width: 100px; font-weight: 500; }
+  .ryb-bar-track { flex: 1; height: 24px; background: var(--mist); border-radius: 3px; overflow: visible; }
+  .ryb-bar-fill {
+    height: 100%; border-radius: 3px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 6px;
+    transition: width 0.6s ease;
+  }
+  .ryb-bar-fill span { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #fff; }
+  .ryb-note { font-size: 0.78rem; color: var(--ghost); margin-top: 0.6rem; line-height: 1.5; }
+
+  /* Stolper-Samuelson Interactive */
+  .ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .ss-indicator {
+    background: var(--cream); border-radius: 6px; padding: 0.85rem;
+    text-align: center; border: 2px solid transparent; transition: all 0.3s;
+  }
+  .ss-indicator h6 { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ghost); margin-bottom: 0.35rem; }
+  .ss-indicator .ss-val {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+    transition: all 0.3s;
+  }
+  .ss-indicator .ss-arrow { font-size: 1rem; margin-left: 0.25rem; transition: all 0.3s; }
+
+  /* ─── LEARNING ──────────────────────────────────────────── */
+  #learning { background: var(--cream); }
+  .learning-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .learn-card {
+    background: #fff; border-radius: 10px;
+    border: 1px solid var(--rule); padding: 2rem;
+    box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .learn-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .learn-card .l-icon {
+    width: 52px; height: 52px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 1.25rem;
+  }
+  .learn-card .l-icon.amber { background: rgba(212,132,26,0.1); }
+  .learn-card .l-icon.teal { background: rgba(26,107,107,0.1); }
+  .learn-card .l-icon.ink { background: rgba(15,17,23,0.07); }
+  .learn-card h3 {
+    font-family: 'Playfair Display', serif; font-size: 1.3rem;
+    font-weight: 700; margin-bottom: 1rem;
+  }
+  .learn-card ul { list-style: none; }
+  .learn-card ul li {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    font-size: 0.88rem; color: var(--ghost);
+    padding: 0.35rem 0; line-height: 1.5;
+  }
+  .learn-card ul li::before {
+    content: '●'; color: var(--amber); font-size: 0.45rem;
+    flex-shrink: 0; margin-top: 0.5rem;
+  }
+
+  /* ─── FOOTER ────────────────────────────────────────────── */
+  footer {
+    background: var(--ink); color: rgba(250,248,243,0.6);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+  footer p { font-size: 0.82rem; line-height: 1.8; }
+  footer strong { color: var(--amber); }
+
+  /* ─── ANIMATIONS ────────────────────────────────────────── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { opacity: 0; animation: fadeIn 0.6s ease forwards; }
+  .fade-in-delay-1 { animation-delay: 0.1s; }
+  .fade-in-delay-2 { animation-delay: 0.25s; }
+  .fade-in-delay-3 { animation-delay: 0.4s; }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(30px); transition: all 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--rule); margin: 2rem 0; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">H-O <span>Model</span></div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#demo">Demos</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#learning">Reflection</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content container">
+    <div class="hero-tag fade-in">International Trade Theory</div>
+    <h1 class="fade-in fade-in-delay-1">
+      Resources &amp;<br><em>Trade</em>
+    </h1>
+    <p class="hero-sub fade-in fade-in-delay-2">
+      An interactive exploration of the Heckscher-Ohlin Factor Proportions Model — how differences in resource endowments shape the patterns of global commerce.
+    </p>
+    <a href="#overview" class="hero-cta fade-in fade-in-delay-3">
+      Begin Exploring ↓
+    </a>
+  </div>
+  <div class="hero-theorem">
+    <p>"A country exports the good whose production uses intensively its abundant factor."</p>
+    <cite>— Heckscher-Ohlin Theorem</cite>
+  </div>
+</section>
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="section-label">Section 01</div>
+    <h2 class="section-title reveal">Project Overview</h2>
+    <p class="section-lead reveal">This page was inspired by the course reading <em>"Resources and Trade: The Heckscher-Ohlin Model,"</em> exploring how factor endowments — labor and capital — determine the direction of international trade.</p>
+
+    <div class="overview-grid reveal">
+      <div class="card">
+        <div class="card-icon amber">📖</div>
+        <h3>What Inspired This Page</h3>
+        <p>Based on the course reading <strong>"Resources and Trade: The Heckscher-Ohlin Model,"</strong> this page explores how differences in countries' factor endowments (labor and capital) create systematic patterns of international trade through comparative advantage.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon teal">⚖️</div>
+        <h3>Main Concept Demonstrated</h3>
+        <p>The <strong>Heckscher-Ohlin Theory</strong> states that countries export goods whose production uses intensively the factors they possess most abundantly — labor-abundant countries export labor-intensive goods, capital-abundant countries export capital-intensive goods.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon rust">🌐</div>
+        <h3>Why This Concept Matters</h3>
+        <p>The H-O model explains global trade patterns, wage inequality between nations, the effects of globalization on income distribution, and why developing countries specialize in manufacturing while developed ones specialize in high-tech and capital-intensive industries.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon amber">📊</div>
+        <h3>Real-World Applications</h3>
+        <p>From China's dominance in apparel to Germany's machine exports, from NAFTA debates to trade policy design — the H-O framework provides the theoretical foundation for analyzing virtually every major trade policy question.</p>
+      </div>
+    </div>
+
+    <div class="theorem-banner reveal">
+      <div class="icon">💡</div>
+      <p>"Countries export what uses their <strong>abundant resources</strong> — the H-O theorem links factor endowments directly to export patterns."</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: DEMOS -->
+<section id="demo">
+  <div class="container">
+    <div class="section-label">Section 02</div>
+    <h2 class="section-title reveal">Interactive Demonstrations</h2>
+    <p class="section-lead reveal">Explore the Heckscher-Ohlin model through five hands-on simulations and tools. Each demo brings a core concept to life.</p>
+
+    <div class="demo-tabs reveal">
+      <button class="tab-btn active" onclick="switchTab('sim')">① H-O Simulator</button>
+      <button class="tab-btn" onclick="switchTab('bars')">② Factor Abundance</button>
+      <button class="tab-btn" onclick="switchTab('price')">③ Price & Wages</button>
+      <button class="tab-btn" onclick="switchTab('decision')">④ Trade Decision</button>
+      <button class="tab-btn" onclick="switchTab('quiz')">⑤ Knowledge Quiz</button>
+    </div>
+
+    <!-- DEMO 1: H-O Simulator -->
+    <div class="demo-panel active" id="tab-sim">
+      <div class="demo-box reveal">
+        <h3>Heckscher-Ohlin Trade Simulator</h3>
+        <p class="demo-desc">Adjust labor and capital supplies for two countries. The model will determine factor abundance and predict what each country should export according to H-O theory.</p>
+        <div class="two-col">
+          <div class="country-panel">
+            <h4>Country <span>A</span></h4>
+            <div class="slider-group">
+              <label>Labor Supply <span id="a-labor-val">50</span></label>
+              <input type="range" min="10" max="100" value="50" id="a-labor" oninput="updateSim()">
+            </div>
+            <div class="slider-group">
+              <label>Capital Supply <span id="a-capital-val">50</span></label>
+              <input type="range" min="10" max="100" value="50" id="a-capital" oninput="updateSim()">
+            </div>
+          </div>
+          <div class="country-panel">
+            <h4>Country <span>B</span></h4>
+            <div class="slider-group">
+              <label>Labor Supply <span id="b-labor-val">70</span></label>
+              <input type="range" min="10" max="100" value="70" id="b-labor" oninput="updateSim()">
+            </div>
+            <div class="slider-group">
+              <label>Capital Supply <span id="b-capital-val">30</span></label>
+              <input type="range" min="10" max="100" value="30" id="b-capital" oninput="updateSim()">
+            </div>
+          </div>
+        </div>
+        <div class="result-box">
+          <div class="result-item">
+            <div class="label">Country A Abundance</div>
+            <div class="value" id="a-abundance">Capital</div>
+            <div class="export" id="a-export">🏭 Food</div>
+          </div>
+          <div class="result-item">
+            <div class="label">Country B Abundance</div>
+            <div class="value" id="b-abundance">Labor</div>
+            <div class="export" id="b-export">👕 Cloth</div>
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--ghost);margin-top:1rem;line-height:1.6;">
+          <strong>H-O Logic:</strong> The labor/capital ratio determines abundance. A country is labor-abundant if its L/K ratio exceeds the other country's. Labor-abundant → export cloth (labor-intensive). Capital-abundant → export food (capital-intensive).
+        </p>
+      </div>
+    </div>
+
+    <!-- DEMO 2: Factor Abundance Bars -->
+    <div class="demo-panel" id="tab-bars">
+      <div class="demo-box reveal">
+        <h3>Factor Abundance Visualization</h3>
+        <p class="demo-desc">Animated bar charts showing the relative factor endowments of two countries. Use the sliders to observe how changing resource levels shifts comparative advantage.</p>
+        <div class="two-col">
+          <div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Country A</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div> Country B</div>
+            </div>
+            <div class="bar-chart">
+              <p style="font-size:0.8rem;font-weight:600;margin-bottom:0.5rem;color:var(--ghost);">LABOR ENDOWMENT</p>
+              <div class="bar-row">
+                <div class="bar-label">Country A</div>
+                <div class="bar-track">
+                  <div class="bar-fill amber" id="bar-a-labor" style="width:50%"><span id="bar-a-labor-pct">50%</span></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Country B</div>
+                <div class="bar-track">
+                  <div class="bar-fill teal" id="bar-b-labor" style="width:70%"><span id="bar-b-labor-pct">70%</span></div>
+                </div>
+              </div>
+              <p style="font-size:0.8rem;font-weight:600;margin:0.75rem 0 0.5rem;color:var(--ghost);">CAPITAL ENDOWMENT</p>
+              <div class="bar-row">
+                <div class="bar-label">Country A</div>
+                <div class="bar-track">
+                  <div class="bar-fill amber" id="bar-a-capital" style="width:50%"><span id="bar-a-capital-pct">50%</span></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Country B</div>
+                <div class="bar-track">
+                  <div class="bar-fill teal" id="bar-b-capital" style="width:30%"><span id="bar-b-capital-pct">30%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="country-panel" style="height:100%">
+              <h4>Adjust Values</h4>
+              <div class="slider-group">
+                <label>A: Labor <span id="v-a-labor">50</span></label>
+                <input type="range" min="10" max="100" value="50" id="v-a-labor-s" oninput="updateBars()">
+              </div>
+              <div class="slider-group">
+                <label>A: Capital <span id="v-a-capital">50</span></label>
+                <input type="range" min="10" max="100" value="50" id="v-a-capital-s" oninput="updateBars()">
+              </div>
+              <div class="slider-group">
+                <label>B: Labor <span id="v-b-labor">70</span></label>
+                <input type="range" min="10" max="100" value="70" id="v-b-labor-s" oninput="updateBars()">
+              </div>
+              <div class="slider-group">
+                <label>B: Capital <span id="v-b-capital">30</span></label>
+                <input type="range" min="10" max="100" value="30" id="v-b-capital-s" oninput="updateBars()">
+              </div>
+              <p id="bars-conclusion" style="font-size:0.82rem;color:var(--ghost);margin-top:0.75rem;line-height:1.5;padding:0.75rem;background:var(--cream);border-radius:5px;"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Price & Wages -->
+    <div class="demo-panel" id="tab-price">
+      <div class="demo-box reveal">
+        <h3>Relative Price &amp; Wage Simulator</h3>
+        <p class="demo-desc">Simulate the Stolper-Samuelson effect: as the relative price of cloth changes, observe how worker incomes and capital owner incomes respond in opposite directions.</p>
+        <div class="slider-group">
+          <label>Relative Price of Cloth (P<sub>C</sub>/P<sub>F</sub>) <span id="price-val">1.00</span></label>
+          <input type="range" min="0.2" max="2.8" step="0.1" value="1.0" id="price-slider" oninput="updatePrice()">
+        </div>
+        <div class="price-meter">
+          <div class="price-display">
+            <div class="unit">CLOTH PRICE RATIO</div>
+            <div class="val" id="price-big">1.00</div>
+          </div>
+          <div class="income-bars">
+            <div class="income-bar-item">
+              <div class="title">👷 Worker Income (Real Wage)</div>
+              <div class="fill-track">
+                <div class="fill-bar" id="worker-bar" style="width:50%;background:linear-gradient(90deg,var(--teal),var(--teal-light))"></div>
+              </div>
+              <div class="fill-val" id="worker-val" style="color:var(--teal-light)">100</div>
+            </div>
+            <div class="income-bar-item">
+              <div class="title">🏦 Capital Owner Income (Real Return)</div>
+              <div class="fill-track">
+                <div class="fill-bar" id="capital-bar" style="width:50%;background:linear-gradient(90deg,var(--amber),var(--amber-light))"></div>
+              </div>
+              <div class="fill-val" id="capital-val" style="color:var(--amber-light)">100</div>
+            </div>
+          </div>
+        </div>
+        <div id="price-note" class="note-tag"></div>
+        <p style="font-size:0.82rem;color:var(--ghost);margin-top:1rem;line-height:1.6;padding:0.85rem;background:var(--cream);border-radius:6px;">
+          <strong>Stolper-Samuelson Theorem:</strong> When the price of a labor-intensive good (cloth) rises, real wages rise and real capital returns fall. This explains why trade liberalization can hurt owners of the scarce factor.
+        </p>
+      </div>
+    </div>
+
+    <!-- DEMO 4: Trade Decision -->
+    <div class="demo-panel" id="tab-decision">
+      <div class="demo-box reveal">
+        <h3>Trade Pattern Decision Tool</h3>
+        <p class="demo-desc">Select a country type and good type, then predict the trade outcome using Heckscher-Ohlin logic. Understand when a country should import or export.</p>
+        <div class="decision-grid">
+          <div class="select-group">
+            <label>Country Type</label>
+            <select id="country-type">
+              <option value="labor">Labor Abundant</option>
+              <option value="capital">Capital Abundant</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label>Good Type</label>
+            <select id="good-type">
+              <option value="labor">Labor Intensive</option>
+              <option value="capital">Capital Intensive</option>
+            </select>
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predictTrade()">Predict Trade Outcome →</button>
+        <div class="prediction-result" id="prediction-result">
+          <div class="verdict" id="pred-verdict"></div>
+          <p id="pred-explanation"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 5: Quiz -->
+    <div class="demo-panel" id="tab-quiz">
+      <div class="demo-box reveal">
+        <h3>Knowledge Check Quiz</h3>
+        <p class="demo-desc">Test your understanding of the Heckscher-Ohlin model with five multiple-choice questions. Review each answer and track your score.</p>
+
+        <div id="quiz-form">
+          <!-- Q1 -->
+          <div class="quiz-question">
+            <p>1. According to the Heckscher-Ohlin theorem, a labor-abundant country will tend to export:</p>
+            <div class="quiz-options">
+              <label class="quiz-opt"><input type="radio" name="q1" value="a"> Capital-intensive goods like machinery</label>
+              <label class="quiz-opt"><input type="radio" name="q1" value="b"> Labor-intensive goods like clothing or textiles</label>
+              <label class="quiz-opt"><input type="radio" name="q1" value="c"> Natural resource-intensive goods like oil</label>
+              <label class="quiz-opt"><input type="radio" name="q1" value="d"> Only high-technology goods</label>
+            </div>
+          </div>
+          <!-- Q2 -->
+          <div class="quiz-question">
+            <p>2. Which of the following is an example of a capital-intensive product?</p>
+            <div class="quiz-options">
+              <label class="quiz-opt"><input type="radio" name="q2" value="a"> Hand-stitched clothing</label>
+              <label class="quiz-opt"><input type="radio" name="q2" value="b"> Agricultural produce harvested manually</label>
+              <label class="quiz-opt"><input type="radio" name="q2" value="c"> Commercial aircraft manufactured with heavy machinery</label>
+              <label class="quiz-opt"><input type="radio" name="q2" value="d"> Handicrafts and textiles</label>
+            </div>
+          </div>
+          <!-- Q3 -->
+          <div class="quiz-question">
+            <p>3. The Stolper-Samuelson theorem states that when the price of a labor-intensive good rises:</p>
+            <div class="quiz-options">
+              <label class="quiz-opt"><input type="radio" name="q3" value="a"> Both wages and capital returns rise equally</label>
+              <label class="quiz-opt"><input type="radio" name="q3" value="b"> Real wages rise and real capital returns fall</label>
+              <label class="quiz-opt"><input type="radio" name="q3" value="c"> Real wages fall and real capital returns rise</label>
+              <label class="quiz-opt"><input type="radio" name="q3" value="d"> Factor prices are unaffected by product prices</label>
+            </div>
+          </div>
+          <!-- Q4 -->
+          <div class="quiz-question">
+            <p>4. The Factor Price Equalization theorem predicts that free trade will:</p>
+            <div class="quiz-options">
+              <label class="quiz-opt"><input type="radio" name="q4" value="a"> Increase wage differences between trading countries</label>
+              <label class="quiz-opt"><input type="radio" name="q4" value="b"> Have no effect on wages or returns to capital</label>
+              <label class="quiz-opt"><input type="radio" name="q4" value="c"> Tend to equalize wages and capital returns across countries</label>
+              <label class="quiz-opt"><input type="radio" name="q4" value="d"> Benefit only the capital-abundant country</label>
+            </div>
+          </div>
+          <!-- Q5 -->
+          <div class="quiz-question">
+            <p>5. The Rybczynski effect states that an increase in the supply of labor (holding all else constant) will cause:</p>
+            <div class="quiz-options">
+              <label class="quiz-opt"><input type="radio" name="q5" value="a"> An equal expansion in all sectors of the economy</label>
+              <label class="quiz-opt"><input type="radio" name="q5" value="b"> A large expansion in labor-intensive sectors and a reduction in capital-intensive output</label>
+              <label class="quiz-opt"><input type="radio" name="q5" value="c"> A fall in total national output</label>
+              <label class="quiz-opt"><input type="radio" name="q5" value="d"> Higher capital returns across the board</label>
+            </div>
+          </div>
+
+          <button class="quiz-submit" onclick="submitQuiz()">Submit Answers</button>
+        </div>
+
+        <div class="quiz-score-display" id="quiz-score">
+          <div class="big-num" id="score-num">0/5</div>
+          <div class="grade" id="score-grade"></div>
+          <p id="score-msg"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: EVIDENCE -->
+<section id="evidence">
+  <div class="container">
+    <div class="section-label">Section 03</div>
+    <h2 class="section-title reveal">Evidence from Course Work</h2>
+    <p class="section-lead reveal">These panels summarize the key theoretical concepts from the course reading on the Heckscher-Ohlin model, presented as structured economic evidence.</p>
+
+    <div class="evidence-grid">
+      <!-- E1 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.01</div>
+          <h4>Heckscher-Ohlin Theorem</h4>
+        </div>
+        <div class="ev-body">
+          <p>The core theorem: <em>"The country abundant in a factor exports the good intensive in that factor."</em> This follows directly from cost differences — when a country has abundant labor, wages are low, making labor-intensive production cheaper and thus competitive in export markets.</p>
+          <div class="factor-cards">
+            <div class="factor-card">
+              <div class="factor-icon">🏭</div>
+              <div class="factor-text">
+                <strong>Capital-Abundant → Export Capital-Intensive</strong>
+                <span>e.g., Germany exporting machinery, chemicals, aircraft</span>
+              </div>
+            </div>
+            <div class="factor-card">
+              <div class="factor-icon">👕</div>
+              <div class="factor-text">
+                <strong>Labor-Abundant → Export Labor-Intensive</strong>
+                <span>e.g., Bangladesh exporting textiles and apparel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E2 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.02</div>
+          <h4>Labor-Intensive vs Capital-Intensive Goods</h4>
+        </div>
+        <div class="ev-body">
+          <table class="ev-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Examples</th>
+                <th>Key Features</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge labor">Labor-Intensive</span></td>
+                <td>Clothing, Textiles, Shoes, Furniture</td>
+                <td>High worker hours per unit output</td>
+              </tr>
+              <tr>
+                <td><span class="badge capital">Capital-Intensive</span></td>
+                <td>Aircraft, Machinery, Chemicals, Autos</td>
+                <td>Heavy equipment investment per worker</td>
+              </tr>
+              <tr>
+                <td><span class="badge labor">Labor-Intensive</span></td>
+                <td>Food assembly, Electronics assembly</td>
+                <td>Large workforce, modest machinery</td>
+              </tr>
+              <tr>
+                <td><span class="badge capital">Capital-Intensive</span></td>
+                <td>Semiconductors, Oil refining</td>
+                <td>Highly automated, capital-heavy</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- E3 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.03</div>
+          <h4>Factor Abundance Definitions</h4>
+        </div>
+        <div class="ev-body">
+          <p>A country is <strong>labor-abundant</strong> if its labor-to-capital ratio (L/K) is higher than the ratio in the other country. Capital abundance is defined symmetrically.</p>
+          <div class="factor-cards" style="margin-top:0.75rem;">
+            <div class="factor-card">
+              <div class="factor-icon">👥</div>
+              <div class="factor-text">
+                <strong>Labor-Abundant: L/K > L*/K*</strong>
+                <span>Lower wage relative to capital cost; cloth production is cheap</span>
+              </div>
+            </div>
+            <div class="factor-card">
+              <div class="factor-icon">⚙️</div>
+              <div class="factor-text">
+                <strong>Capital-Abundant: K/L > K*/L*</strong>
+                <span>Lower capital cost relative to wages; food/machinery is cheap</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E4 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.04</div>
+          <h4>Factor Price Equalization</h4>
+        </div>
+        <div class="ev-body">
+          <p>Trade in goods acts as an indirect form of factor trade. Under ideal conditions, free trade causes wages and capital returns to converge across countries.</p>
+          <div class="flow-diagram" style="margin-top:0.75rem;">
+            <div class="flow-step">
+              <div class="flow-node">Country A: High Wages</div>
+            </div>
+            <div class="flow-step" style="justify-content:center">
+              <div class="flow-arrow">↓ Free Trade Opens ↓</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-node highlight">A exports labor-intensive goods</div>
+            </div>
+            <div class="flow-step" style="justify-content:center">
+              <div class="flow-arrow">↓ Demand for Labor Equalizes ↓</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-node">Wages converge across countries</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E5 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.05</div>
+          <h4>Income Distribution Effects</h4>
+        </div>
+        <div class="ev-body">
+          <p>Trade produces winners and losers. The H-O model predicts that <strong>owners of abundant factors gain</strong> from trade, while owners of scarce factors lose.</p>
+          <div class="two-side" style="margin-top:0.75rem;">
+            <div class="side-card winners">
+              <h5>✅ Winners</h5>
+              <ul>
+                <li>Owners of abundant factors</li>
+                <li>Workers in labor-rich countries</li>
+                <li>Capital owners in capital-rich countries</li>
+                <li>Export-sector firms</li>
+              </ul>
+            </div>
+            <div class="side-card losers">
+              <h5>❌ Losers</h5>
+              <ul>
+                <li>Owners of scarce factors</li>
+                <li>Workers in capital-rich countries</li>
+                <li>Capital in labor-rich countries</li>
+                <li>Import-competing industries</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E6 -->
+      <div class="ev-card reveal">
+        <div class="ev-header">
+          <div class="ev-num">E.06</div>
+          <h4>The Rybczynski Effect</h4>
+        </div>
+        <div class="ev-body">
+          <p>When the supply of one factor (e.g., labor) increases at constant prices, the output of the labor-intensive sector expands greatly while the capital-intensive sector actually <em>contracts</em>.</p>
+          <div class="ryb-bars" style="margin-top:0.75rem;" id="ryb-vis">
+            <div class="ryb-row">
+              <div class="ryb-label">Cloth (Labor-Intensive)</div>
+              <div class="ryb-bar-track">
+                <div class="ryb-bar-fill" style="width:70%;background:linear-gradient(90deg,var(--teal),var(--teal-light))"><span>+70%</span></div>
+              </div>
+            </div>
+            <div class="ryb-row">
+              <div class="ryb-label">Food (Capital-Intensive)</div>
+              <div class="ryb-bar-track">
+                <div class="ryb-bar-fill" style="width:25%;background:linear-gradient(90deg,var(--rust),#e86b38)"><span>-25%</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="ryb-note">Example: After a 10% increase in labor supply, cloth output rises by ~70% while food output contracts by ~25% (at constant factor prices).</p>
+        </div>
+      </div>
+
+      <!-- E7 -->
+      <div class="ev-card reveal" style="grid-column: 1 / -1; max-width: 680px;">
+        <div class="ev-header">
+          <div class="ev-num">E.07</div>
+          <h4>Stolper-Samuelson Interactive Illustration</h4>
+        </div>
+        <div class="ev-body">
+          <p>Use the slider to see how changes in the price of cloth affect real wages and real capital returns — the Stolper-Samuelson theorem in action.</p>
+          <div class="slider-group" style="margin-top:0.75rem;">
+            <label>Cloth Price Change <span id="ss-price-label">No Change (0%)</span></label>
+            <input type="range" min="-50" max="50" value="0" id="ss-slider" oninput="updateSS()">
+          </div>
+          <div class="ss-grid">
+            <div class="ss-indicator" id="ss-wage">
+              <h6>Real Wage (Workers)</h6>
+              <div class="ss-val" id="ss-wage-val" style="color:var(--teal)">100</div>
+              <div class="ss-arrow" id="ss-wage-arrow">→</div>
+            </div>
+            <div class="ss-indicator" id="ss-cap">
+              <h6>Real Capital Return</h6>
+              <div class="ss-val" id="ss-cap-val" style="color:var(--amber)">100</div>
+              <div class="ss-arrow" id="ss-cap-arrow">→</div>
+            </div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--ghost);margin-top:0.75rem;line-height:1.5;background:var(--cream);padding:0.6rem 0.75rem;border-radius:5px;" id="ss-explanation">
+            At neutral prices, wages and capital returns are balanced.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: LEARNING -->
+<section id="learning">
+  <div class="container">
+    <div class="section-label">Section 04</div>
+    <h2 class="section-title reveal">What Did I Learn?</h2>
+    <p class="section-lead reveal">Reflecting on three dimensions of growth from this project — the knowledge gained, skills developed, and broader insights drawn from engaging with the Heckscher-Ohlin model.</p>
+
+    <div class="learning-grid">
+      <div class="learn-card reveal">
+        <div class="l-icon amber">📚</div>
+        <h3>Knowledge</h3>
+        <ul>
+          <li>The Heckscher-Ohlin theorem and its conditions</li>
+          <li>Factor abundance vs. factor intensity distinction</li>
+          <li>How resource endowments determine trade patterns</li>
+          <li>Factor Price Equalization and its assumptions</li>
+          <li>The Stolper-Samuelson theorem on income distribution</li>
+          <li>The Rybczynski effect on output composition</li>
+          <li>Why trade creates both winners and losers within countries</li>
+          <li>Empirical evidence for and against the H-O model</li>
+        </ul>
+      </div>
+      <div class="learn-card reveal">
+        <div class="l-icon teal">🛠️</div>
+        <h3>Skills Developed</h3>
+        <ul>
+          <li>Economic modeling and theoretical reasoning</li>
+          <li>Data visualization and chart interpretation</li>
+          <li>Comparative advantage analysis using factor ratios</li>
+          <li>Critical evaluation of trade theory predictions</li>
+          <li>Translating abstract theorems into interactive simulations</li>
+          <li>Communicating economic concepts to a general audience</li>
+          <li>Connecting theory to real-world trade phenomena</li>
+        </ul>
+      </div>
+      <div class="learn-card reveal">
+        <div class="l-icon ink">💭</div>
+        <h3>Reflection</h3>
+        <ul>
+          <li><strong>Surprising:</strong> Trade's distributional effects — that free trade can actually harm workers in wealthy nations — challenged my initial assumptions that trade is universally beneficial.</li>
+          <li><strong>Challenging:</strong> Reconciling the Leontief Paradox (U.S. exports being labor-intensive) with H-O predictions required understanding model limitations.</li>
+          <li><strong>Real-World:</strong> The H-O model explains global manufacturing shifts — why apparel moved to Bangladesh, why Germany dominates machinery exports.</li>
+          <li><strong>Policy Link:</strong> Trade policy debates (tariffs, quotas) often hinge on exactly which factors of production each country has in abundance.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>Resources &amp; Trade: The Heckscher-Ohlin Model</strong><br>
+  University Course Project · International Economics<br>
+  <span style="font-size:0.75rem;opacity:0.5;">Based on course reading material · All simulations are educational approximations</span></p>
+</footer>
+
+<script>
+  // ─── SCROLL REVEAL ─────────────────────────────────────────────
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i * 0.07) + 's';
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  // ─── TAB SWITCHING ─────────────────────────────────────────────
+  function switchTab(id) {
+    document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // ─── DEMO 1: H-O SIMULATOR ─────────────────────────────────────
+  function updateSim() {
+    const aL = +document.getElementById('a-labor').value;
+    const aK = +document.getElementById('a-capital').value;
+    const bL = +document.getElementById('b-labor').value;
+    const bK = +document.getElementById('b-capital').value;
+
+    document.getElementById('a-labor-val').textContent = aL;
+    document.getElementById('a-capital-val').textContent = aK;
+    document.getElementById('b-labor-val').textContent = bL;
+    document.getElementById('b-capital-val').textContent = bK;
+
+    const aRatio = aL / aK;
+    const bRatio = bL / bK;
+
+    let aAbundance, bAbundance, aExport, bExport;
+
+    if (aRatio > bRatio) {
+      aAbundance = 'Labor'; aExport = '👕 Cloth';
+      bAbundance = 'Capital'; bExport = '🌾 Food';
+    } else if (bRatio > aRatio) {
+      bAbundance = 'Labor'; bExport = '👕 Cloth';
+      aAbundance = 'Capital'; aExport = '🌾 Food';
+    } else {
+      aAbundance = 'Equal'; aExport = '⚖️ Both';
+      bAbundance = 'Equal'; bExport = '⚖️ Both';
+    }
+
+    document.getElementById('a-abundance').textContent = aAbundance;
+    document.getElementById('b-abundance').textContent = bAbundance;
+    document.getElementById('a-export').textContent = aExport;
+    document.getElementById('b-export').textContent = bExport;
+  }
+  updateSim();
+
+  // ─── DEMO 2: BARS ──────────────────────────────────────────────
+  function updateBars() {
+    const aL = +document.getElementById('v-a-labor-s').value;
+    const aK = +document.getElementById('v-a-capital-s').value;
+    const bL = +document.getElementById('v-b-labor-s').value;
+    const bK = +document.getElementById('v-b-capital-s').value;
+
+    document.getElementById('v-a-labor').textContent = aL;
+    document.getElementById('v-a-capital').textContent = aK;
+    document.getElementById('v-b-labor').textContent = bL;
+    document.getElementById('v-b-capital').textContent = bK;
+
+    const maxL = Math.max(aL, bL, 10);
+    const maxK = Math.max(aK, bK, 10);
+
+    const aLpct = Math.round((aL / maxL) * 100);
+    const bLpct = Math.round((bL / maxL) * 100);
+    const aKpct = Math.round((aK / maxK) * 100);
+    const bKpct = Math.round((bK / maxK) * 100);
+
+    document.getElementById('bar-a-labor').style.width = aLpct + '%';
+    document.getElementById('bar-b-labor').style.width = bLpct + '%';
+    document.getElementById('bar-a-capital').style.width = aKpct + '%';
+    document.getElementById('bar-b-capital').style.width = bKpct + '%';
+
+    document.getElementById('bar-a-labor-pct').textContent = aL;
+    document.getElementById('bar-b-labor-pct').textContent = bL;
+    document.getElementById('bar-a-capital-pct').textContent = aK;
+    document.getElementById('bar-b-capital-pct').textContent = bK;
+
+    const aRatio = aL / aK;
+    const bRatio = bL / bK;
+    let conclusion = '';
+    if (aRatio > bRatio) {
+      conclusion = `Country A is labor-abundant (L/K = ${aRatio.toFixed(2)} vs ${bRatio.toFixed(2)}). H-O predicts: A exports cloth, B exports food.`;
+    } else if (bRatio > aRatio) {
+      conclusion = `Country B is labor-abundant (L/K = ${bRatio.toFixed(2)} vs ${aRatio.toFixed(2)}). H-O predicts: B exports cloth, A exports food.`;
+    } else {
+      conclusion = `Both countries have identical L/K ratios — no comparative advantage based on factor proportions.`;
+    }
+    document.getElementById('bars-conclusion').textContent = conclusion;
+  }
+  updateBars();
+
+  // ─── DEMO 3: PRICE & WAGES ────────────────────────────────────
+  function updatePrice() {
+    const raw = +document.getElementById('price-slider').value;
+    const display = raw.toFixed(2);
+    document.getElementById('price-val').textContent = display;
+    document.getElementById('price-big').textContent = display;
+
+    // Worker income rises with cloth price; capital falls (Stolper-Samuelson)
+    const neutral = 1.5; // midpoint
+    const norm = (raw - 0.2) / (2.8 - 0.2); // 0 to 1
+
+    const workerIncome = Math.round(50 + norm * 100);
+    const capitalIncome = Math.round(150 - norm * 100);
+    const wBar = Math.min(Math.max(workerIncome, 5), 100);
+    const kBar = Math.min(Math.max(capitalIncome, 5), 100);
+
+    document.getElementById('worker-bar').style.width = wBar + '%';
+    document.getElementById('capital-bar').style.width = kBar + '%';
+    document.getElementById('worker-val').textContent = workerIncome;
+    document.getElementById('capital-val').textContent = capitalIncome;
+
+    let note = '';
+    if (raw > 1.4) note = '📈 High cloth price → Workers gain, Capital owners lose';
+    else if (raw < 0.8) note = '📉 Low cloth price → Capital owners gain, Workers lose';
+    else note = '⚖️ Near-equilibrium price → Incomes relatively balanced';
+    document.getElementById('price-note').textContent = note;
+  }
+  updatePrice();
+
+  // ─── DEMO 4: TRADE DECISION ───────────────────────────────────
+  function predictTrade() {
+    const country = document.getElementById('country-type').value;
+    const good = document.getElementById('good-type').value;
+    const el = document.getElementById('prediction-result');
+    const verd = document.getElementById('pred-verdict');
+    const exp = document.getElementById('pred-explanation');
+
+    let verdict, explanation;
+
+    if (country === 'labor' && good === 'labor') {
+      verdict = '✅ EXPORT — Clear Comparative Advantage';
+      explanation = 'A labor-abundant country producing a labor-intensive good has a cost advantage. Low wages make production cheap relative to trading partners. Per H-O theory, this country should EXPORT this good and specialize in labor-intensive production.';
+    } else if (country === 'labor' && good === 'capital') {
+      verdict = '📦 IMPORT — Comparative Disadvantage';
+      explanation = 'A labor-abundant country producing a capital-intensive good faces a cost disadvantage. With relatively scarce capital, production costs are high. H-O theory predicts this country should IMPORT capital-intensive goods and use its resources where it has an advantage.';
+    } else if (country === 'capital' && good === 'capital') {
+      verdict = '✅ EXPORT — Clear Comparative Advantage';
+      explanation = 'A capital-abundant country producing a capital-intensive good benefits from low capital costs. Abundant machinery and infrastructure make capital-intensive production cost-effective. H-O theory predicts EXPORT of this good.';
+    } else {
+      verdict = '📦 IMPORT — Comparative Disadvantage';
+      explanation = 'A capital-abundant country producing a labor-intensive good is at a cost disadvantage — labor is relatively scarce and expensive. H-O theory predicts this country should IMPORT such goods from labor-abundant trading partners.';
+    }
+
+    verd.textContent = verdict;
+    exp.textContent = explanation;
+    el.classList.add('show');
+  }
+
+  // ─── DEMO 5: QUIZ ─────────────────────────────────────────────
+  const correctAnswers = { q1: 'b', q2: 'c', q3: 'b', q4: 'c', q5: 'b' };
+  const gradeMessages = [
+    { min: 5, grade: 'Excellent!', msg: 'Perfect score! You have mastered the Heckscher-Ohlin model.' },
+    { min: 4, grade: 'Very Good', msg: 'Strong understanding of factor proportions theory. Review the one you missed.' },
+    { min: 3, grade: 'Good', msg: 'Solid foundation. Re-read the Stolper-Samuelson and Rybczynski sections.' },
+    { min: 2, grade: 'Keep Studying', msg: 'You grasped some key ideas. Review the core H-O theorem and its corollaries.' },
+    { min: 0, grade: 'Needs Review', msg: 'Revisit the demonstrations above to reinforce the key concepts.' }
+  ];
+
+  function submitQuiz() {
+    let score = 0;
+    [1,2,3,4,5].forEach(q => {
+      const selected = document.querySelector(`input[name="q${q}"]:checked`);
+      const opts = document.querySelectorAll(`input[name="q${q}"]`);
+      opts.forEach(opt => {
+        const label = opt.parentElement;
+        label.classList.remove('correct', 'wrong');
+        if (opt.value === correctAnswers['q'+q]) {
+          label.classList.add('correct');
+        } else if (selected && opt === selected && opt.value !== correctAnswers['q'+q]) {
+          label.classList.add('wrong');
+        }
+      });
+      if (selected && selected.value === correctAnswers['q'+q]) score++;
+    });
+
+    const gradeInfo = gradeMessages.find(g => score >= g.min);
+    document.getElementById('score-num').textContent = score + '/5';
+    document.getElementById('score-grade').textContent = gradeInfo.grade;
+    document.getElementById('score-msg').textContent = gradeInfo.msg;
+    document.getElementById('quiz-score').classList.add('show');
+    document.getElementById('quiz-score').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ─── EVIDENCE 7: STOLPER-SAMUELSON ───────────────────────────
+  function updateSS() {
+    const val = +document.getElementById('ss-slider').value;
+    const label = val > 0 ? `+${val}% increase` : val < 0 ? `${val}% decrease` : 'No Change (0%)';
+    document.getElementById('ss-price-label').textContent = label;
+
+    // Wage rises with price increase; capital return falls
+    const wageVal = Math.round(100 + val * 1.4);
+    const capVal = Math.round(100 - val * 1.2);
+
+    document.getElementById('ss-wage-val').textContent = wageVal;
+    document.getElementById('ss-cap-val').textContent = capVal;
+
+    const wEl = document.getElementById('ss-wage');
+    const cEl = document.getElementById('ss-cap');
+
+    if (val > 5) {
+      document.getElementById('ss-wage-val').style.color = 'var(--teal)';
+      document.getElementById('ss-cap-val').style.color = 'var(--rust)';
+      document.getElementById('ss-wage-arrow').textContent = '↑';
+      document.getElementById('ss-cap-arrow').textContent = '↓';
+      wEl.style.borderColor = 'var(--teal)';
+      cEl.style.borderColor = 'var(--rust)';
+      document.getElementById('ss-explanation').textContent = 'Cloth price rising → Labor (cloth factor) benefits. Real wages increase more than proportionally. Capital owners lose — this is the magnification effect.';
+    } else if (val < -5) {
+      document.getElementById('ss-wage-val').style.color = 'var(--rust)';
+      document.getElementById('ss-cap-val').style.color = 'var(--amber)';
+      document.getElementById('ss-wage-arrow').textContent = '↓';
+      document.getElementById('ss-cap-arrow').textContent = '↑';
+      wEl.style.borderColor = 'var(--rust)';
+      cEl.style.borderColor = 'var(--amber)';
+      document.getElementById('ss-explanation').textContent = 'Cloth price falling → Capital (food factor) benefits. Real capital returns rise. Workers in labor-intensive sectors see real wage cuts — the scarce-factor penalty.';
+    } else {
+      document.getElementById('ss-wage-val').style.color = 'var(--teal)';
+      document.getElementById('ss-cap-val').style.color = 'var(--amber)';
+      document.getElementById('ss-wage-arrow').textContent = '→';
+      document.getElementById('ss-cap-arrow').textContent = '→';
+      wEl.style.borderColor = 'transparent';
+      cEl.style.borderColor = 'transparent';
+      document.getElementById('ss-explanation').textContent = 'Near neutral price change — wages and capital returns remain close to baseline. Move the slider further to see the Stolper-Samuelson effect.';
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resource Abundance & Trade Patterns Lab | Hasan Osiul</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0f1e;
+    --navy-mid: #111827;
+    --navy-light: #1a2540;
+    --teal: #0ecfb0;
+    --teal-dim: rgba(14,207,176,0.15);
+    --gold: #f5c842;
+    --gold-dim: rgba(245,200,66,0.12);
+    --coral: #ff6b6b;
+    --coral-dim: rgba(255,107,107,0.12);
+    --slate: #94a3b8;
+    --white: #f0f4ff;
+    --glass: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0;
+  }
+
+  /* ── HERO BACKGROUND ── */
+  .hero-bg {
+    position:fixed; inset:0; z-index:-1; overflow:hidden;
+    background: radial-gradient(ellipse 80% 60% at 20% 30%, rgba(14,207,176,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(245,200,66,0.06) 0%, transparent 60%),
+                var(--navy);
+  }
+  .hero-bg span {
+    position:absolute; border-radius:50%;
+    background: radial-gradient(circle, rgba(14,207,176,0.15), transparent 70%);
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+  .hero-bg span:nth-child(1){ width:600px;height:600px;top:-200px;left:-100px; animation-duration:22s; }
+  .hero-bg span:nth-child(2){ width:400px;height:400px;bottom:-100px;right:-50px;background:radial-gradient(circle,rgba(245,200,66,0.1),transparent 70%); animation-duration:28s; }
+  .hero-bg span:nth-child(3){ width:300px;height:300px;top:50%;left:60%;background:radial-gradient(circle,rgba(255,107,107,0.08),transparent 70%); animation-duration:18s; }
+  @keyframes drift { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,30px) scale(1.1)} }
+
+  /* ── NAV ── */
+  nav {
+    position:sticky; top:0; z-index:100;
+    background: rgba(10,15,30,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width:1200px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    height:60px;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size:1.1rem;
+    color: var(--teal);
+    text-decoration:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  .nav-logo svg { width:24px; height:24px; }
+  .nav-links {
+    display:flex; gap:0; list-style:none;
+  }
+  .nav-links a {
+    display:block; padding:8px 14px;
+    color: var(--slate);
+    text-decoration:none; font-size:0.82rem;
+    font-weight:500; letter-spacing:0.04em; text-transform:uppercase;
+    transition: color .25s;
+    border-radius:6px;
+  }
+  .nav-links a:hover { color:var(--teal); }
+  .nav-badge {
+    font-size:0.75rem; background:var(--teal-dim); color:var(--teal);
+    padding:4px 10px; border-radius:20px; border:1px solid rgba(14,207,176,0.3);
+    font-weight:500;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; display:flex; align-items:center;
+    padding: 6rem 2rem 4rem;
+    position:relative;
+  }
+  .hero-inner { max-width:1200px; margin:0 auto; width:100%; }
+  .hero-eyebrow {
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.78rem; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--teal); font-weight:600; margin-bottom:1.5rem;
+    padding:6px 14px; background:var(--teal-dim); border-radius:20px;
+    border:1px solid rgba(14,207,176,0.25);
+  }
+  .hero-eyebrow::before { content:''; display:block; width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem,8vw,6rem);
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing:-0.02em;
+    margin-bottom:1.5rem;
+  }
+  .hero h1 em { font-style:italic; color:var(--teal); }
+  .hero-sub {
+    font-size:1.15rem; color:var(--slate); max-width:520px;
+    margin-bottom:3rem; font-weight:300;
+  }
+  .hero-stats {
+    display:flex; gap:2rem; flex-wrap:wrap;
+  }
+  .hero-stat { display:flex; flex-direction:column; }
+  .hero-stat-num {
+    font-family:var(--font-display);
+    font-size:2.5rem; font-weight:700; color:var(--gold);
+    line-height:1;
+  }
+  .hero-stat-label { font-size:0.8rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px; }
+
+  .hero-scroll {
+    position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    color:var(--slate); font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase;
+    animation: bounce 2s infinite;
+  }
+  .hero-scroll svg { opacity:.4; }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* ── SECTION STRUCTURE ── */
+  section { padding: 5rem 2rem; position:relative; }
+  .container { max-width:1200px; margin:0 auto; }
+
+  .section-label {
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--teal); font-weight:700; margin-bottom:1rem;
+  }
+  .section-label span { display:block;width:24px;height:1px;background:var(--teal); }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem,5vw,3.5rem);
+    font-weight:700; line-height:1.1;
+    margin-bottom:0.75rem;
+  }
+  .section-subtitle { color:var(--slate); font-size:1rem; max-width:520px; margin-bottom:3rem; }
+
+  /* ── GLASS CARD ── */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(10px);
+    transition: border-color .3s, transform .3s, box-shadow .3s;
+  }
+  .glass:hover {
+    border-color: rgba(14,207,176,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(14,207,176,0.05);
+  }
+
+  /* ── SECTION 1: OVERVIEW ── */
+  #overview { background: linear-gradient(180deg, transparent, rgba(14,207,176,0.03) 50%, transparent); }
+
+  .overview-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem; }
+
+  .concept-card {
+    padding:2rem; border-radius:var(--radius);
+    position:relative; overflow:hidden;
+  }
+  .concept-card.labor {
+    background: linear-gradient(135deg, rgba(14,207,176,0.1), rgba(14,207,176,0.03));
+    border: 1px solid rgba(14,207,176,0.2);
+  }
+  .concept-card.capital {
+    background: linear-gradient(135deg, rgba(245,200,66,0.1), rgba(245,200,66,0.03));
+    border: 1px solid rgba(245,200,66,0.2);
+  }
+  .concept-card-icon {
+    font-size:2.5rem; margin-bottom:1rem; display:block;
+  }
+  .concept-card h3 {
+    font-family:var(--font-display); font-size:1.3rem; margin-bottom:0.5rem;
+  }
+  .concept-card.labor h3 { color:var(--teal); }
+  .concept-card.capital h3 { color:var(--gold); }
+  .concept-card p { color:var(--slate); font-size:0.9rem; }
+  .concept-card ul { list-style:none; margin-top:0.75rem; }
+  .concept-card ul li {
+    font-size:0.88rem; color:var(--slate); padding:3px 0;
+    display:flex; align-items:center; gap:8px;
+  }
+  .concept-card ul li::before { content:'→'; opacity:.5; }
+
+  .ho-theory {
+    padding:2rem 2.5rem; margin-bottom:2rem;
+    background: linear-gradient(135deg, rgba(255,107,107,0.06), rgba(245,200,66,0.06));
+    border: 1px solid rgba(255,255,255,0.08); border-radius:var(--radius);
+    display:flex; align-items:center; gap:2rem;
+  }
+  .ho-theory-icon { font-size:4rem; flex-shrink:0; }
+  .ho-theory h3 { font-family:var(--font-display); font-size:1.4rem; margin-bottom:.5rem; }
+  .ho-theory p { color:var(--slate); font-size:0.95rem; }
+
+  .quote-block {
+    padding:2rem 3rem; margin:2rem 0;
+    background: linear-gradient(90deg, rgba(14,207,176,0.08), rgba(14,207,176,0.02));
+    border-left:3px solid var(--teal); border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+    font-family:var(--font-display); font-size:1.6rem; font-style:italic;
+    color:var(--white);
+  }
+
+  .why-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+  .why-card { padding:1.25rem; border-radius:var(--radius-sm); text-align:center; }
+  .why-card-icon { font-size:1.8rem; margin-bottom:.5rem; }
+  .why-card h4 { font-size:0.85rem; font-weight:600; color:var(--white); margin-bottom:.25rem; }
+  .why-card p { font-size:0.78rem; color:var(--slate); }
+
+  /* ── SECTION 2: DEMO ── */
+  #demos { background: rgba(17,24,39,0.5); }
+
+  .demo-tabs {
+    display:flex; gap:.5rem; margin-bottom:2rem; flex-wrap:wrap;
+  }
+  .demo-tab {
+    padding:.5rem 1.25rem; border-radius:30px;
+    background:transparent; border:1px solid var(--glass-border);
+    color:var(--slate); cursor:pointer; font-size:0.82rem; font-weight:500;
+    font-family:var(--font-body); transition:all .25s;
+  }
+  .demo-tab.active, .demo-tab:hover {
+    background:var(--teal-dim); border-color:rgba(14,207,176,0.4); color:var(--teal);
+  }
+
+  .demo-panel { display:none; }
+  .demo-panel.active { display:block; animation: fadeUp .4s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Demo 1 – Calculator */
+  .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+  .calc-inputs { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); }
+  .input-group { margin-bottom:1.5rem; }
+  .input-group label { display:block; font-size:0.8rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--slate); margin-bottom:.5rem; }
+  .input-row { display:flex; align-items:center; gap:.75rem; }
+  .input-row input[type=number] {
+    flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
+    color:var(--white); font-family:var(--font-mono); font-size:1.1rem; font-weight:500;
+    padding:.6rem 1rem; border-radius:var(--radius-sm); outline:none;
+    transition:border-color .2s;
+  }
+  .input-row input[type=number]:focus { border-color:var(--teal); }
+  .input-icon { font-size:1.5rem; }
+  .calc-btn {
+    width:100%; padding:.75rem; background:var(--teal); color:var(--navy);
+    border:none; border-radius:var(--radius-sm); font-family:var(--font-body);
+    font-size:1rem; font-weight:700; cursor:pointer; transition:opacity .2s, transform .1s;
+    letter-spacing:.03em;
+  }
+  .calc-btn:hover { opacity:.9; transform:translateY(-1px); }
+  .calc-btn:active { transform:translateY(0); }
+
+  .calc-result { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); min-height:260px; }
+  .calc-result-placeholder { display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--slate);gap:.5rem;font-size:.9rem; }
+  .result-ratio-display {
+    text-align:center; padding:1.5rem; border-radius:var(--radius-sm);
+    border:1px solid var(--glass-border); margin-bottom:1rem;
+    background:rgba(255,255,255,0.02);
+  }
+  .result-ratio-num { font-family:var(--font-display); font-size:3rem; font-weight:900; }
+  .result-ratio-label { font-size:.8rem; color:var(--slate); text-transform:uppercase; letter-spacing:.1em; margin-top:.25rem; }
+  .result-badge {
+    display:inline-block; padding:.4rem 1.2rem; border-radius:20px;
+    font-size:0.9rem; font-weight:700; letter-spacing:.04em;
+    margin-top:.5rem;
+  }
+  .result-badge.labor { background:rgba(14,207,176,0.15); color:var(--teal); border:1px solid rgba(14,207,176,0.3); }
+  .result-badge.capital { background:rgba(245,200,66,0.15); color:var(--gold); border:1px solid rgba(245,200,66,0.3); }
+  .calc-formula { font-family:var(--font-mono); font-size:.82rem; color:var(--slate); margin-top:1rem; text-align:center; }
+  .result-bar-wrap { margin-top:1.5rem; }
+  .result-bar-label { display:flex; justify-content:space-between; font-size:.75rem; color:var(--slate); margin-bottom:.4rem; }
+  .result-bar { height:10px; border-radius:20px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .result-bar-fill { height:100%; border-radius:20px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+  .result-bar-fill.labor { background: linear-gradient(90deg, var(--teal), rgba(14,207,176,0.4)); }
+  .result-bar-fill.capital { background: linear-gradient(90deg, var(--gold), rgba(245,200,66,0.4)); }
+
+  /* Demo 2 – Ranking */
+  .ranking-note { font-size:.85rem; color:var(--slate); margin-bottom:1.25rem; }
+  .ranking-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.75rem; }
+  .rank-card {
+    padding:1rem 1.25rem; border-radius:var(--radius-sm); cursor:grab;
+    background:var(--glass); border:1px solid var(--glass-border);
+    transition:all .25s; position:relative; user-select:none;
+  }
+  .rank-card.dragging { opacity:.5; border-color:var(--teal); }
+  .rank-card:hover { border-color:rgba(14,207,176,0.3); transform:translateY(-2px); }
+  .rank-card-name { font-size:.88rem; font-weight:600; color:var(--white); margin-bottom:.5rem; }
+  .rank-card-ratio { font-family:var(--font-mono); font-size:1.1rem; font-weight:700; }
+  .rank-card-bar { height:5px; border-radius:20px; background:rgba(255,255,255,.05); margin-top:.6rem; overflow:hidden; }
+  .rank-card-fill { height:100%; border-radius:20px; }
+  .rank-num { position:absolute; top:8px; right:10px; font-size:.7rem; font-weight:700; opacity:.4; font-family:var(--font-mono); }
+  .sort-btns { display:flex; gap:.75rem; margin-bottom:1.25rem; }
+  .sort-btn {
+    padding:.45rem 1rem; border-radius:20px; font-size:.8rem; font-weight:600;
+    cursor:pointer; font-family:var(--font-body); transition:all .2s;
+    border:1px solid var(--glass-border); background:transparent; color:var(--slate);
+  }
+  .sort-btn:hover { background:var(--teal-dim); color:var(--teal); border-color:rgba(14,207,176,0.3); }
+
+  /* Demo 3 – HO Predictor */
+  .predictor-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+  .pred-panel { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); }
+  .pred-panel h3 { font-size:1rem; font-weight:700; margin-bottom:1.25rem; }
+  .pred-select-group { margin-bottom:1.5rem; }
+  .pred-select-group label { display:block; font-size:.78rem; color:var(--slate); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin-bottom:.5rem; }
+  .pred-select {
+    width:100%; background:rgba(255,255,255,.05); border:1px solid var(--glass-border);
+    color:var(--white); font-family:var(--font-body); font-size:.95rem;
+    padding:.6rem 1rem; border-radius:var(--radius-sm); outline:none; cursor:pointer;
+  }
+  .pred-select:focus { border-color:var(--teal); }
+  .pred-select option { background:var(--navy-mid); }
+
+  .pred-result { padding:2rem; border-radius:var(--radius); min-height:300px; }
+  .pred-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;height:260px;color:var(--slate);gap:.5rem;font-size:.9rem; text-align:center; }
+  .pred-verdict {
+    text-align:center; padding:2rem;
+  }
+  .pred-verdict-icon { font-size:3.5rem; margin-bottom:1rem; }
+  .pred-verdict-action {
+    font-family:var(--font-display); font-size:2rem; font-weight:700; margin-bottom:.5rem;
+  }
+  .pred-verdict-action.export { color:var(--teal); }
+  .pred-verdict-action.import { color:var(--coral); }
+  .pred-explanation { font-size:.9rem; color:var(--slate); line-height:1.7; margin-top:1rem; }
+
+  /* Demo 4 – Simulator */
+  .sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+  .sim-country { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); }
+  .sim-country h3 { font-size:1rem; font-weight:700; margin-bottom:1.5rem; }
+  .sim-slider-group { margin-bottom:1.25rem; }
+  .sim-slider-group label {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:.8rem; color:var(--slate); text-transform:uppercase;
+    letter-spacing:.06em; font-weight:600; margin-bottom:.5rem;
+  }
+  .sim-slider-group label span { font-family:var(--font-mono); font-size:.9rem; color:var(--white); text-transform:none; letter-spacing:0; }
+  input[type=range] {
+    width:100%; appearance:none; background:rgba(255,255,255,.07);
+    height:6px; border-radius:20px; outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--teal); cursor:pointer; transition:transform .15s;
+    box-shadow: 0 0 10px rgba(14,207,176,0.5);
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
+  .sim-result-box {
+    margin-top:1rem; padding:1rem; border-radius:var(--radius-sm);
+    background:rgba(255,255,255,.03); border:1px solid var(--glass-border);
+    text-align:center;
+  }
+  .sim-lk { font-family:var(--font-display); font-size:2rem; font-weight:700; }
+  .sim-lk-label { font-size:.75rem; color:var(--slate); text-transform:uppercase; letter-spacing:.08em; }
+  .sim-class { font-size:.88rem; font-weight:700; margin-top:.5rem; padding:.3rem .8rem; border-radius:20px; display:inline-block; }
+  .sim-class.labor { background:rgba(14,207,176,.15); color:var(--teal); }
+  .sim-class.capital { background:rgba(245,200,66,.15); color:var(--gold); }
+  .sim-comparison {
+    grid-column:1/-1; padding:2rem; border-radius:var(--radius);
+    background:var(--glass); border:1px solid var(--glass-border);
+  }
+  .sim-comparison h3 { font-size:1rem; font-weight:700; margin-bottom:1.5rem; }
+  .trade-flow { display:flex; align-items:center; gap:1rem; }
+  .trade-box { flex:1; padding:1rem; border-radius:var(--radius-sm); text-align:center; }
+  .trade-box h4 { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.5rem; }
+  .trade-box.home { background:rgba(14,207,176,.07); border:1px solid rgba(14,207,176,.2); }
+  .trade-box.foreign { background:rgba(245,200,66,.07); border:1px solid rgba(245,200,66,.2); }
+  .trade-box.home h4 { color:var(--teal); }
+  .trade-box.foreign h4 { color:var(--gold); }
+  .trade-box .exports { font-size:.82rem; color:var(--slate); line-height:1.8; }
+  .trade-arrow { font-size:2rem; opacity:.3; flex-shrink:0; text-align:center; }
+  .trade-arrows-center { display:flex; flex-direction:column; gap:.25rem; align-items:center; }
+
+  /* Demo 5 – World Trade Viz */
+  .world-viz { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); }
+  .world-viz h3 { font-size:1rem; font-weight:700; margin-bottom:1.5rem; }
+  .viz-canvas { position:relative; height:360px; border-radius:var(--radius-sm); background:rgba(255,255,255,.02); border:1px solid var(--glass-border); overflow:hidden; display:flex; align-items:center; justify-content:space-around; padding:2rem; }
+  .viz-country {
+    width:200px; padding:1.5rem; border-radius:var(--radius-sm); text-align:center;
+    position:relative; z-index:2;
+  }
+  .viz-country.labor-c { background:rgba(14,207,176,.08); border:1px solid rgba(14,207,176,.25); }
+  .viz-country.capital-c { background:rgba(245,200,66,.08); border:1px solid rgba(245,200,66,.25); }
+  .viz-country h4 { font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.75rem; }
+  .viz-country.labor-c h4 { color:var(--teal); }
+  .viz-country.capital-c h4 { color:var(--gold); }
+  .viz-goods { display:flex; flex-direction:column; gap:.3rem; }
+  .viz-good { font-size:.78rem; color:var(--slate); background:rgba(255,255,255,.04); padding:.2rem .6rem; border-radius:20px; }
+  .viz-flow-area { flex:1; position:relative; height:100%; display:flex; flex-direction:column; justify-content:center; gap:1rem; }
+  .viz-arrow-row {
+    display:flex; align-items:center; gap:.5rem; font-size:.75rem;
+    animation: flowAnim 3s ease-in-out infinite;
+  }
+  .viz-arrow-row:nth-child(even) { animation-delay:1.5s; }
+  @keyframes flowAnim { 0%,100%{opacity:.3} 50%{opacity:1} }
+  .viz-arrow-row.left-to-right { flex-direction:row; }
+  .viz-arrow-row.right-to-left { flex-direction:row-reverse; }
+  .viz-arrow-line { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--teal),transparent); }
+  .viz-arrow-line.gold { background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .viz-arrow-label { font-size:.7rem; color:var(--slate); white-space:nowrap; }
+  .viz-arrow-end { font-size:1rem; }
+
+  /* ── SECTION 3: EVIDENCE ── */
+  #evidence { background: linear-gradient(180deg, transparent, rgba(245,200,66,0.03) 50%, transparent); }
+
+  .evidence-cards { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+
+  .ev-card { padding:2rem; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border); }
+  .ev-card-full { grid-column:1/-1; }
+  .ev-card h3 {
+    font-family:var(--font-display); font-size:1.2rem; margin-bottom:1.25rem;
+    padding-bottom:.75rem; border-bottom:1px solid var(--glass-border);
+    display:flex; align-items:center; gap:.75rem;
+  }
+  .ev-badge { font-size:.65rem; background:var(--gold-dim); color:var(--gold); border:1px solid rgba(245,200,66,.3); padding:.2rem .5rem; border-radius:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Definition cards */
+  .def-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .def-item { padding:1rem; border-radius:var(--radius-sm); text-align:center; }
+  .def-item:nth-child(1) { background:rgba(14,207,176,.06); border:1px solid rgba(14,207,176,.15); }
+  .def-item:nth-child(2) { background:rgba(14,207,176,.06); border:1px solid rgba(14,207,176,.15); }
+  .def-item:nth-child(3) { background:rgba(245,200,66,.06); border:1px solid rgba(245,200,66,.15); }
+  .def-item:nth-child(4) { background:rgba(245,200,66,.06); border:1px solid rgba(245,200,66,.15); }
+  .def-item:nth-child(5) { background:rgba(255,107,107,.06); border:1px solid rgba(255,107,107,.15); }
+  .def-item:nth-child(6) { background:rgba(255,107,107,.06); border:1px solid rgba(255,107,107,.15); }
+  .def-item h4 { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.4rem; }
+  .def-item:nth-child(1) h4,.def-item:nth-child(2) h4 { color:var(--teal); }
+  .def-item:nth-child(3) h4,.def-item:nth-child(4) h4 { color:var(--gold); }
+  .def-item:nth-child(5) h4,.def-item:nth-child(6) h4 { color:var(--coral); }
+  .def-item p { font-size:.8rem; color:var(--slate); line-height:1.5; }
+
+  /* Factor table */
+  .ev-table-wrap { overflow-x:auto; }
+  .ev-table { width:100%; border-collapse:collapse; font-size:.875rem; }
+  .ev-table th { text-align:left; padding:.75rem 1rem; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--slate); border-bottom:1px solid var(--glass-border); }
+  .ev-table td { padding:.7rem 1rem; border-bottom:1px solid rgba(255,255,255,.04); font-family:var(--font-mono); }
+  .ev-table td:first-child { font-family:var(--font-body); color:var(--white); font-weight:500; }
+  .ev-table tr:hover td { background:rgba(255,255,255,.03); }
+  .ev-table .td-ratio { font-weight:700; }
+  .td-type { font-size:.72rem; padding:.15rem .6rem; border-radius:20px; font-family:var(--font-body); font-weight:600; display:inline-block; }
+  .td-type.labor { background:rgba(14,207,176,.12); color:var(--teal); }
+  .td-type.capital { background:rgba(245,200,66,.12); color:var(--gold); }
+
+  /* Country comparison chart */
+  .country-compare { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+  .country-box { padding:1.5rem; border-radius:var(--radius-sm); }
+  .country-box.home-box { background:rgba(14,207,176,.05); border:1px solid rgba(14,207,176,.2); }
+  .country-box.foreign-box { background:rgba(245,200,66,.05); border:1px solid rgba(245,200,66,.2); }
+  .country-box h4 { font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem; }
+  .country-box.home-box h4 { color:var(--teal); }
+  .country-box.foreign-box h4 { color:var(--gold); }
+  .country-stat-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:.6rem; }
+  .country-stat-key { font-size:.78rem; color:var(--slate); text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+  .country-stat-val { font-family:var(--font-mono); font-weight:700; color:var(--white); }
+  .country-class { margin-top:1rem; text-align:center; padding:.5rem; border-radius:var(--radius-sm); font-size:.88rem; font-weight:700; }
+  .country-class.labor { background:rgba(14,207,176,.12); color:var(--teal); }
+  .country-class.capital { background:rgba(245,200,66,.12); color:var(--gold); }
+  .country-bar-area { margin-top:1rem; }
+  .country-bar-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem; }
+  .country-bar-row span { font-size:.72rem; color:var(--slate); width:50px; flex-shrink:0; }
+  .country-bar-bg { flex:1; height:8px; background:rgba(255,255,255,.06); border-radius:20px; overflow:hidden; }
+  .country-bar-fill { height:100%; border-radius:20px; }
+  .fill-labor { background:var(--teal); }
+  .fill-capital { background:var(--gold); }
+
+  /* Trade predictions */
+  .trade-pred-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+  .trade-pred-box { padding:1.25rem; border-radius:var(--radius-sm); }
+  .trade-pred-box.home-exports { background:rgba(14,207,176,.05); border:1px solid rgba(14,207,176,.2); }
+  .trade-pred-box.foreign-exports { background:rgba(245,200,66,.05); border:1px solid rgba(245,200,66,.2); }
+  .trade-pred-box h4 { font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:1rem; }
+  .trade-pred-box.home-exports h4 { color:var(--teal); }
+  .trade-pred-box.foreign-exports h4 { color:var(--gold); }
+  .trade-pred-box ul { list-style:none; }
+  .trade-pred-box ul li { font-size:.9rem; color:var(--slate); padding:.3rem 0; display:flex; align-items:center; gap:.5rem; }
+  .trade-pred-box ul li::before { content:'↗'; opacity:.6; }
+
+  /* HO Flow */
+  .ho-flow { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
+  .ho-step { padding:1rem 1.5rem; border-radius:var(--radius-sm); text-align:center; min-width:140px; }
+  .ho-step:nth-child(odd) { background:rgba(14,207,176,.07); border:1px solid rgba(14,207,176,.2); }
+  .ho-step h4 { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--teal); margin-bottom:.3rem; }
+  .ho-step p { font-size:.8rem; color:var(--slate); }
+  .ho-arrow { font-size:1.5rem; opacity:.3; padding:0 .25rem; }
+
+  /* ── SECTION 4: LEARN ── */
+  #learn { background: rgba(17,24,39,0.5); }
+
+  .learn-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+  .learn-card { padding:2.5rem 2rem; border-radius:var(--radius); position:relative; overflow:hidden; }
+  .learn-card::before { content:''; position:absolute; inset:0; opacity:.05; }
+  .learn-card.knowledge { background:linear-gradient(135deg,rgba(14,207,176,.1),rgba(14,207,176,.03)); border:1px solid rgba(14,207,176,.2); }
+  .learn-card.skills    { background:linear-gradient(135deg,rgba(245,200,66,.1),rgba(245,200,66,.03)); border:1px solid rgba(245,200,66,.2); }
+  .learn-card.reflect   { background:linear-gradient(135deg,rgba(255,107,107,.1),rgba(255,107,107,.03)); border:1px solid rgba(255,107,107,.2); }
+  .learn-card-icon { font-size:2.5rem; margin-bottom:1.25rem; display:block; }
+  .learn-card h3 { font-family:var(--font-display); font-size:1.5rem; margin-bottom:1rem; }
+  .learn-card.knowledge h3 { color:var(--teal); }
+  .learn-card.skills h3    { color:var(--gold); }
+  .learn-card.reflect h3   { color:var(--coral); }
+  .learn-list { list-style:none; }
+  .learn-list li { font-size:.9rem; color:var(--slate); padding:.3rem 0; display:flex; align-items:center; gap:.6rem; }
+  .learn-list li::before { content:'▸'; flex-shrink:0; opacity:.6; }
+  .learn-card.knowledge .learn-list li::before { color:var(--teal); }
+  .learn-card.skills    .learn-list li::before { color:var(--gold); }
+  .learn-card.reflect   .learn-list li::before { color:var(--coral); }
+  .learn-card p { font-size:.9rem; color:var(--slate); line-height:1.7; margin-bottom:.75rem; }
+  .learn-card p:last-child { margin-bottom:0; }
+
+  /* ── COUNTERS ── */
+  .counters-strip {
+    padding:3rem 2rem; background:rgba(14,207,176,.04); border-top:1px solid var(--glass-border); border-bottom:1px solid var(--glass-border);
+  }
+  .counters-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-around; flex-wrap:wrap; gap:2rem; }
+  .counter-item { text-align:center; }
+  .counter-num { font-family:var(--font-display); font-size:3rem; font-weight:900; color:var(--teal); }
+  .counter-label { font-size:.78rem; color:var(--slate); text-transform:uppercase; letter-spacing:.1em; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding:3rem 2rem;
+    background:rgba(10,15,30,.8); border-top:1px solid var(--glass-border);
+    text-align:center;
+  }
+  footer .footer-name { font-family:var(--font-display); font-size:1.5rem; color:var(--teal); margin-bottom:.25rem; }
+  footer .footer-sub { font-size:.85rem; color:var(--slate); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px) {
+    .nav-links { display:none; }
+    .overview-grid,.calc-grid,.predictor-grid,.sim-grid,.country-compare,.trade-pred-grid,.learn-grid,.def-grid { grid-template-columns:1fr; }
+    .evidence-cards { grid-template-columns:1fr; }
+    .why-grid { grid-template-columns:1fr 1fr; }
+    .sim-comparison { grid-column:auto; }
+    .ev-card-full { grid-column:auto; }
+    .ho-flow { flex-direction:column; }
+    .ho-arrow { transform:rotate(90deg); }
+    .viz-canvas { flex-direction:column; height:auto; gap:1rem; }
+    .viz-flow-area { height:60px; flex-direction:row; }
+  }
+</style>
+</head>
+<body>
+<div class="hero-bg">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+      Resource Abundance Lab
+    </a>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#demos">Demos</a></li>
+      <li><a href="#evidence">Evidence</a></li>
+      <li><a href="#learn">Reflection</a></li>
+    </ul>
+    <span class="nav-badge">Hasan Osiul</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Economics Portfolio Project</div>
+    <h1>Resource Abundance<br>& <em>Trade Patterns</em> Lab</h1>
+    <p class="hero-sub">An interactive exploration of the Heckscher-Ohlin Theory — how factor endowments shape international trade and global specialization.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num" data-count="10">0</span>
+        <span class="hero-stat-label">Trade Goods Analyzed</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" data-count="5">0</span>
+        <span class="hero-stat-label">Interactive Demos</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" data-count="2">0</span>
+        <span class="hero-stat-label">Country Profiles</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    scroll to explore
+  </div>
+</section>
+
+<!-- SECTION 1 -->
+<section id="overview">
+  <div class="container">
+    <div class="section-label"><span></span>Section 01</div>
+    <h2 class="section-title">Project Overview</h2>
+    <p class="section-subtitle">Based on the "Resource Abundance and Trade Patterns Lab" classroom activity — exploring why countries specialize and trade the way they do.</p>
+
+    <div class="ho-theory glass reveal">
+      <div class="ho-theory-icon">⚖️</div>
+      <div>
+        <h3>The Heckscher-Ohlin Theory</h3>
+        <p>Countries export products that intensively use the factors of production they possess abundantly. If a country has abundant labor, it tends to export labor-intensive goods. If it has abundant capital, it tends to export capital-intensive goods.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid reveal">
+      <div class="concept-card labor glass">
+        <span class="concept-card-icon">👷</span>
+        <h3>Labor-Intensive Goods</h3>
+        <p>Goods requiring large amounts of human labor relative to machinery or capital investment.</p>
+        <ul>
+          <li>Textiles</li>
+          <li>Footwear</li>
+          <li>Hand-sewn Apparel</li>
+          <li>Call Center Services</li>
+        </ul>
+      </div>
+      <div class="concept-card capital glass">
+        <span class="concept-card-icon">🏭</span>
+        <h3>Capital-Intensive Goods</h3>
+        <p>Goods requiring large amounts of machinery, technology, and financial investment.</p>
+        <ul>
+          <li>Semiconductors</li>
+          <li>Luxury Watches</li>
+          <li>Steel</li>
+          <li>Smartphones</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      "Countries export what uses their abundant resources."
+    </div>
+
+    <div class="why-grid reveal">
+      <div class="why-card glass">
+        <div class="why-card-icon">🌐</div>
+        <h4>Trade Patterns</h4>
+        <p>Explains why different countries trade what they trade</p>
+      </div>
+      <div class="why-card glass">
+        <div class="why-card-icon">🎯</div>
+        <h4>Specialization</h4>
+        <p>Guides global production specialization decisions</p>
+      </div>
+      <div class="why-card glass">
+        <div class="why-card-icon">📈</div>
+        <h4>Comparative Advantage</h4>
+        <p>Reveals comparative production advantages between nations</p>
+      </div>
+      <div class="why-card glass">
+        <div class="why-card-icon">🚀</div>
+        <h4>Development</h4>
+        <p>Informs economic development and industrialization paths</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COUNTERS -->
+<div class="counters-strip">
+  <div class="counters-inner">
+    <div class="counter-item"><div class="counter-num" data-count="10">0</div><div class="counter-label">Goods Classified</div></div>
+    <div class="counter-item"><div class="counter-num" data-count="2000">0</div><div class="counter-label">Home Country Labor</div></div>
+    <div class="counter-item"><div class="counter-num" data-count="8000">0</div><div class="counter-label">Foreign Capital</div></div>
+    <div class="counter-item"><div class="counter-num" data-count="5">0</div><div class="counter-label">Home L/K Ratio</div></div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<section id="demos">
+  <div class="container">
+    <div class="section-label"><span></span>Section 02</div>
+    <h2 class="section-title">Interactive Demonstrations</h2>
+    <p class="section-subtitle">Five interactive tools to explore Heckscher-Ohlin theory in action.</p>
+
+    <div class="demo-tabs">
+      <button class="demo-tab active" onclick="switchDemo(0)">🧮 L/K Calculator</button>
+      <button class="demo-tab" onclick="switchDemo(1)">📊 Product Ranking</button>
+      <button class="demo-tab" onclick="switchDemo(2)">🔮 H-O Predictor</button>
+      <button class="demo-tab" onclick="switchDemo(3)">🌍 Country Simulator</button>
+      <button class="demo-tab" onclick="switchDemo(4)">📡 Trade Visualization</button>
+    </div>
+
+    <!-- Demo 1 -->
+    <div class="demo-panel active" id="demo-0">
+      <div class="calc-grid">
+        <div class="calc-inputs">
+          <h3 style="font-size:1.1rem;margin-bottom:1.5rem;font-family:var(--font-display);">Labor-to-Capital Ratio Calculator</h3>
+          <p style="font-size:.85rem;color:var(--slate);margin-bottom:1.5rem;">Enter capital and labor units to calculate the L/K ratio and determine factor intensity.</p>
+          <div class="input-group">
+            <label>Capital Units (K)</label>
+            <div class="input-row">
+              <span class="input-icon">🏭</span>
+              <input type="number" id="calc-k" placeholder="e.g. 80" min="1" value="">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Labor Units (L)</label>
+            <div class="input-row">
+              <span class="input-icon">👷</span>
+              <input type="number" id="calc-l" placeholder="e.g. 20" min="1" value="">
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calculateRatio()">Calculate L/K Ratio →</button>
+        </div>
+        <div class="calc-result glass" id="calc-output">
+          <div class="calc-result-placeholder">
+            <span style="font-size:2.5rem">🧮</span>
+            <span>Enter values and click Calculate</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo 2 -->
+    <div class="demo-panel" id="demo-1">
+      <div style="margin-bottom:1.5rem;">
+        <h3 style="font-size:1.1rem;margin-bottom:.5rem;font-family:var(--font-display);">Interactive Product Ranking Tool</h3>
+        <p class="ranking-note">Products sorted from most labor-intensive to most capital-intensive. Use the buttons to re-sort.</p>
+        <div class="sort-btns">
+          <button class="sort-btn" onclick="sortRanking('labor')">↑ Most Labor-Intensive First</button>
+          <button class="sort-btn" onclick="sortRanking('capital')">↓ Most Capital-Intensive First</button>
+          <button class="sort-btn" onclick="sortRanking('alpha')">A-Z Alphabetical</button>
+        </div>
+      </div>
+      <div class="ranking-grid" id="ranking-grid"></div>
+    </div>
+
+    <!-- Demo 3 -->
+    <div class="demo-panel" id="demo-2">
+      <div class="predictor-grid">
+        <div class="pred-panel glass">
+          <h3>🔮 Heckscher-Ohlin Trade Predictor</h3>
+          <div class="pred-select-group">
+            <label>Country Type</label>
+            <select class="pred-select" id="pred-country" onchange="runPredictor()">
+              <option value="">— Select country type —</option>
+              <option value="labor">Labor-Abundant Country</option>
+              <option value="capital">Capital-Abundant Country</option>
+            </select>
+          </div>
+          <div class="pred-select-group">
+            <label>Select Product</label>
+            <select class="pred-select" id="pred-product" onchange="runPredictor()">
+              <option value="">— Select a product —</option>
+              <option value="Semiconductors">Semiconductors (L/K = 0.25)</option>
+              <option value="Petrodollars">Petrodollars (L/K = 0.05)</option>
+              <option value="Luxury Watches">Luxury Watches (L/K = 0.67)</option>
+              <option value="Steel">Steel (L/K = 0.43)</option>
+              <option value="Smartphones">Smartphones (L/K = 1.00)</option>
+              <option value="Wheat">Wheat (L/K = 1.50)</option>
+              <option value="Textiles">Textiles (L/K = 3.00)</option>
+              <option value="Hand-sewn Apparel">Hand-sewn Apparel (L/K = 9.00)</option>
+              <option value="Footwear">Footwear (L/K = 4.00)</option>
+              <option value="Call Center Services">Call Center Services (L/K = 5.67)</option>
+            </select>
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,.03);border-radius:var(--radius-sm);font-size:.82rem;color:var(--slate);">
+            <strong style="color:var(--white);">How it works:</strong> The predictor compares the product's factor intensity to the country's resource abundance. A labor-abundant country will likely <em>export</em> labor-intensive goods and <em>import</em> capital-intensive ones.
+          </div>
+        </div>
+        <div class="pred-result glass" id="pred-output">
+          <div class="pred-empty">
+            <span style="font-size:3rem">🔮</span>
+            <span>Select a country type and product<br>to see the H-O prediction</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo 4 -->
+    <div class="demo-panel" id="demo-3">
+      <div class="sim-grid">
+        <div class="sim-country glass">
+          <h3>🏠 Home Country</h3>
+          <div class="sim-slider-group">
+            <label>Labor Units <span id="home-l-val">10000</span></label>
+            <input type="range" min="1000" max="20000" step="500" value="10000" id="home-l" oninput="updateSim()">
+          </div>
+          <div class="sim-slider-group">
+            <label>Capital Units <span id="home-k-val">2000</span></label>
+            <input type="range" min="500" max="15000" step="500" value="2000" id="home-k" oninput="updateSim()">
+          </div>
+          <div class="sim-result-box">
+            <div class="sim-lk" id="home-lk">5.00</div>
+            <div class="sim-lk-label">L/K Ratio</div>
+            <div class="sim-class labor" id="home-class">Labor-Abundant</div>
+          </div>
+        </div>
+        <div class="sim-country glass">
+          <h3>🌍 Foreign Country</h3>
+          <div class="sim-slider-group">
+            <label>Labor Units <span id="foreign-l-val">16000</span></label>
+            <input type="range" min="1000" max="20000" step="500" value="16000" id="foreign-l" oninput="updateSim()">
+          </div>
+          <div class="sim-slider-group">
+            <label>Capital Units <span id="foreign-k-val">8000</span></label>
+            <input type="range" min="500" max="15000" step="500" value="8000" id="foreign-k" oninput="updateSim()">
+          </div>
+          <div class="sim-result-box">
+            <div class="sim-lk" id="foreign-lk">2.00</div>
+            <div class="sim-lk-label">L/K Ratio</div>
+            <div class="sim-class capital" id="foreign-class">Capital-Abundant</div>
+          </div>
+        </div>
+        <div class="sim-comparison glass" style="grid-column:1/-1;">
+          <h3>Predicted Trade Pattern</h3>
+          <div class="trade-flow" id="sim-trade-flow">
+            <div class="trade-box home">
+              <h4>🏠 Home Exports</h4>
+              <div class="exports" id="sim-home-exports">Textiles<br>Footwear<br>Apparel<br>Call Center Services</div>
+            </div>
+            <div class="trade-arrows-center">
+              <div style="font-size:.7rem;color:var(--slate);margin-bottom:.3rem;">HOME→FOREIGN</div>
+              <div class="trade-arrow">⇄</div>
+              <div style="font-size:.7rem;color:var(--slate);margin-top:.3rem;">FOREIGN→HOME</div>
+            </div>
+            <div class="trade-box foreign">
+              <h4>🌍 Foreign Exports</h4>
+              <div class="exports" id="sim-foreign-exports">Semiconductors<br>Steel<br>Luxury Watches<br>Petrodollars</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo 5 -->
+    <div class="demo-panel" id="demo-4">
+      <div class="world-viz glass">
+        <h3>🌐 Global Trade Flow Visualization</h3>
+        <p style="font-size:.85rem;color:var(--slate);margin-bottom:1.5rem;">Animated trade flows between labor-abundant and capital-abundant countries based on the Heckscher-Ohlin model.</p>
+        <div class="viz-canvas">
+          <div class="viz-country labor-c">
+            <h4>Labor-Abundant Country</h4>
+            <div class="viz-goods">
+              <div class="viz-good">📦 Textiles</div>
+              <div class="viz-good">👟 Footwear</div>
+              <div class="viz-good">🧵 Hand-sewn Apparel</div>
+              <div class="viz-good">📞 Call Center Services</div>
+              <div class="viz-good">🌾 Wheat</div>
+            </div>
+          </div>
+          <div class="viz-flow-area">
+            <div class="viz-arrow-row left-to-right">
+              <div class="viz-arrow-end">→</div>
+              <div class="viz-arrow-line"></div>
+              <div class="viz-arrow-label">Exports: Labor-Intensive Goods</div>
+              <div class="viz-arrow-end">→</div>
+            </div>
+            <div class="viz-arrow-row right-to-left">
+              <div class="viz-arrow-end">←</div>
+              <div class="viz-arrow-line gold"></div>
+              <div class="viz-arrow-label">Exports: Capital-Intensive Goods</div>
+              <div class="viz-arrow-end">←</div>
+            </div>
+          </div>
+          <div class="viz-country capital-c">
+            <h4>Capital-Abundant Country</h4>
+            <div class="viz-goods">
+              <div class="viz-good">💻 Semiconductors</div>
+              <div class="viz-good">⚙️ Steel</div>
+              <div class="viz-good">⌚ Luxury Watches</div>
+              <div class="viz-good">📱 Smartphones</div>
+              <div class="viz-good">🛢️ Petrodollars</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 -->
+<section id="evidence">
+  <div class="container">
+    <div class="section-label"><span></span>Section 03</div>
+    <h2 class="section-title">Evidence From Course Activity</h2>
+    <p class="section-subtitle">Recreated spreadsheet data, country analysis, and trade predictions from the classroom lab.</p>
+
+    <div class="evidence-cards">
+      <!-- Card 1 -->
+      <div class="ev-card glass reveal">
+        <h3>📚 Key Definitions <span class="ev-badge">CONCEPTUAL</span></h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <h4>Factor Intensity</h4>
+            <p>The relative amount of labor and capital needed to produce a good</p>
+          </div>
+          <div class="def-item">
+            <h4>Labor-Intensive</h4>
+            <p>Goods requiring large amounts of labor relative to capital</p>
+          </div>
+          <div class="def-item">
+            <h4>Capital-Intensive</h4>
+            <p>Goods needing significant machinery, technology, and investment</p>
+          </div>
+          <div class="def-item">
+            <h4>Factor Endowment</h4>
+            <p>Total amount of labor and capital available within a country</p>
+          </div>
+          <div class="def-item">
+            <h4>Labor-Abundant</h4>
+            <p>Country with a high L/K ratio — more workers relative to capital</p>
+          </div>
+          <div class="def-item">
+            <h4>Capital-Abundant</h4>
+            <p>Country with a low L/K ratio — more capital relative to workers</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="ev-card glass reveal">
+        <h3>🏛️ Country Endowment Analysis <span class="ev-badge">ACTIVITY DATA</span></h3>
+        <div class="country-compare">
+          <div class="country-box home-box">
+            <h4>Home Country</h4>
+            <div class="country-stat-row"><span class="country-stat-key">Capital (K)</span><span class="country-stat-val">2,000</span></div>
+            <div class="country-stat-row"><span class="country-stat-key">Labor (L)</span><span class="country-stat-val">10,000</span></div>
+            <div class="country-stat-row"><span class="country-stat-key">L/K Ratio</span><span class="country-stat-val" style="color:var(--teal)">5.00</span></div>
+            <div class="country-bar-area">
+              <div class="country-bar-row"><span>Labor</span><div class="country-bar-bg"><div class="country-bar-fill fill-labor" style="width:83%"></div></div></div>
+              <div class="country-bar-row"><span>Capital</span><div class="country-bar-bg"><div class="country-bar-fill fill-capital" style="width:17%"></div></div></div>
+            </div>
+            <div class="country-class labor">✓ Labor-Abundant</div>
+          </div>
+          <div class="country-box foreign-box">
+            <h4>Foreign Country</h4>
+            <div class="country-stat-row"><span class="country-stat-key">Capital (K)</span><span class="country-stat-val">8,000</span></div>
+            <div class="country-stat-row"><span class="country-stat-key">Labor (L)</span><span class="country-stat-val">16,000</span></div>
+            <div class="country-stat-row"><span class="country-stat-key">L/K Ratio</span><span class="country-stat-val" style="color:var(--gold)">2.00</span></div>
+            <div class="country-bar-area">
+              <div class="country-bar-row"><span>Labor</span><div class="country-bar-bg"><div class="country-bar-fill fill-labor" style="width:67%"></div></div></div>
+              <div class="country-bar-row"><span>Capital</span><div class="country-bar-bg"><div class="country-bar-fill fill-capital" style="width:33%"></div></div></div>
+            </div>
+            <div class="country-class capital">✓ Capital-Abundant</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 - Full width -->
+      <div class="ev-card ev-card-full glass reveal">
+        <h3>📊 Factor Intensity Table <span class="ev-badge">SPREADSHEET DATA</span></h3>
+        <div class="ev-table-wrap">
+          <table class="ev-table">
+            <thead>
+              <tr>
+                <th>Good</th>
+                <th>Capital (K)</th>
+                <th>Labor (L)</th>
+                <th>L/K Ratio</th>
+                <th>Classification</th>
+              </tr>
+            </thead>
+            <tbody id="evidence-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="ev-card glass reveal">
+        <h3>↗️ Predicted Trade Patterns <span class="ev-badge">ACTIVITY RESULTS</span></h3>
+        <div class="trade-pred-grid">
+          <div class="trade-pred-box home-exports">
+            <h4>🏠 Home Country Exports</h4>
+            <ul>
+              <li>Textiles</li>
+              <li>Hand-sewn Apparel</li>
+              <li>Footwear</li>
+              <li>Call Center Services</li>
+              <li>Wheat</li>
+            </ul>
+          </div>
+          <div class="trade-pred-box foreign-exports">
+            <h4>🌍 Foreign Country Exports</h4>
+            <ul>
+              <li>Semiconductors</li>
+              <li>Steel</li>
+              <li>Luxury Watches</li>
+              <li>Petrodollars</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="ev-card glass reveal">
+        <h3>🔄 Heckscher-Ohlin Model Flow <span class="ev-badge">CONCEPTUAL</span></h3>
+        <div class="ho-flow">
+          <div class="ho-step">
+            <h4>Factor Endowment</h4>
+            <p>Available labor & capital</p>
+          </div>
+          <div class="ho-arrow">→</div>
+          <div class="ho-step">
+            <h4>Resource Abundance</h4>
+            <p>Relative L/K ratio</p>
+          </div>
+          <div class="ho-arrow">→</div>
+          <div class="ho-step">
+            <h4>Specialization</h4>
+            <p>Focus on goods using abundant factors</p>
+          </div>
+          <div class="ho-arrow">→</div>
+          <div class="ho-step">
+            <h4>Exports</h4>
+            <p>Send surplus goods abroad</p>
+          </div>
+          <div class="ho-arrow">→</div>
+          <div class="ho-step">
+            <h4>International Trade</h4>
+            <p>Global exchange of goods</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 -->
+<section id="learn">
+  <div class="container">
+    <div class="section-label"><span></span>Section 04</div>
+    <h2 class="section-title">What Did I Learn?</h2>
+    <p class="section-subtitle">A three-dimensional reflection on knowledge gained, skills developed, and surprising insights.</p>
+    <div class="learn-grid reveal">
+      <div class="learn-card knowledge">
+        <span class="learn-card-icon">🧠</span>
+        <h3>Knowledge</h3>
+        <ul class="learn-list">
+          <li>Heckscher-Ohlin Theory fundamentals</li>
+          <li>Factor abundance and scarcity</li>
+          <li>Factor intensity measurement (L/K)</li>
+          <li>Labor-intensive vs. capital-intensive production</li>
+          <li>Trade specialization principles</li>
+          <li>How endowments drive export patterns</li>
+        </ul>
+      </div>
+      <div class="learn-card skills">
+        <span class="learn-card-icon">⚡</span>
+        <h3>Skills</h3>
+        <ul class="learn-list">
+          <li>Economic data analysis</li>
+          <li>Spreadsheet L/K calculations</li>
+          <li>Interpreting factor ratios</li>
+          <li>Critical thinking about trade</li>
+          <li>Predicting trade patterns</li>
+          <li>Visualizing economic concepts</li>
+        </ul>
+      </div>
+      <div class="learn-card reflect">
+        <span class="learn-card-icon">💡</span>
+        <h3>Reflection</h3>
+        <p>Countries do not always trade because they are <em>better</em> at producing something. Trade occurs because countries have different resource endowments — a fascinating insight.</p>
+        <p>I was surprised by how accurately a simple L/K ratio can predict real-world trade patterns.</p>
+        <p><strong style="color:var(--coral)">Real-world applications:</strong> Global manufacturing, international business, trade policy, economic development, and labor markets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Hasan Osiul</div>
+  <div class="footer-sub">Economics Portfolio Project · Resource Abundance and Trade Patterns Lab</div>
+</footer>
+
+<script>
+  // ── DATA ──
+  const products = [
+    { name:"Semiconductors",       capital:80, labor:20,  lk:0.25  },
+    { name:"Petrodollars",         capital:95, labor:5,   lk:0.05  },
+    { name:"Luxury Watches",       capital:60, labor:40,  lk:0.67  },
+    { name:"Steel",                capital:70, labor:30,  lk:0.43  },
+    { name:"Smartphones",          capital:50, labor:50,  lk:1.00  },
+    { name:"Wheat",                capital:40, labor:60,  lk:1.50  },
+    { name:"Textiles",             capital:25, labor:75,  lk:3.00  },
+    { name:"Hand-sewn Apparel",    capital:10, labor:90,  lk:9.00  },
+    { name:"Footwear",             capital:20, labor:80,  lk:4.00  },
+    { name:"Call Center Services", capital:15, labor:85,  lk:5.67  },
+  ];
+
+  const LABOR_THRESHOLD = 1.5; // L/K > 1.5 → labor-intensive
+
+  // ── DEMO 1: Calculator ──
+  function calculateRatio() {
+    const K = parseFloat(document.getElementById('calc-k').value);
+    const L = parseFloat(document.getElementById('calc-l').value);
+    const out = document.getElementById('calc-output');
+    if (!K || !L || K <= 0 || L <= 0) {
+      out.innerHTML = `<div class="calc-result-placeholder"><span style="font-size:2rem">⚠️</span><span>Please enter valid positive numbers</span></div>`;
+      return;
+    }
+    const ratio = (L / K).toFixed(2);
+    const isLabor = ratio >= LABOR_THRESHOLD;
+    const pctLabor = Math.min(100, Math.round((L / (L + K)) * 100));
+    const pctCapital = 100 - pctLabor;
+    const color = isLabor ? 'var(--teal)' : 'var(--gold)';
+    out.innerHTML = `
+      <div class="result-ratio-display">
+        <div class="result-ratio-num" style="color:${color}">${ratio}</div>
+        <div class="result-ratio-label">L/K Ratio (Labor / Capital)</div>
+        <div>
+          <span class="result-badge ${isLabor ? 'labor' : 'capital'}">${isLabor ? '👷 Labor-Intensive' : '🏭 Capital-Intensive'}</span>
+        </div>
+      </div>
+      <div class="calc-formula">L/K = ${L} ÷ ${K} = ${ratio}</div>
+      <div class="result-bar-wrap">
+        <div class="result-bar-label"><span>Labor ${L}</span><span>Capital ${K}</span></div>
+        <div class="result-bar">
+          <div class="result-bar-fill labor" id="rbar-l" style="width:0%"></div>
+        </div>
+        <div style="margin-top:.5rem;" class="result-bar">
+          <div class="result-bar-fill capital" id="rbar-k" style="width:0%"></div>
+        </div>
+        <div class="result-bar-label" style="margin-top:.3rem;"><span>Labor %</span><span>Capital %</span></div>
+        <p style="font-size:.78rem;color:var(--slate);margin-top:.75rem;">
+          ${isLabor 
+            ? `With an L/K ratio of <strong>${ratio}</strong> (≥ ${LABOR_THRESHOLD}), this good is <strong style="color:var(--teal)">labor-intensive</strong>. Countries with abundant labor would likely export this.`
+            : `With an L/K ratio of <strong>${ratio}</strong> (< ${LABOR_THRESHOLD}), this good is <strong style="color:var(--gold)">capital-intensive</strong>. Countries with abundant capital would likely export this.`
+          }
+        </p>
+      </div>
+    `;
+    setTimeout(() => {
+      const lbar = document.getElementById('rbar-l');
+      const kbar = document.getElementById('rbar-k');
+      if (lbar) lbar.style.width = pctLabor + '%';
+      if (kbar) kbar.style.width = pctCapital + '%';
+    }, 50);
+  }
+
+  // ── DEMO 2: Ranking ──
+  let rankData = [...products].sort((a,b) => b.lk - a.lk);
+  const maxLK = Math.max(...products.map(p => p.lk));
+
+  function renderRanking() {
+    const grid = document.getElementById('ranking-grid');
+    grid.innerHTML = '';
+    rankData.forEach((p, i) => {
+      const isLabor = p.lk >= LABOR_THRESHOLD;
+      const pct = Math.min(100, Math.round((p.lk / maxLK) * 100));
+      const color = isLabor ? 'var(--teal)' : 'var(--gold)';
+      const card = document.createElement('div');
+      card.className = 'rank-card glass';
+      card.innerHTML = `
+        <div class="rank-num">#${i+1}</div>
+        <div class="rank-card-name">${p.name}</div>
+        <div class="rank-card-ratio" style="color:${color}">L/K: ${p.lk}</div>
+        <div style="font-size:.72rem;color:var(--slate);margin-top:.2rem;">${isLabor ? '👷 Labor-Intensive' : '🏭 Capital-Intensive'}</div>
+        <div class="rank-card-bar">
+          <div class="rank-card-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function sortRanking(mode) {
+    if (mode === 'labor') rankData = [...products].sort((a,b) => b.lk - a.lk);
+    else if (mode === 'capital') rankData = [...products].sort((a,b) => a.lk - b.lk);
+    else rankData = [...products].sort((a,b) => a.name.localeCompare(b.name));
+    renderRanking();
+  }
+
+  // ── DEMO 3: Predictor ──
+  const productData = {};
+  products.forEach(p => productData[p.name] = p.lk);
+
+  function runPredictor() {
+    const country = document.getElementById('pred-country').value;
+    const product = document.getElementById('pred-product').value;
+    const out = document.getElementById('pred-output');
+    if (!country || !product) {
+      out.innerHTML = `<div class="pred-empty"><span style="font-size:3rem">🔮</span><span>Select a country type and product<br>to see the H-O prediction</span></div>`;
+      return;
+    }
+    const lk = productData[product];
+    const isProductLabor = lk >= LABOR_THRESHOLD;
+    const isCountryLabor = country === 'labor';
+    const willExport = (isProductLabor && isCountryLabor) || (!isProductLabor && !isCountryLabor);
+    const action = willExport ? 'EXPORT' : 'IMPORT';
+    const actionColor = willExport ? 'var(--teal)' : 'var(--coral)';
+    const icon = willExport ? '📤' : '📥';
+    const productType = isProductLabor ? 'labor-intensive' : 'capital-intensive';
+    const countryType = isCountryLabor ? 'labor-abundant' : 'capital-abundant';
+    const explanation = willExport
+      ? `This country is <strong style="color:var(--teal)">${countryType}</strong> and ${product} is a <strong style="color:var(--teal)">${productType}</strong> good. According to the Heckscher-Ohlin Theory, this country will EXPORT ${product} because it aligns with their resource abundance.`
+      : `This country is <strong style="color:var(--gold)">${countryType}</strong> but ${product} is a <strong style="color:var(--coral)">${productType}</strong> good. According to the Heckscher-Ohlin Theory, this country will IMPORT ${product} because it doesn't match their resource abundance.`;
+    out.innerHTML = `
+      <div class="pred-verdict">
+        <div class="pred-verdict-icon">${icon}</div>
+        <div style="font-size:.85rem;color:var(--slate);margin-bottom:.5rem;">${countryType.toUpperCase()} + ${product.toUpperCase()}</div>
+        <div class="pred-verdict-action ${willExport ? 'export' : 'import'}">${action}</div>
+        <div style="font-size:.78rem;color:var(--slate);">Likely trade action</div>
+        <div class="pred-explanation">${explanation}</div>
+        <div style="margin-top:1rem;padding:.75rem;background:rgba(255,255,255,.03);border-radius:var(--radius-sm);font-size:.78rem;color:var(--slate);">
+          Product L/K Ratio: <strong style="color:var(--white)">${lk}</strong> · 
+          ${isProductLabor ? '👷 Labor-Intensive' : '🏭 Capital-Intensive'}
+        </div>
+      </div>
+    `;
+  }
+
+  // ── DEMO 4: Simulator ──
+  const laborGoods = ["Textiles","Hand-sewn Apparel","Footwear","Call Center Services","Wheat"];
+  const capitalGoods = ["Semiconductors","Steel","Luxury Watches","Petrodollars"];
+
+  function updateSim() {
+    const hl = parseInt(document.getElementById('home-l').value);
+    const hk = parseInt(document.getElementById('home-k').value);
+    const fl = parseInt(document.getElementById('foreign-l').value);
+    const fk = parseInt(document.getElementById('foreign-k').value);
+    document.getElementById('home-l-val').textContent = hl.toLocaleString();
+    document.getElementById('home-k-val').textContent = hk.toLocaleString();
+    document.getElementById('foreign-l-val').textContent = fl.toLocaleString();
+    document.getElementById('foreign-k-val').textContent = fk.toLocaleString();
+    const hlk = (hl / hk).toFixed(2);
+    const flk = (fl / fk).toFixed(2);
+    const homeIsLabor = parseFloat(hlk) > parseFloat(flk);
+    document.getElementById('home-lk').textContent = hlk;
+    document.getElementById('foreign-lk').textContent = flk;
+    const hClass = document.getElementById('home-class');
+    const fClass = document.getElementById('foreign-class');
+    hClass.textContent = homeIsLabor ? 'Labor-Abundant' : 'Capital-Abundant';
+    hClass.className = 'sim-class ' + (homeIsLabor ? 'labor' : 'capital');
+    fClass.textContent = homeIsLabor ? 'Capital-Abundant' : 'Labor-Abundant';
+    fClass.className = 'sim-class ' + (homeIsLabor ? 'capital' : 'labor');
+    document.getElementById('sim-home-exports').innerHTML = homeIsLabor
+      ? laborGoods.join('<br>') : capitalGoods.join('<br>');
+    document.getElementById('sim-foreign-exports').innerHTML = homeIsLabor
+      ? capitalGoods.join('<br>') : laborGoods.join('<br>');
+  }
+
+  // ── DEMO TABS ──
+  function switchDemo(idx) {
+    document.querySelectorAll('.demo-panel').forEach((p,i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.demo-tab').forEach((t,i) => {
+      t.classList.toggle('active', i === idx);
+    });
+  }
+
+  // ── EVIDENCE TABLE ──
+  function buildEvidenceTable() {
+    const tbody = document.getElementById('evidence-table-body');
+    if (!tbody) return;
+    const sorted = [...products].sort((a,b) => b.lk - a.lk);
+    tbody.innerHTML = sorted.map(p => {
+      const isLabor = p.lk >= LABOR_THRESHOLD;
+      const barPct = Math.min(100, Math.round((p.lk / maxLK) * 100));
+      const barColor = isLabor ? 'var(--teal)' : 'var(--gold)';
+      return `<tr>
+        <td>${p.name}</td>
+        <td style="color:var(--gold)">${p.capital}</td>
+        <td style="color:var(--teal)">${p.labor}</td>
+        <td class="td-ratio" style="color:${barColor}">${p.lk.toFixed(2)}
+          <div style="width:60px;height:4px;background:rgba(255,255,255,.06);border-radius:20px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px">
+            <div style="width:${barPct}%;height:100%;background:${barColor};border-radius:20px"></div>
+          </div>
+        </td>
+        <td><span class="td-type ${isLabor ? 'labor' : 'capital'}">${isLabor ? '👷 Labor-Intensive' : '🏭 Capital-Intensive'}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── ANIMATED COUNTERS ──
+  function animateCounter(el, target, duration) {
+    const start = performance.now();
+    const update = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(eased * target).toLocaleString();
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  // ── SCROLL REVEAL ──
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── COUNTER OBSERVER ──
+  let countersTriggered = false;
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !countersTriggered) {
+        countersTriggered = true;
+        // Hero counters
+        document.querySelectorAll('[data-count]').forEach(el => {
+          animateCounter(el, parseInt(el.dataset.count), 1800);
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const cs = document.querySelector('.counters-strip');
+  if (cs) counterObserver.observe(cs);
+
+  // Hero counters on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.hero-stat-num').forEach(el => {
+        if (el.dataset.count) animateCounter(el, parseInt(el.dataset.count), 1800);
+      });
+    }, 400);
+  });
+
+  // ── INIT ──
+  renderRanking();
+  buildEvidenceTable();
+  updateSim();
+</script>
+</body>
+</html>
