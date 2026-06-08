@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Branch & Bound — Hasan Osiul | Management Science</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0f;
+  --paper: #f5f2eb;
+  --gold: #c8a84b;
+  --gold-light: #e8c96c;
+  --gold-pale: #f5e9c8;
+  --amber: #e07b2a;
+  --rust: #c24b2a;
+  --teal: #1a7a6e;
+  --teal-light: #2ab5a4;
+  --slate: #1e2030;
+  --slate-mid: #2d3150;
+  --slate-light: #3d4260;
+  --ghost: rgba(255,255,255,0.06);
+  --ghost-strong: rgba(255,255,255,0.12);
+  --border: rgba(200,168,75,0.25);
+  --border-strong: rgba(200,168,75,0.5);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --mono: 'Space Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --body: 'DM Sans', sans-serif;
+  --shadow: 0 20px 60px rgba(0,0,0,0.4);
+  --shadow-gold: 0 8px 40px rgba(200,168,75,0.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow-x:hidden;line-height:1.6}
+
+/* ─── NOISE TEXTURE OVERLAY ─── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.4;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:1rem 2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:all 0.3s;
+}
+.nav-brand{
+  font-family:var(--display);font-weight:800;font-size:1rem;
+  color:var(--gold);letter-spacing:0.05em;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.nav-brand span{color:var(--paper);font-weight:400}
+.nav-links{display:flex;gap:0.25rem;list-style:none}
+.nav-links a{
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;
+  color:var(--paper);opacity:0.6;
+  text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;
+  transition:all 0.2s;text-transform:uppercase;
+}
+.nav-links a:hover{opacity:1;background:var(--ghost);color:var(--gold)}
+
+/* ─── HERO ─── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:8rem 4rem 4rem;
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(200,168,75,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(26,122,110,0.06) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(10,10,15,0) 0%, rgba(10,10,15,0.4) 100%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(200,168,75,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,168,75,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+.hero-tag{
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.2em;
+  color:var(--gold);text-transform:uppercase;
+  background:rgba(200,168,75,0.1);border:1px solid var(--border);
+  padding:0.4rem 1rem;border-radius:100px;
+  display:inline-flex;align-items:center;gap:0.5rem;
+  margin-bottom:2rem;width:fit-content;
+  animation:fadeSlideUp 0.8s ease both;
+}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+.hero-title{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(3rem,8vw,7rem);line-height:0.95;
+  letter-spacing:-0.03em;
+  animation:fadeSlideUp 0.8s 0.1s ease both;
+}
+.hero-title .accent{color:var(--gold)}
+.hero-title .outline{
+  -webkit-text-stroke:1px var(--gold);color:transparent;
+  opacity:0.4;
+}
+.hero-subtitle{
+  font-size:1.15rem;color:rgba(245,242,235,0.6);
+  max-width:600px;margin-top:1.5rem;line-height:1.7;
+  animation:fadeSlideUp 0.8s 0.2s ease both;
+}
+.hero-meta{
+  display:flex;gap:2rem;margin-top:3rem;
+  animation:fadeSlideUp 0.8s 0.3s ease both;
+}
+.hero-meta-item{
+  display:flex;flex-direction:column;gap:0.2rem;
+}
+.hero-meta-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;opacity:0.7}
+.hero-meta-value{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.hero-scroll{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;
+  color:var(--gold);opacity:0.5;text-transform:uppercase;
+  animation:fadeSlideUp 1s 0.6s ease both;
+}
+.scroll-line{width:1px;height:40px;background:linear-gradient(180deg,var(--gold) 0%,transparent 100%);animation:scrollLine 2s infinite}
+
+/* ─── SECTIONS ─── */
+section{padding:6rem 4rem;position:relative;max-width:1400px;margin:0 auto}
+.section-header{margin-bottom:3rem}
+.section-number{
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.3em;
+  color:var(--gold);text-transform:uppercase;opacity:0.6;
+}
+.section-title{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(2rem,4vw,3.5rem);line-height:1;
+  letter-spacing:-0.02em;margin-top:0.5rem;
+}
+.section-line{
+  width:60px;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  margin-top:1rem;
+}
+
+/* ─── GLASS CARD ─── */
+.glass-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:2rem;
+  backdrop-filter:blur(10px);
+  transition:all 0.3s;
+  position:relative;overflow:hidden;
+}
+.glass-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(200,168,75,0.05) 0%,transparent 60%);
+  border-radius:inherit;pointer-events:none;
+}
+.glass-card:hover{
+  border-color:var(--border-strong);
+  background:rgba(255,255,255,0.05);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-gold);
+}
+
+/* ─── OVERVIEW ─── */
+.overview-grid{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:2rem;
+  margin-top:2rem;
+}
+.overview-main-text{
+  font-size:1.05rem;line-height:1.9;color:rgba(245,242,235,0.8);
+}
+.overview-main-text p+p{margin-top:1.2rem}
+.big-quote{
+  grid-column:1/-1;
+  background:linear-gradient(135deg,rgba(200,168,75,0.1),rgba(200,168,75,0.03));
+  border:1px solid var(--border-strong);
+  border-left:4px solid var(--gold);
+  border-radius:var(--radius-lg);
+  padding:2.5rem 3rem;
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(1.2rem,2.5vw,1.8rem);
+  font-style:italic;line-height:1.4;
+  color:var(--paper);
+  position:relative;
+}
+.big-quote::before{
+  content:'"';font-size:8rem;color:var(--gold);opacity:0.15;
+  position:absolute;top:-1rem;left:1.5rem;
+  font-family:var(--display);line-height:1;
+}
+.concepts-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;
+}
+.concept-pill{
+  background:var(--ghost);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.2rem;
+  transition:all 0.3s;cursor:default;
+}
+.concept-pill:hover{background:var(--ghost-strong);border-color:var(--border-strong)}
+.concept-pill h4{
+  font-family:var(--display);font-weight:700;font-size:0.9rem;
+  color:var(--gold);margin-bottom:0.4rem;
+}
+.concept-pill p{font-size:0.8rem;color:rgba(245,242,235,0.6);line-height:1.5}
+.applications-list{
+  list-style:none;margin-top:1rem;
+}
+.applications-list li{
+  font-family:var(--mono);font-size:0.75rem;
+  padding:0.5rem 0;border-bottom:1px solid rgba(200,168,75,0.08);
+  color:rgba(245,242,235,0.7);
+  display:flex;align-items:center;gap:0.75rem;
+  letter-spacing:0.05em;
+}
+.applications-list li::before{content:'→';color:var(--gold);opacity:0.7}
+
+/* ─── DEMO SECTION ─── */
+.demos-wrapper{display:flex;flex-direction:column;gap:3rem}
+.demo-block{
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+.demo-header{
+  padding:1.5rem 2rem;
+  background:rgba(200,168,75,0.06);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.demo-title{
+  font-family:var(--display);font-weight:700;font-size:1.1rem;
+}
+.demo-tag{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;
+  color:var(--gold);background:rgba(200,168,75,0.15);
+  border:1px solid var(--border);border-radius:100px;
+  padding:0.3rem 0.75rem;text-transform:uppercase;
+}
+.demo-body{padding:2rem}
+
+/* ─── BB TREE DEMO ─── */
+#tree-svg{width:100%;height:380px;overflow:visible}
+.tree-controls{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.btn{
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.1em;
+  padding:0.6rem 1.2rem;border-radius:8px;cursor:pointer;
+  border:1px solid var(--border);text-transform:uppercase;
+  background:var(--ghost);color:var(--paper);
+  transition:all 0.2s;
+}
+.btn:hover{background:rgba(200,168,75,0.15);border-color:var(--border-strong);color:var(--gold)}
+.btn-gold{background:rgba(200,168,75,0.2);border-color:var(--border-strong);color:var(--gold)}
+.btn-gold:hover{background:rgba(200,168,75,0.35)}
+.tree-info-row{display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap}
+.tree-info-chip{
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;
+  padding:0.4rem 0.9rem;border-radius:100px;
+  border:1px solid;text-transform:uppercase;
+}
+.chip-green{border-color:rgba(42,181,164,0.4);color:var(--teal-light);background:rgba(42,181,164,0.08)}
+.chip-gold{border-color:var(--border-strong);color:var(--gold);background:rgba(200,168,75,0.08)}
+.chip-red{border-color:rgba(194,75,42,0.4);color:#e07b6e;background:rgba(194,75,42,0.08)}
+.chip-gray{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.04)}
+
+/* ─── PIZZA DEMO ─── */
+.pizza-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.pizza-toppings-list{display:flex;flex-direction:column;gap:0.5rem;max-height:420px;overflow-y:auto}
+.pizza-toppings-list::-webkit-scrollbar{width:3px}
+.pizza-toppings-list::-webkit-scrollbar-thumb{background:var(--gold)}
+.topping-row{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 1rem;
+  background:var(--ghost);border:1px solid rgba(200,168,75,0.1);
+  border-radius:var(--radius);cursor:pointer;transition:all 0.2s;
+}
+.topping-row:hover{background:var(--ghost-strong);border-color:var(--border)}
+.topping-row.selected{background:rgba(200,168,75,0.12);border-color:var(--border-strong)}
+.topping-toggle{
+  width:28px;height:16px;border-radius:100px;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  position:relative;transition:all 0.3s;flex-shrink:0;
+}
+.topping-toggle::after{
+  content:'';position:absolute;
+  width:12px;height:12px;border-radius:50%;
+  background:rgba(255,255,255,0.4);
+  top:1px;left:1px;transition:all 0.3s;
+}
+.topping-row.selected .topping-toggle{background:rgba(200,168,75,0.4);border-color:var(--gold)}
+.topping-row.selected .topping-toggle::after{left:13px;background:var(--gold)}
+.topping-name{font-size:0.82rem;font-weight:500;flex:1}
+.topping-cost{font-family:var(--mono);font-size:0.7rem;color:var(--gold)}
+.topping-score{font-family:var(--mono);font-size:0.7rem;color:var(--teal-light)}
+.pizza-stats{display:flex;flex-direction:column;gap:1.5rem}
+.pizza-stat-card{
+  background:var(--ghost);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;
+}
+.pizza-stat-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:0.5rem}
+.pizza-stat-value{font-family:var(--display);font-weight:800;font-size:2rem}
+.budget-bar-wrap{margin-top:0.75rem}
+.budget-bar{
+  width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden;
+}
+.budget-fill{
+  height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--teal-light),var(--gold));
+  transition:width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.pizza-selected-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem;min-height:32px}
+.sel-tag{
+  font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;
+  padding:0.25rem 0.6rem;border-radius:100px;
+  background:rgba(200,168,75,0.15);border:1px solid var(--border);color:var(--gold);
+}
+.optimal-badge{
+  padding:1rem;background:rgba(42,181,164,0.08);border:1px solid rgba(42,181,164,0.3);
+  border-radius:var(--radius);font-family:var(--mono);font-size:0.7rem;
+  color:var(--teal-light);letter-spacing:0.05em;
+  display:flex;flex-direction:column;gap:0.4rem;
+}
+.optimal-badge strong{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.15em}
+
+/* ─── PRUNING DEMO ─── */
+.pruning-arena{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.branch-card{
+  background:var(--ghost);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.25rem;
+  transition:all 0.5s;position:relative;overflow:hidden;
+}
+.branch-card.pruned{
+  border-color:rgba(194,75,42,0.5);
+  background:rgba(194,75,42,0.08);
+  opacity:0.5;
+}
+.branch-card.pruned::after{
+  content:'PRUNED';
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);
+  font-family:var(--display);font-weight:800;font-size:1.5rem;
+  color:rgba(194,75,42,0.6);letter-spacing:0.1em;
+  pointer-events:none;
+}
+.branch-card.optimal{border-color:rgba(42,181,164,0.5);background:rgba(42,181,164,0.08)}
+.branch-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.75rem}
+.branch-val{font-family:var(--display);font-weight:800;font-size:1.6rem;margin-bottom:0.25rem}
+.branch-sub{font-size:0.75rem;color:rgba(255,255,255,0.5)}
+.best-so-far{
+  padding:1rem 1.5rem;background:rgba(200,168,75,0.08);
+  border:1px solid var(--border-strong);border-radius:var(--radius);
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:1.5rem;
+}
+.best-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7}
+.best-value{font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--gold)}
+.pruning-log{
+  background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem 1.25rem;font-family:var(--mono);font-size:0.7rem;
+  height:100px;overflow-y:auto;color:rgba(255,255,255,0.5);line-height:1.8;
+}
+.pruning-log::-webkit-scrollbar{width:3px}
+.pruning-log::-webkit-scrollbar-thumb{background:var(--gold)}
+.log-line-prune{color:#e07b6e}
+.log-line-ok{color:var(--teal-light)}
+.log-line-found{color:var(--gold)}
+
+/* ─── BINARY VARS ─── */
+.binary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.binary-card{
+  background:var(--ghost);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.25rem;
+  cursor:pointer;transition:all 0.25s;
+  display:flex;flex-direction:column;gap:0.75rem;
+}
+.binary-card:hover{background:var(--ghost-strong);border-color:var(--border)}
+.binary-card.on{background:rgba(200,168,75,0.1);border-color:var(--border-strong)}
+.binary-icon{font-size:1.8rem}
+.binary-name{font-weight:600;font-size:0.9rem}
+.binary-desc{font-size:0.75rem;color:rgba(255,255,255,0.5)}
+.binary-value{
+  font-family:var(--mono);font-size:2rem;font-weight:700;
+  color:rgba(255,255,255,0.2);transition:all 0.3s;
+}
+.binary-card.on .binary-value{color:var(--gold)}
+.obj-fn-display{
+  margin-top:1.5rem;padding:1.25rem 1.5rem;
+  background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:var(--radius);
+  font-family:var(--mono);font-size:0.85rem;color:rgba(255,255,255,0.7);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+}
+.obj-result{font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--gold)}
+
+/* ─── KNAPSACK ─── */
+.knapsack-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:2rem}
+.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.item-card{
+  background:var(--ghost);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem;cursor:pointer;transition:all 0.25s;text-align:center;
+}
+.item-card:hover{background:var(--ghost-strong)}
+.item-card.selected{background:rgba(200,168,75,0.12);border-color:var(--border-strong)}
+.item-emoji{font-size:1.5rem;margin-bottom:0.4rem}
+.item-name{font-size:0.8rem;font-weight:600;margin-bottom:0.5rem}
+.item-stats{display:flex;justify-content:center;gap:1rem}
+.item-cost{font-family:var(--mono);font-size:0.65rem;color:var(--rust)}
+.item-val{font-family:var(--mono);font-size:0.65rem;color:var(--teal-light)}
+.knapsack-panel{display:flex;flex-direction:column;gap:1rem}
+.k-stat{background:var(--ghost);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+.k-stat-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.3rem}
+.k-stat-value{font-family:var(--display);font-weight:800;font-size:1.5rem}
+.solve-result{
+  padding:1.25rem;background:rgba(200,168,75,0.08);
+  border:1px solid var(--border-strong);border-radius:var(--radius);
+  font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,0.7);
+  line-height:2;min-height:90px;
+}
+
+/* ─── COMPARISON DEMO ─── */
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.method-card{background:var(--ghost);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.method-title{font-family:var(--display);font-weight:700;font-size:1.1rem;margin-bottom:0.25rem}
+.method-desc{font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem}
+.progress-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.4rem;margin-top:1rem}
+.progress-bar-wrap{height:20px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;position:relative}
+.progress-fill{height:100%;border-radius:100px;transition:width 0.1s linear;position:relative}
+.progress-fill.brute{background:linear-gradient(90deg,var(--rust),var(--amber))}
+.progress-fill.bb{background:linear-gradient(90deg,var(--teal-light),var(--gold))}
+.progress-val{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.7);
+}
+.nodes-counter{
+  font-family:var(--display);font-weight:800;font-size:2rem;
+  color:var(--gold);margin-top:0.75rem;
+}
+.nodes-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase}
+.efficiency-badge{
+  margin-top:1rem;padding:0.75rem 1rem;
+  border-radius:var(--radius);font-family:var(--mono);font-size:0.72rem;
+  text-align:center;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+}
+.eff-bad{background:rgba(194,75,42,0.1);border:1px solid rgba(194,75,42,0.3);color:#e07b6e}
+.eff-good{background:rgba(42,181,164,0.1);border:1px solid rgba(42,181,164,0.3);color:var(--teal-light)}
+
+/* ─── CHALLENGE GAME ─── */
+.challenge-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:2rem}
+.challenge-items{display:flex;flex-direction:column;gap:0.5rem}
+.c-item{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 1rem;background:var(--ghost);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.2s;
+}
+.c-item:hover{background:var(--ghost-strong)}
+.c-item.picked{background:rgba(200,168,75,0.1);border-color:var(--border-strong)}
+.c-item-check{
+  width:18px;height:18px;border-radius:4px;
+  border:1.5px solid rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all 0.2s;font-size:0.7rem;
+}
+.c-item.picked .c-item-check{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.c-item-name{flex:1;font-size:0.85rem;font-weight:500}
+.c-item-details{font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.5)}
+.challenge-panel{display:flex;flex-direction:column;gap:1rem}
+.result-reveal{
+  padding:1.5rem;border-radius:var(--radius);
+  border:1px solid;display:none;
+}
+.result-reveal.show{display:block}
+.result-win{border-color:rgba(42,181,164,0.4);background:rgba(42,181,164,0.06)}
+.result-lose{border-color:rgba(200,168,75,0.4);background:rgba(200,168,75,0.06)}
+.result-title{font-family:var(--display);font-weight:800;font-size:1.2rem;margin-bottom:0.5rem}
+.result-text{font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.6}
+
+/* ─── EVIDENCE SECTION ─── */
+.evidence-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+  gap:1.5rem;
+}
+.evidence-card{
+  background:rgba(255,255,255,0.02);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:2rem;
+  position:relative;overflow:hidden;
+}
+.evidence-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+}
+.evidence-card-num{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;
+  color:var(--gold);opacity:0.5;text-transform:uppercase;margin-bottom:0.5rem;
+}
+.evidence-card h3{
+  font-family:var(--display);font-weight:700;font-size:1.05rem;
+  margin-bottom:1.25rem;
+}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:0.75rem}
+.data-table th{
+  font-family:var(--mono);font-size:0.58rem;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--gold);opacity:0.7;
+  padding:0.6rem 0.75rem;border-bottom:1px solid var(--border);text-align:left;
+}
+.data-table td{
+  padding:0.5rem 0.75rem;border-bottom:1px solid rgba(200,168,75,0.06);
+  color:rgba(245,242,235,0.7);font-family:var(--mono);
+}
+.data-table tr:hover td{background:rgba(200,168,75,0.05);color:var(--paper)}
+.var-x{color:var(--teal-light);font-weight:700}
+
+/* FLOW DIAGRAM */
+.flow-diagram{display:flex;flex-direction:column;align-items:center;gap:0;margin:1rem 0}
+.flow-step{
+  background:rgba(200,168,75,0.08);border:1px solid var(--border);
+  border-radius:var(--radius);padding:0.7rem 1.5rem;
+  font-family:var(--mono);font-size:0.72rem;letter-spacing:0.05em;
+  color:var(--paper);text-align:center;min-width:200px;
+}
+.flow-arrow{
+  width:1px;height:24px;background:linear-gradient(180deg,var(--gold),transparent 80%);
+  margin:0.1rem 0;display:flex;align-items:flex-end;justify-content:center;
+  color:var(--gold);font-size:0.7rem;
+}
+.flow-arrow::after{content:'▼';color:var(--gold);font-size:0.5rem}
+
+/* BOUND CARDS */
+.bound-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.bound-card{
+  border-radius:var(--radius);padding:1.25rem;
+}
+.bound-upper{background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.3)}
+.bound-lower{background:rgba(42,181,164,0.06);border:1px solid rgba(42,181,164,0.25)}
+.bound-title{
+  font-family:var(--display);font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;
+}
+.bound-upper .bound-title{color:var(--gold)}
+.bound-lower .bound-title{color:var(--teal-light)}
+.bound-desc{font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.6}
+
+/* MINI B&B TREE SVG */
+.mini-tree-wrap{overflow-x:auto}
+
+/* PRUNE INFOGRAPHIC */
+.prune-flow{display:flex;flex-direction:column;gap:0.5rem}
+.prune-step{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 1rem;border-radius:var(--radius);
+  font-size:0.82rem;
+}
+.prune-step.bad{background:rgba(194,75,42,0.08);border:1px solid rgba(194,75,42,0.2);color:#e07b6e}
+.prune-step.good{background:rgba(42,181,164,0.06);border:1px solid rgba(42,181,164,0.2);color:var(--teal-light)}
+.prune-step.neutral{background:var(--ghost);border:1px solid var(--border);color:rgba(255,255,255,0.6)}
+
+/* APP CARDS */
+.app-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
+.app-card{
+  background:var(--ghost);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1rem;text-align:center;
+  transition:all 0.25s;
+}
+.app-card:hover{background:var(--ghost-strong);border-color:var(--border-strong)}
+.app-card-icon{font-size:1.4rem;margin-bottom:0.4rem}
+.app-card-name{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.6)}
+
+/* MATH MODEL */
+.math-block{
+  background:rgba(0,0,0,0.3);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;
+  font-family:var(--mono);font-size:0.82rem;line-height:2.2;color:rgba(255,255,255,0.8);
+}
+.math-label{color:var(--gold);opacity:0.7;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.75rem;display:block}
+.math-eq{color:var(--paper)}
+.math-var{color:var(--gold)}
+.math-constraint{color:var(--teal-light)}
+
+/* ─── LEARN SECTION ─── */
+.learn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.learn-card{
+  background:rgba(255,255,255,0.02);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:2.5rem 2rem;
+  position:relative;overflow:hidden;
+}
+.learn-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.learn-card-k::before{background:linear-gradient(90deg,var(--gold),var(--amber))}
+.learn-card-s::before{background:linear-gradient(90deg,var(--teal-light),var(--teal))}
+.learn-card-r::before{background:linear-gradient(90deg,var(--rust),var(--amber))}
+.learn-icon{font-size:2rem;margin-bottom:1rem}
+.learn-card-type{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;
+  text-transform:uppercase;margin-bottom:0.5rem;opacity:0.5;
+}
+.learn-card-k .learn-card-type{color:var(--gold)}
+.learn-card-s .learn-card-type{color:var(--teal-light)}
+.learn-card-r .learn-card-type{color:var(--amber)}
+.learn-card h3{font-family:var(--display);font-weight:700;font-size:1.2rem;margin-bottom:1rem}
+.learn-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem}
+.learn-tag{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;
+  padding:0.3rem 0.7rem;border-radius:100px;border:1px solid;
+}
+.learn-card-k .learn-tag{border-color:rgba(200,168,75,0.3);color:rgba(200,168,75,0.8);background:rgba(200,168,75,0.06)}
+.learn-card-s .learn-tag{border-color:rgba(42,181,164,0.3);color:rgba(42,181,164,0.8);background:rgba(42,181,164,0.06)}
+.learn-card-r .learn-tag{border-color:rgba(224,123,42,0.3);color:rgba(224,123,42,0.8);background:rgba(224,123,42,0.06)}
+.learn-card p{font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:0.5rem}
+
+/* ─── DIVIDERS ─── */
+.section-divider{
+  width:100%;max-width:1400px;margin:0 auto;
+  height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);
+}
+
+/* ─── FOOTER ─── */
+footer{
+  padding:3rem 4rem;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:1rem;
+}
+.footer-brand{font-family:var(--display);font-weight:700;font-size:1rem;color:var(--gold)}
+.footer-meta{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeSlideUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.4;transform:scale(0.7)}
+}
+@keyframes scrollLine{
+  0%{transform:scaleY(0);transform-origin:top;opacity:1}
+  50%{transform:scaleY(1);transform-origin:top;opacity:1}
+  100%{transform:scaleY(1);transform-origin:bottom;opacity:0}
+}
+@keyframes pruneShake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  75%{transform:translateX(4px)}
+}
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity 0.7s ease,transform 0.7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  nav{padding:0.75rem 1.25rem}
+  .hero{padding:6rem 1.5rem 3rem}
+  section{padding:4rem 1.5rem}
+  .overview-grid,.pizza-grid,.knapsack-layout,.challenge-layout,.comparison-grid{grid-template-columns:1fr}
+  .learn-grid{grid-template-columns:1fr}
+  .concepts-grid{grid-template-columns:1fr}
+  .pruning-arena{grid-template-columns:1fr}
+  .app-cards{grid-template-columns:repeat(2,1fr)}
+  footer{padding:2rem 1.5rem}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav id="main-nav">
+  <div class="nav-brand">B&amp;B <span>Algorithm</span></div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#learn">Learnings</a></li>
+  </ul>
+</nav>
+
+<!-- ─────────────── HERO ─────────────── -->
+<div class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-tag">Management Science · Optimization</div>
+    <h1 class="hero-title">
+      Branch<br>
+      <span class="accent">&amp; Bound</span><br>
+      <span class="outline">Algorithm</span>
+    </h1>
+    <p class="hero-subtitle">How computers intelligently search for optimal decisions without evaluating every possibility — a deep dive into integer programming and systematic pruning.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Student</span>
+        <span class="hero-meta-value">Hasan Osiul</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Course</span>
+        <span class="hero-meta-value">Management Science</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">ID</span>
+        <span class="hero-meta-value">2417921</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    Scroll to explore
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SECTION 1: OVERVIEW
+════════════════════════════════════ -->
+<section id="overview">
+  <div class="section-header reveal">
+    <div class="section-number">01 / Project Overview</div>
+    <h2 class="section-title">What is<br><span style="color:var(--gold)">Branch &amp; Bound?</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="overview-grid reveal">
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+      <div class="glass-card">
+        <h3 style="font-family:var(--display);font-weight:700;font-size:1rem;color:var(--gold);margin-bottom:1rem">About This Project</h3>
+        <div class="overview-main-text">
+          <p>This project is based on a Management Science reading about <strong>Branch and Bound (B&amp;B)</strong> — one of the most important optimization algorithms used in operations research and decision science.</p>
+          <p>The algorithm solves complex combinatorial problems by systematically exploring the solution space while eliminating solutions that provably cannot be optimal — a technique called <em>pruning</em>.</p>
+          <p>The reading demonstrates the process using a <strong>pizza topping optimization problem</strong>: given a limited budget of 7 euros, how do we select toppings to maximize satisfaction? This deceptively simple problem becomes a gateway to understanding how real-world optimization works.</p>
+        </div>
+      </div>
+      <div class="big-quote">
+        "Optimization is not about checking every possibility. It is about intelligently eliminating bad possibilities."
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+      <div class="glass-card">
+        <h3 style="font-family:var(--display);font-weight:700;font-size:0.9rem;color:var(--gold);margin-bottom:1rem">Core Concepts</h3>
+        <div class="concepts-grid">
+          <div class="concept-pill">
+            <h4>Integer Programming</h4>
+            <p>Variables restricted to 0 or 1: excluded or included. No fractions allowed.</p>
+          </div>
+          <div class="concept-pill">
+            <h4>Branching</h4>
+            <p>Breaking one large problem into smaller subproblems at each variable.</p>
+          </div>
+          <div class="concept-pill">
+            <h4>Bounding</h4>
+            <p>Calculating the best possible outcome a branch could ever achieve.</p>
+          </div>
+          <div class="concept-pill">
+            <h4>Pruning</h4>
+            <p>Discarding branches whose bound cannot beat the current best solution.</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-family:var(--display);font-weight:700;font-size:0.9rem;color:var(--gold);margin-bottom:0.75rem">Real-World Applications</h3>
+        <ul class="applications-list">
+          <li>Airline crew scheduling</li>
+          <li>Supply chain &amp; logistics routing</li>
+          <li>Production planning &amp; scheduling</li>
+          <li>Facility location problems</li>
+          <li>AI decision-making systems</li>
+          <li>Network design &amp; optimization</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════
+     SECTION 2: DEMO
+════════════════════════════════════ -->
+<section id="demo">
+  <div class="section-header reveal">
+    <div class="section-number">02 / Demonstration</div>
+    <h2 class="section-title">Interactive<br><span style="color:var(--gold)">Simulations</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="demos-wrapper">
+
+    <!-- DEMO 1: BB TREE -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Branch &amp; Bound Tree Visualizer</div>
+        <div class="demo-tag">Demo 01</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Watch the algorithm build a decision tree step-by-step. Each node represents a subproblem with its upper bound. Pruned nodes (red) cannot beat the current best.</p>
+        <div class="tree-controls">
+          <button class="btn btn-gold" onclick="bbTreeStep()">▶ Next Step</button>
+          <button class="btn" onclick="bbTreeReset()">↺ Reset</button>
+          <button class="btn" onclick="bbTreeRunAll()">⚡ Run All</button>
+        </div>
+        <svg id="tree-svg" viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="tree-info-row">
+          <div class="tree-info-chip chip-gold" id="chip-step">Step: 0</div>
+          <div class="tree-info-chip chip-green" id="chip-best">Best: —</div>
+          <div class="tree-info-chip chip-gray" id="chip-active">Active Nodes: 1</div>
+          <div class="tree-info-chip chip-red" id="chip-pruned">Pruned: 0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: PIZZA -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Pizza Optimization Simulator</div>
+        <div class="demo-tag">Demo 02</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Budget: <strong style="color:var(--gold)">7 euros</strong>. Select toppings to maximize satisfaction. Branch &amp; Bound found the optimal solution — can you match it?</p>
+        <div class="pizza-grid">
+          <div>
+            <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.75rem;display:flex;gap:2rem;padding:0 1rem">
+              <span style="flex:1">Topping</span>
+              <span>Cost(€)</span>
+              <span style="margin-left:0.5rem">Score</span>
+            </div>
+            <div class="pizza-toppings-list" id="pizza-list"></div>
+          </div>
+          <div class="pizza-stats">
+            <div class="pizza-stat-card">
+              <div class="pizza-stat-label">Budget Used</div>
+              <div class="pizza-stat-value" id="p-cost" style="color:var(--gold)">€0.00</div>
+              <div class="budget-bar-wrap">
+                <div class="budget-bar"><div class="budget-fill" id="p-bar" style="width:0%"></div></div>
+              </div>
+              <div style="font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.3);margin-top:0.4rem">of €7.00 budget</div>
+            </div>
+            <div class="pizza-stat-card">
+              <div class="pizza-stat-label">Satisfaction Score</div>
+              <div class="pizza-stat-value" id="p-score" style="color:var(--teal-light)">0</div>
+            </div>
+            <div class="pizza-stat-card" style="flex:1">
+              <div class="pizza-stat-label">Selected Toppings</div>
+              <div class="pizza-selected-tags" id="p-tags"></div>
+            </div>
+            <div class="optimal-badge" id="p-optimal" style="display:none">
+              <strong>✓ Optimal Solution Reached!</strong>
+              <span>Your selection matches the B&amp;B optimum</span>
+            </div>
+            <div class="optimal-badge" id="p-over" style="display:none;border-color:rgba(194,75,42,0.3);background:rgba(194,75,42,0.08);color:#e07b6e">
+              <strong>⚠ Over Budget!</strong>
+              <span>Current selection exceeds €7.00</span>
+            </div>
+            <button class="btn btn-gold" onclick="showPizzaOptimal()" style="margin-top:0.5rem">Show Optimal Solution →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: PRUNING -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Pruning Simulator</div>
+        <div class="demo-tag">Demo 03</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Watch branches get evaluated and pruned in real-time. If a branch's upper bound cannot beat the current best, it is eliminated.</p>
+        <div class="best-so-far">
+          <div>
+            <div class="best-label">Current Best Solution</div>
+            <div class="best-value" id="prune-best">—</div>
+          </div>
+          <button class="btn btn-gold" onclick="pruneStep()">▶ Evaluate Next Branch</button>
+          <button class="btn" onclick="pruneReset()">↺ Reset</button>
+        </div>
+        <div class="pruning-arena" id="pruning-arena"></div>
+        <div class="pruning-log" id="prune-log"><span style="opacity:0.4">// Pruning log — press "Evaluate Next Branch" to start</span></div>
+      </div>
+    </div>
+
+    <!-- DEMO 4: BINARY VARS -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Binary Decision Variable Explorer</div>
+        <div class="demo-tag">Demo 04</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Click to toggle each binary variable. See how xᵢ ∈ {0,1} represents real-world include/exclude decisions in optimization models.</p>
+        <div class="binary-grid" id="binary-grid"></div>
+        <div class="obj-fn-display">
+          <span>Objective: <strong style="color:var(--gold)" id="bin-obj-fn">5x₁ + 8x₂ + 3x₃ + 7x₄ + 4x₅</strong></span>
+          <span>Current Value: <span class="obj-result" id="bin-result">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 5: KNAPSACK -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Knapsack Problem Game</div>
+        <div class="demo-tag">Demo 05</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Fill your knapsack! Budget: <strong style="color:var(--gold)">€12</strong>. Choose items to maximize value. Then hit "Solve with B&amp;B" to see the optimal answer.</p>
+        <div class="knapsack-layout">
+          <div>
+            <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:1rem;display:flex;gap:2rem">
+              <span>Items (cost / value)</span>
+            </div>
+            <div class="items-grid" id="knapsack-items"></div>
+          </div>
+          <div class="knapsack-panel">
+            <div class="k-stat">
+              <div class="k-stat-label">Cost Used</div>
+              <div class="k-stat-value" id="k-cost" style="color:var(--amber)">€0</div>
+              <div class="budget-bar-wrap" style="margin-top:0.5rem">
+                <div class="budget-bar"><div class="budget-fill" id="k-bar" style="width:0%"></div></div>
+              </div>
+            </div>
+            <div class="k-stat">
+              <div class="k-stat-label">Total Value</div>
+              <div class="k-stat-value" id="k-val" style="color:var(--teal-light)">0</div>
+            </div>
+            <button class="btn btn-gold" onclick="solveKnapsack()">🧮 Solve with B&amp;B</button>
+            <div class="solve-result" id="k-result">Press "Solve with B&amp;B" to see the optimal solution...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 6: COMPARISON -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Search Strategy Comparison</div>
+        <div class="demo-tag">Demo 06</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.5rem">Race Brute Force against Branch &amp; Bound on a 12-item problem (4096 total combinations). Watch the difference in nodes explored.</p>
+        <div class="comparison-grid">
+          <div class="method-card">
+            <div class="method-title">🔨 Brute Force</div>
+            <div class="method-desc">Checks every possible solution exhaustively</div>
+            <div class="progress-label">Progress</div>
+            <div class="progress-bar-wrap"><div class="progress-fill brute" id="bf-progress" style="width:0%"><span class="progress-val" id="bf-pval">0%</span></div></div>
+            <div class="nodes-counter" id="bf-nodes">0</div>
+            <div class="nodes-label">Nodes Evaluated</div>
+            <div class="efficiency-badge eff-bad" id="bf-badge">Inefficient — 2ⁿ complexity</div>
+          </div>
+          <div class="method-card">
+            <div class="method-title">⚡ Branch &amp; Bound</div>
+            <div class="method-desc">Prunes branches that cannot be optimal</div>
+            <div class="progress-label">Progress</div>
+            <div class="progress-bar-wrap"><div class="progress-fill bb" id="bb-progress" style="width:0%"><span class="progress-val" id="bb-pval">0%</span></div></div>
+            <div class="nodes-counter" id="bb-nodes">0</div>
+            <div class="nodes-label">Nodes Evaluated</div>
+            <div class="efficiency-badge eff-good" id="bb-badge">Intelligent Pruning</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:1.5rem;display:flex;gap:1rem;justify-content:center">
+          <button class="btn btn-gold" onclick="startComparison()" id="comp-btn">▶ Start Race</button>
+          <button class="btn" onclick="resetComparison()">↺ Reset</button>
+          <div class="tree-info-chip chip-green" id="savings-chip" style="display:none">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 7: CHALLENGE -->
+    <div class="demo-block reveal">
+      <div class="demo-header">
+        <div class="demo-title">Optimization Challenge</div>
+        <div class="demo-tag">Demo 07</div>
+      </div>
+      <div class="demo-body">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:1.25rem">Can you find the optimal solution manually? Budget: <strong style="color:var(--gold)">€9</strong>. Maximize value. Then compare your answer to B&amp;B's optimal.</p>
+        <div class="challenge-layout">
+          <div>
+            <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.75rem;display:flex;gap:1rem;padding:0 1rem">
+              <span style="flex:1">Item</span>
+              <span>Cost</span>
+              <span>Value</span>
+            </div>
+            <div class="challenge-items" id="challenge-items"></div>
+          </div>
+          <div class="challenge-panel">
+            <div class="k-stat">
+              <div class="k-stat-label">Your Cost</div>
+              <div class="k-stat-value" id="ch-cost" style="color:var(--amber)">€0</div>
+            </div>
+            <div class="k-stat">
+              <div class="k-stat-label">Your Value</div>
+              <div class="k-stat-value" id="ch-val" style="color:var(--teal-light)">0</div>
+            </div>
+            <button class="btn btn-gold" onclick="submitChallenge()">Submit My Answer →</button>
+            <button class="btn" onclick="resetChallenge()">↺ Try Again</button>
+            <div class="result-reveal" id="ch-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════
+     SECTION 3: EVIDENCE
+════════════════════════════════════ -->
+<section id="evidence">
+  <div class="section-header reveal">
+    <div class="section-number">03 / Evidence</div>
+    <h2 class="section-title">Course<br><span style="color:var(--gold)">Material</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="evidence-grid">
+
+    <!-- Card 1 -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 01</div>
+      <h3>Pizza Optimization Problem</h3>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px">
+          <div class="pizza-stat-card" style="padding:1.25rem">
+            <div class="pizza-stat-label">Budget</div>
+            <div class="pizza-stat-value" style="color:var(--gold);font-size:1.8rem">€7.00</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div class="pizza-stat-card" style="padding:1.25rem">
+            <div class="pizza-stat-label">Goal</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:1rem;margin-top:0.3rem">Maximize<br>Satisfaction</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div class="pizza-stat-card" style="padding:1.25rem">
+            <div class="pizza-stat-label">Variables</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:1.5rem;margin-top:0.3rem;color:var(--teal-light)">12</div>
+            <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">binary decisions</div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:1rem;line-height:1.6">Each topping is a binary variable xᵢ ∈ {0,1}. We select which to include to maximize total satisfaction without exceeding the budget — a classic Integer Linear Program.</p>
+    </div>
+
+    <!-- Card 2 — Data Table -->
+    <div class="evidence-card reveal" style="grid-column:span 1">
+      <div class="evidence-card-num">Evidence 02</div>
+      <h3>Pizza Topping Dataset</h3>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Topping</th>
+              <th>Cost (€)</th>
+              <th>Score</th>
+              <th>Variable</th>
+            </tr>
+          </thead>
+          <tbody id="evidence-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Card 3 — Math Model -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 03</div>
+      <h3>Optimization Model</h3>
+      <div class="math-block">
+        <span class="math-label">Objective Function</span>
+        <div class="math-eq">max z = <span class="math-var">Σ sᵢ · xᵢ</span></div>
+        <span class="math-label" style="margin-top:0.75rem">Subject To</span>
+        <div class="math-constraint">Σ cᵢ · xᵢ ≤ 7  &nbsp; (budget)</div>
+        <div class="math-constraint">xᵢ ∈ {0, 1}  &nbsp; ∀ i  (binary)</div>
+        <span class="math-label" style="margin-top:0.75rem">Where</span>
+        <div>sᵢ = satisfaction of topping i</div>
+        <div>cᵢ = cost of topping i</div>
+        <div>xᵢ = 1 if selected, 0 otherwise</div>
+      </div>
+    </div>
+
+    <!-- Card 4 — Flow -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 04</div>
+      <h3>B&amp;B Workflow</h3>
+      <div class="flow-diagram">
+        <div class="flow-step" style="background:rgba(200,168,75,0.15);border-color:var(--border-strong)">① Relax Integer Constraints</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">② Solve LP Relaxation</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">③ Calculate Upper Bound</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">④ Branch on Fractional Variable</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">⑤ Evaluate Child Nodes</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">⑥ Prune if UB ≤ Best Known</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step" style="background:rgba(42,181,164,0.1);border-color:rgba(42,181,164,0.4);color:var(--teal-light)">✓ Optimal Solution Found</div>
+      </div>
+    </div>
+
+    <!-- Card 5 — Mini Tree -->
+    <div class="evidence-card reveal" style="grid-column:span 1">
+      <div class="evidence-card-num">Evidence 05</div>
+      <h3>Decision Tree Structure</h3>
+      <div class="mini-tree-wrap">
+        <svg viewBox="0 0 500 280" width="100%" style="font-family:var(--mono)">
+          <!-- edges -->
+          <line x1="250" y1="55" x2="130" y2="120" stroke="rgba(200,168,75,0.4)" stroke-width="1.5"/>
+          <line x1="250" y1="55" x2="370" y2="120" stroke="rgba(200,168,75,0.4)" stroke-width="1.5"/>
+          <line x1="130" y1="165" x2="65" y2="220" stroke="rgba(200,168,75,0.3)" stroke-width="1.5"/>
+          <line x1="130" y1="165" x2="195" y2="220" stroke="rgba(200,168,75,0.3)" stroke-width="1.5"/>
+          <line x1="370" y1="165" x2="305" y2="220" stroke="rgba(194,75,42,0.4)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <line x1="370" y1="165" x2="435" y2="220" stroke="rgba(200,168,75,0.3)" stroke-width="1.5"/>
+          <!-- edge labels -->
+          <text x="183" y="98" fill="rgba(200,168,75,0.7)" font-size="9">x₁=0</text>
+          <text x="298" y="98" fill="rgba(200,168,75,0.7)" font-size="9">x₁=1</text>
+          <text x="81" y="202" fill="rgba(200,168,75,0.6)" font-size="9">x₂=0</text>
+          <text x="158" y="202" fill="rgba(200,168,75,0.6)" font-size="9">x₂=1</text>
+          <text x="319" y="202" fill="rgba(194,75,42,0.6)" font-size="9">x₂=0</text>
+          <text x="389" y="202" fill="rgba(200,168,75,0.6)" font-size="9">x₂=1</text>
+          <!-- root -->
+          <rect x="195" y="15" width="110" height="44" rx="8" fill="rgba(200,168,75,0.15)" stroke="rgba(200,168,75,0.6)" stroke-width="1.5"/>
+          <text x="250" y="35" text-anchor="middle" fill="#e8c96c" font-size="10" font-weight="bold">ROOT</text>
+          <text x="250" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">UB = 14.2</text>
+          <!-- left -->
+          <rect x="75" y="120" width="110" height="44" rx="8" fill="rgba(200,168,75,0.08)" stroke="rgba(200,168,75,0.3)" stroke-width="1.5"/>
+          <text x="130" y="140" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">x₁ = 0</text>
+          <text x="130" y="155" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">UB = 12.5</text>
+          <!-- right -->
+          <rect x="315" y="120" width="110" height="44" rx="8" fill="rgba(200,168,75,0.08)" stroke="rgba(200,168,75,0.3)" stroke-width="1.5"/>
+          <text x="370" y="140" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">x₁ = 1</text>
+          <text x="370" y="155" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">UB = 11.8</text>
+          <!-- LL -->
+          <rect x="15" y="220" width="100" height="44" rx="8" fill="rgba(200,168,75,0.06)" stroke="rgba(200,168,75,0.2)" stroke-width="1"/>
+          <text x="65" y="238" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">x₁=0, x₂=0</text>
+          <text x="65" y="252" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9">UB = 10.1</text>
+          <!-- LR OPTIMAL -->
+          <rect x="145" y="220" width="100" height="44" rx="8" fill="rgba(42,181,164,0.12)" stroke="rgba(42,181,164,0.5)" stroke-width="1.5"/>
+          <text x="195" y="238" text-anchor="middle" fill="var(--teal-light)" font-size="9" font-weight="bold">x₁=0, x₂=1</text>
+          <text x="195" y="252" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">✓ z = 12</text>
+          <!-- RL PRUNED -->
+          <rect x="255" y="220" width="100" height="44" rx="8" fill="rgba(194,75,42,0.1)" stroke="rgba(194,75,42,0.4)" stroke-width="1" stroke-dasharray="4,2"/>
+          <text x="305" y="238" text-anchor="middle" fill="#e07b6e" font-size="9">x₁=1, x₂=0</text>
+          <text x="305" y="252" text-anchor="middle" fill="rgba(194,75,42,0.7)" font-size="9">PRUNED ✗</text>
+          <!-- RR -->
+          <rect x="385" y="220" width="100" height="44" rx="8" fill="rgba(200,168,75,0.06)" stroke="rgba(200,168,75,0.2)" stroke-width="1"/>
+          <text x="435" y="238" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">x₁=1, x₂=1</text>
+          <text x="435" y="252" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9">UB = 9.4</text>
+        </svg>
+      </div>
+      <p style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.75rem;line-height:1.6">The tree branches on each binary variable. Green node = feasible optimal. Red dashed = pruned because its UB cannot beat the current best (12).</p>
+    </div>
+
+    <!-- Card 6 — Bounds -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 06</div>
+      <h3>Upper Bound vs Lower Bound</h3>
+      <div class="bound-grid">
+        <div class="bound-card bound-upper">
+          <div class="bound-title">⬆ Upper Bound</div>
+          <div class="bound-desc">The best possible outcome a branch could <em>ever</em> achieve, found by relaxing integer constraints (LP relaxation). If this is not better than what we already know, the branch is useless.</div>
+          <div style="font-family:var(--mono);font-size:0.7rem;margin-top:0.75rem;color:rgba(200,168,75,0.7)">UB = LP Relaxation optimal</div>
+        </div>
+        <div class="bound-card bound-lower">
+          <div class="bound-title">⬇ Lower Bound</div>
+          <div class="bound-desc">The best <em>feasible</em> integer solution found so far. Acts as a benchmark — any branch whose upper bound does not exceed this gets pruned immediately.</div>
+          <div style="font-family:var(--mono);font-size:0.7rem;margin-top:0.75rem;color:rgba(42,181,164,0.7)">LB = Best integer solution known</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding:0.75rem 1rem;background:var(--ghost);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,0.6)">
+        <strong style="color:var(--gold)">Pruning Rule:</strong> If UB(node) ≤ LB(best), prune that node.
+      </div>
+    </div>
+
+    <!-- Card 7 — Why Pruning -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 07</div>
+      <h3>Why Pruning Works</h3>
+      <div class="prune-flow">
+        <div class="prune-step bad">① Evaluate a branch's upper bound</div>
+        <div class="prune-step bad">② UB = 8 &lt; Current Best = 12</div>
+        <div class="prune-step neutral">③ This branch cannot possibly beat what we know</div>
+        <div class="prune-step bad" style="font-weight:600">④ PRUNE — eliminate entire subtree</div>
+        <div class="prune-step good">⑤ Save computation on all descendant nodes</div>
+        <div class="prune-step good">⑥ Algorithm converges faster to global optimum</div>
+      </div>
+      <div style="margin-top:1rem;font-family:var(--mono);font-size:0.7rem;color:rgba(255,255,255,0.4);line-height:1.8">
+        In practice, B&amp;B can explore &lt;5% of the brute-force solution space on typical problems.
+      </div>
+    </div>
+
+    <!-- Card 8 — Applications -->
+    <div class="evidence-card reveal">
+      <div class="evidence-card-num">Evidence 08</div>
+      <h3>Applications of Branch &amp; Bound</h3>
+      <div class="app-cards">
+        <div class="app-card"><div class="app-card-icon">🚛</div><div class="app-card-name">Supply Chains</div></div>
+        <div class="app-card"><div class="app-card-icon">✈️</div><div class="app-card-name">Airline Sched.</div></div>
+        <div class="app-card"><div class="app-card-icon">📍</div><div class="app-card-name">Facility Location</div></div>
+        <div class="app-card"><div class="app-card-icon">🗓️</div><div class="app-card-name">Scheduling</div></div>
+        <div class="app-card"><div class="app-card-icon">🗺️</div><div class="app-card-name">Routing</div></div>
+        <div class="app-card"><div class="app-card-icon">🏭</div><div class="app-card-name">Production</div></div>
+        <div class="app-card"><div class="app-card-icon">🤖</div><div class="app-card-name">AI Decisions</div></div>
+        <div class="app-card"><div class="app-card-icon">📦</div><div class="app-card-name">Knapsack</div></div>
+        <div class="app-card"><div class="app-card-icon">🔌</div><div class="app-card-name">Network Design</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════
+     SECTION 4: WHAT DID I LEARN
+════════════════════════════════════ -->
+<section id="learn">
+  <div class="section-header reveal">
+    <div class="section-number">04 / What Did I Learn?</div>
+    <h2 class="section-title">Reflection &amp;<br><span style="color:var(--gold)">Takeaways</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="learn-grid reveal">
+    <div class="learn-card learn-card-k">
+      <div class="learn-icon">🧠</div>
+      <div class="learn-card-type">Knowledge</div>
+      <h3>What I Learned</h3>
+      <p>I gained a deep understanding of how integer programming works and why it is fundamentally harder than continuous optimization. The key insight is that restricting variables to binary values dramatically increases complexity — but B&amp;B manages this elegantly through systematic search.</p>
+      <div class="learn-tags">
+        <span class="learn-tag">Branch &amp; Bound</span>
+        <span class="learn-tag">Integer Programming</span>
+        <span class="learn-tag">Binary Variables</span>
+        <span class="learn-tag">Optimization Trees</span>
+        <span class="learn-tag">LP Relaxation</span>
+        <span class="learn-tag">Pruning Logic</span>
+        <span class="learn-tag">Search Strategies</span>
+      </div>
+    </div>
+
+    <div class="learn-card learn-card-s">
+      <div class="learn-icon">⚙️</div>
+      <div class="learn-card-type">Skills</div>
+      <h3>Skills Developed</h3>
+      <p>Working through the pizza problem taught me to translate a real-world scenario into a formal mathematical model — defining variables, writing objective functions, and specifying constraints. I also practised algorithmic reasoning: tracing through tree expansions step by step.</p>
+      <div class="learn-tags">
+        <span class="learn-tag">Mathematical Modeling</span>
+        <span class="learn-tag">Optimization Thinking</span>
+        <span class="learn-tag">Decision Analysis</span>
+        <span class="learn-tag">Algorithmic Reasoning</span>
+        <span class="learn-tag">Data Interpretation</span>
+        <span class="learn-tag">Problem Decomposition</span>
+      </div>
+    </div>
+
+    <div class="learn-card learn-card-r">
+      <div class="learn-icon">💡</div>
+      <div class="learn-card-type">Reflection</div>
+      <h3>What Surprised Me</h3>
+      <p>I was genuinely surprised that B&amp;B does not need to evaluate every possibility. By computing upper bounds early, vast subtrees can be eliminated before being explored. Complex problems that would take hours by brute force can be solved in seconds.</p>
+      <p style="margin-top:0.75rem">Real-world impact spans everywhere from delivery routing to AI planning — the same algorithmic skeleton underlies modern logistics software used by companies like FedEx, Amazon, and airline networks.</p>
+      <div class="learn-tags">
+        <span class="learn-tag">Logistics</span>
+        <span class="learn-tag">Delivery Routing</span>
+        <span class="learn-tag">Airline Scheduling</span>
+        <span class="learn-tag">Resource Allocation</span>
+        <span class="learn-tag">AI Systems</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer>
+  <div class="footer-brand">Hasan Osiul</div>
+  <div class="footer-meta">Management Science Portfolio · Branch &amp; Bound · ID 2417921</div>
+</footer>
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script>
+// ─── DATA ───
+const PIZZA_TOPPINGS = [
+  {name:'Buffalo Mozzarella', cost:1.5, score:7},
+  {name:'Gorgonzola',         cost:1.2, score:6},
+  {name:'Ricotta',            cost:0.9, score:5},
+  {name:'Burrata',            cost:2.0, score:9},
+  {name:'Parma Ham',          cost:2.5, score:10},
+  {name:'Pancetta',           cost:1.8, score:8},
+  {name:'Salame',             cost:1.3, score:6},
+  {name:'Nduja',              cost:1.6, score:7},
+  {name:'Zucchini',           cost:0.7, score:3},
+  {name:'Fried Eggplant',     cost:0.8, score:4},
+  {name:'Cherry Tomatoes',    cost:0.5, score:3},
+  {name:'Roasted Peppers',    cost:0.6, score:3},
+];
+const PIZZA_OPTIMAL = [3,4,5]; // Burrata, Parma Ham, Pancetta → cost 6.3, score 27
+
+const KNAPSACK_ITEMS = [
+  {name:'Laptop',  emoji:'💻', cost:5, val:8},
+  {name:'Camera',  emoji:'📷', cost:4, val:7},
+  {name:'Book',    emoji:'📚', cost:1, val:3},
+  {name:'Watch',   emoji:'⌚', cost:3, val:5},
+  {name:'Phone',   emoji:'📱', cost:2, val:4},
+  {name:'Tablet',  emoji:'📟', cost:6, val:9},
+  {name:'Jacket',  emoji:'🧥', cost:2, val:3},
+  {name:'Shoes',   emoji:'👟', cost:3, val:4},
+];
+
+const CHALLENGE_ITEMS = [
+  {name:'Strategy Book',  emoji:'📘', cost:2, val:5},
+  {name:'Analytics Tool', emoji:'🔧', cost:3, val:7},
+  {name:'Data Set',       emoji:'📊', cost:4, val:9},
+  {name:'Course License', emoji:'🎓', cost:5, val:10},
+  {name:'Cloud Storage',  emoji:'☁️', cost:1, val:3},
+  {name:'API Access',     emoji:'⚡', cost:4, val:8},
+  {name:'Design Assets',  emoji:'🎨', cost:2, val:4},
+];
+
+// ─── SCROLL REVEAL ───
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible')}});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ═══ DEMO 1: BB TREE ═══
+const BB_STEPS = [
+  {nodes:[{id:0,x:450,y:40,label:'ROOT',ub:14.2,feasible:false,root:true,parent:-1}], active:1, pruned:0, best:null, msg:'Root node: LP relaxation gives UB = 14.2'},
+  {nodes:[
+    {id:0,x:450,y:40,label:'ROOT',ub:14.2,feasible:false,root:true,parent:-1},
+    {id:1,x:220,y:130,label:'x₁=0',ub:12.5,feasible:false,parent:0},
+    {id:2,x:680,y:130,label:'x₁=1',ub:11.8,feasible:false,parent:0},
+  ], active:2, pruned:0, best:null, msg:'Branch on x₁. Left: x₁=0 (UB 12.5), Right: x₁=1 (UB 11.8)'},
+  {nodes:[
+    {id:0,x:450,y:40,label:'ROOT',ub:14.2,feasible:false,root:true,parent:-1},
+    {id:1,x:220,y:130,label:'x₁=0',ub:12.5,feasible:false,parent:0},
+    {id:2,x:680,y:130,label:'x₁=1',ub:11.8,feasible:false,parent:0},
+    {id:3,x:100,y:230,label:'x₁=0\nx₂=0',ub:10.1,feasible:true,val:10,parent:1},
+    {id:4,x:340,y:230,label:'x₁=0\nx₂=1',ub:12.5,feasible:true,val:12,optimal:true,parent:1},
+  ], active:2, pruned:0, best:12, msg:'Branch on x₂. Found feasible: z=12. Best = 12!'},
+  {nodes:[
+    {id:0,x:450,y:40,label:'ROOT',ub:14.2,feasible:false,root:true,parent:-1},
+    {id:1,x:220,y:130,label:'x₁=0',ub:12.5,feasible:false,parent:0},
+    {id:2,x:680,y:130,label:'x₁=1',ub:11.8,feasible:false,parent:0},
+    {id:3,x:100,y:230,label:'x₁=0\nx₂=0',ub:10.1,feasible:true,val:10,parent:1},
+    {id:4,x:340,y:230,label:'x₁=0\nx₂=1',ub:12.5,feasible:true,val:12,optimal:true,parent:1},
+    {id:5,x:580,y:230,label:'x₁=1\nx₂=0',ub:8.3,pruned:true,parent:2},
+    {id:6,x:790,y:230,label:'x₁=1\nx₂=1',ub:11.8,feasible:false,parent:2},
+  ], active:2, pruned:1, best:12, msg:'x₁=1 branch: left pruned (UB=8.3 < 12). Right continues (UB=11.8 ≥ 12)'},
+  {nodes:[
+    {id:0,x:450,y:40,label:'ROOT',ub:14.2,feasible:false,root:true,parent:-1},
+    {id:1,x:220,y:130,label:'x₁=0',ub:12.5,feasible:false,parent:0},
+    {id:2,x:680,y:130,label:'x₁=1',ub:11.8,feasible:false,parent:0},
+    {id:3,x:100,y:230,label:'x₁=0\nx₂=0',ub:10.1,feasible:true,val:10,parent:1},
+    {id:4,x:340,y:230,label:'x₁=0\nx₂=1',ub:12.5,feasible:true,val:12,optimal:true,parent:1},
+    {id:5,x:580,y:230,label:'x₁=1\nx₂=0',ub:8.3,pruned:true,parent:2},
+    {id:6,x:790,y:230,label:'x₁=1\nx₂=1',ub:11.8,feasible:true,val:11,parent:2},
+  ], active:0, pruned:1, best:12, msg:'✓ All nodes explored. Optimal = 12. Saved 3 nodes via pruning!'},
+];
+let bbStep = 0;
+let bbRunning = false;
+
+function bbTreeDraw(stepIdx){
+  const step = BB_STEPS[stepIdx];
+  const svg = document.getElementById('tree-svg');
+  svg.innerHTML = '';
+  // draw edges
+  step.nodes.forEach(n=>{
+    if(n.parent>=0){
+      const p = step.nodes.find(x=>x.id===n.parent);
+      if(p){
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',p.x);line.setAttribute('y1',p.y+22);
+        line.setAttribute('x2',n.x);line.setAttribute('y2',n.y-22);
+        line.setAttribute('stroke', n.pruned?'rgba(194,75,42,0.5)':'rgba(200,168,75,0.35)');
+        line.setAttribute('stroke-width','1.5');
+        if(n.pruned)line.setAttribute('stroke-dasharray','5,3');
+        svg.appendChild(line);
+      }
+    }
+  });
+  // draw nodes
+  step.nodes.forEach(n=>{
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='default';
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const w=110,h=52;
+    rect.setAttribute('x',n.x-w/2);rect.setAttribute('y',n.y-h/2);
+    rect.setAttribute('width',w);rect.setAttribute('height',h);rect.setAttribute('rx',8);
+    let fill='rgba(200,168,75,0.06)', stroke='rgba(200,168,75,0.25)', sw='1.5';
+    if(n.root){fill='rgba(200,168,75,0.18)';stroke='rgba(200,168,75,0.7)';sw='2'}
+    if(n.optimal){fill='rgba(42,181,164,0.15)';stroke='rgba(42,181,164,0.6)';sw='2'}
+    if(n.pruned){fill='rgba(194,75,42,0.1)';stroke='rgba(194,75,42,0.5)';sw='1.5'}
+    rect.setAttribute('fill',fill);rect.setAttribute('stroke',stroke);rect.setAttribute('stroke-width',sw);
+    g.appendChild(rect);
+    // label
+    const labels = n.label.split('\n');
+    labels.forEach((l,i)=>{
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',n.x);t.setAttribute('y',n.y - 8 + i*14);
+      t.setAttribute('text-anchor','middle');t.setAttribute('font-size','10');
+      t.setAttribute('font-family','Space Mono, monospace');
+      t.setAttribute('fill', n.pruned?'rgba(194,75,42,0.8)':n.optimal?'rgba(42,181,164,0.9)':'rgba(245,242,235,0.8)');
+      t.textContent=l;g.appendChild(t);
+    });
+    // ub/val
+    const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
+    sub.setAttribute('x',n.x);sub.setAttribute('y',n.y+20);
+    sub.setAttribute('text-anchor','middle');sub.setAttribute('font-size','9');
+    sub.setAttribute('font-family','Space Mono, monospace');
+    if(n.pruned){sub.setAttribute('fill','rgba(194,75,42,0.6)');sub.textContent='✗ PRUNED';}
+    else if(n.optimal){sub.setAttribute('fill','rgba(42,181,164,0.8)');sub.textContent=`✓ z = ${n.val}`;}
+    else if(n.feasible&&n.val){sub.setAttribute('fill','rgba(255,255,255,0.6)');sub.textContent=`z = ${n.val}`;}
+    else{sub.setAttribute('fill','rgba(200,168,75,0.5)');sub.textContent=`UB = ${n.ub}`;}
+    g.appendChild(sub);
+    svg.appendChild(g);
+  });
+  // update chips
+  document.getElementById('chip-step').textContent=`Step: ${stepIdx+1}/${BB_STEPS.length}`;
+  document.getElementById('chip-best').textContent=`Best: ${step.best??'—'}`;
+  document.getElementById('chip-active').textContent=`Active: ${step.active}`;
+  document.getElementById('chip-pruned').textContent=`Pruned: ${step.pruned}`;
+}
+
+function bbTreeStep(){
+  if(bbStep<BB_STEPS.length){bbTreeDraw(bbStep);bbStep++;}
+}
+function bbTreeReset(){bbStep=0;document.getElementById('tree-svg').innerHTML='';
+  document.getElementById('chip-step').textContent='Step: 0';
+  document.getElementById('chip-best').textContent='Best: —';
+  document.getElementById('chip-active').textContent='Active: 1';
+  document.getElementById('chip-pruned').textContent='Pruned: 0';
+}
+function bbTreeRunAll(){
+  let i=0;const iv=setInterval(()=>{
+    if(i<BB_STEPS.length){bbTreeDraw(i);i++;bbStep=i;}
+    else clearInterval(iv);
+  },700);
+}
+bbTreeDraw(0);bbStep=1;
+
+// ═══ DEMO 2: PIZZA ═══
+const pizzaSelected = new Set();
+function initPizza(){
+  const list = document.getElementById('pizza-list');
+  const tbl = document.getElementById('evidence-table');
+  PIZZA_TOPPINGS.forEach((t,i)=>{
+    const row = document.createElement('div');
+    row.className='topping-row';row.id=`top-${i}`;
+    row.innerHTML=`<div class="topping-toggle"></div><span class="topping-name">${t.name}</span><span class="topping-cost">€${t.cost.toFixed(2)}</span><span class="topping-score">+${t.score}</span>`;
+    row.onclick=()=>togglePizza(i);
+    list.appendChild(row);
+    const tr = document.createElement('tr');
+    tr.innerHTML=`<td>${t.name}</td><td>€${t.cost.toFixed(2)}</td><td>${t.score}</td><td class="var-x">x<sub>${i+1}</sub></td>`;
+    tbl.appendChild(tr);
+  });
+}
+function togglePizza(i){
+  if(pizzaSelected.has(i)) pizzaSelected.delete(i);
+  else pizzaSelected.add(i);
+  document.getElementById(`top-${i}`).classList.toggle('selected');
+  updatePizzaStats();
+}
+function updatePizzaStats(){
+  let cost=0,score=0;
+  pizzaSelected.forEach(i=>{cost+=PIZZA_TOPPINGS[i].cost;score+=PIZZA_TOPPINGS[i].score;});
+  document.getElementById('p-cost').textContent=`€${cost.toFixed(2)}`;
+  document.getElementById('p-score').textContent=score;
+  const pct=Math.min(100,(cost/7)*100);
+  document.getElementById('p-bar').style.width=pct+'%';
+  const tags=document.getElementById('p-tags');
+  tags.innerHTML='';
+  pizzaSelected.forEach(i=>{
+    const t=document.createElement('span');t.className='sel-tag';
+    t.textContent=PIZZA_TOPPINGS[i].name.split(' ')[0];
+    tags.appendChild(t);
+  });
+  const opt=document.getElementById('p-optimal');
+  const ov=document.getElementById('p-over');
+  const isOptimal=PIZZA_OPTIMAL.every(i=>pizzaSelected.has(i))&&pizzaSelected.size===PIZZA_OPTIMAL.length;
+  const isOver=cost>7;
+  opt.style.display=isOptimal&&!isOver?'flex':'none';
+  ov.style.display=isOver?'flex':'none';
+}
+function showPizzaOptimal(){
+  pizzaSelected.clear();
+  document.querySelectorAll('.topping-row').forEach(r=>r.classList.remove('selected'));
+  PIZZA_OPTIMAL.forEach(i=>{pizzaSelected.add(i);document.getElementById(`top-${i}`).classList.add('selected');});
+  updatePizzaStats();
+}
+initPizza();
+
+// ═══ DEMO 3: PRUNING ═══
+const PRUNE_BRANCHES = [
+  {id:0,label:'Branch A',upper:11.5,desc:'Parma Ham + Mozzarella path'},
+  {id:1,label:'Branch B',upper:8.2,desc:'Ricotta + Zucchini path'},
+  {id:2,label:'Branch C',upper:14.1,desc:'Burrata + Pancetta path'},
+  {id:3,label:'Branch D',upper:7.0,desc:'Cherry + Eggplant path'},
+  {id:4,label:'Branch E',upper:12.8,desc:'Nduja + Salame path'},
+];
+let pruneIdx=0, pruneBest=0, pruneLog=[];
+function initPruningArena(){
+  const arena=document.getElementById('pruning-arena');
+  arena.innerHTML='';
+  PRUNE_BRANCHES.forEach(b=>{
+    const c=document.createElement('div');
+    c.className='branch-card';c.id=`branch-${b.id}`;
+    c.innerHTML=`<div class="branch-label">${b.label}</div>
+    <div class="branch-val">UB = ${b.upper}</div>
+    <div class="branch-sub">${b.desc}</div>`;
+    arena.appendChild(c);
+  });
+  document.getElementById('prune-best').textContent='—';
+  document.getElementById('prune-log').innerHTML='<span style="opacity:0.4">// Press "Evaluate Next Branch" to start</span>';
+  pruneIdx=0;pruneBest=0;pruneLog=[];
+}
+function pruneStep(){
+  if(pruneIdx>=PRUNE_BRANCHES.length){addPruneLog('All branches evaluated. Optimal solution found!','found');return;}
+  const b=PRUNE_BRANCHES[pruneIdx];
+  const card=document.getElementById(`branch-${b.id}`);
+  let msg='';
+  if(b.upper>pruneBest){
+    // feasible - treat as lower bound update
+    pruneBest=Math.floor(b.upper);
+    card.classList.add('optimal');
+    document.getElementById('prune-best').textContent=pruneBest;
+    msg=`✓ ${b.label}: UB=${b.upper} > Best=${pruneBest} — New best solution found!`;
+    addPruneLog(msg,'found');
+  } else {
+    card.classList.add('pruned');
+    card.style.animation='pruneShake 0.4s ease';
+    setTimeout(()=>card.style.animation='',500);
+    msg=`✗ ${b.label}: UB=${b.upper} ≤ Best=${pruneBest} — PRUNED`;
+    addPruneLog(msg,'prune');
+  }
+  pruneIdx++;
+}
+function addPruneLog(msg,type){
+  const log=document.getElementById('prune-log');
+  const span=document.createElement('div');
+  span.className=type==='prune'?'log-line-prune':type==='found'?'log-line-found':'log-line-ok';
+  span.textContent=`[${new Date().toLocaleTimeString('en',{hour12:false})}] ${msg}`;
+  if(pruneLog.length===0)log.innerHTML='';
+  log.appendChild(span);
+  log.scrollTop=log.scrollHeight;
+  pruneLog.push(msg);
+}
+function pruneReset(){initPruningArena();}
+initPruningArena();
+
+// ═══ DEMO 4: BINARY VARS ═══
+const BINARY_ITEMS = [
+  {name:'Burrata Topping',   desc:'Select premium cheese',icon:'🧀',coeff:5},
+  {name:'Open Warehouse',    desc:'Logistics decision',    icon:'🏭',coeff:8},
+  {name:'Launch Product',    desc:'Business decision',     icon:'🚀',coeff:3},
+  {name:'Hire Consultant',   desc:'Resource decision',     icon:'👤',coeff:7},
+  {name:'Invest in IT',      desc:'Capital decision',      icon:'💻',coeff:4},
+];
+const binState=[false,false,false,false,false];
+function initBinaryGrid(){
+  const grid=document.getElementById('binary-grid');
+  BINARY_ITEMS.forEach((item,i)=>{
+    const c=document.createElement('div');
+    c.className='binary-card';c.id=`bin-${i}`;
+    c.innerHTML=`<div class="binary-icon">${item.icon}</div>
+    <div class="binary-name">${item.name}</div>
+    <div class="binary-desc">${item.desc}</div>
+    <div class="binary-value" id="binv-${i}">0</div>`;
+    c.onclick=()=>toggleBinary(i);
+    grid.appendChild(c);
+  });
+}
+function toggleBinary(i){
+  binState[i]=!binState[i];
+  document.getElementById(`bin-${i}`).classList.toggle('on');
+  document.getElementById(`binv-${i}`).textContent=binState[i]?'1':'0';
+  updateBinaryObj();
+}
+function updateBinaryObj(){
+  let val=0;
+  BINARY_ITEMS.forEach((item,i)=>{if(binState[i])val+=item.coeff;});
+  document.getElementById('bin-result').textContent=val;
+}
+initBinaryGrid();
+
+// ═══ DEMO 5: KNAPSACK ═══
+const kSelected=new Set();
+function initKnapsack(){
+  const grid=document.getElementById('knapsack-items');
+  KNAPSACK_ITEMS.forEach((item,i)=>{
+    const c=document.createElement('div');
+    c.className='item-card';c.id=`k-${i}`;
+    c.innerHTML=`<div class="item-emoji">${item.emoji}</div>
+    <div class="item-name">${item.name}</div>
+    <div class="item-stats">
+      <span class="item-cost">€${item.cost}</span>
+      <span class="item-val">val:${item.val}</span>
+    </div>`;
+    c.onclick=()=>toggleKnapsack(i);
+    grid.appendChild(c);
+  });
+}
+function toggleKnapsack(i){
+  if(kSelected.has(i))kSelected.delete(i);else kSelected.add(i);
+  document.getElementById(`k-${i}`).classList.toggle('selected');
+  updateKnapsackStats();
+}
+function updateKnapsackStats(){
+  let cost=0,val=0;
+  kSelected.forEach(i=>{cost+=KNAPSACK_ITEMS[i].cost;val+=KNAPSACK_ITEMS[i].val;});
+  document.getElementById('k-cost').textContent=`€${cost}`;
+  document.getElementById('k-val').textContent=val;
+  const pct=Math.min(100,(cost/12)*100);
+  document.getElementById('k-bar').style.width=pct+'%';
+}
+function solveKnapsack(){
+  const BUDGET=12;
+  let best=0,bestSet=[];
+  // DP-based exact solver
+  const n=KNAPSACK_ITEMS.length;
+  for(let mask=0;mask<(1<<n);mask++){
+    let c=0,v=0,set=[];
+    for(let j=0;j<n;j++){if(mask&(1<<j)){c+=KNAPSACK_ITEMS[j].cost;v+=KNAPSACK_ITEMS[j].val;set.push(j);}}
+    if(c<=BUDGET&&v>best){best=v;bestSet=[...set];}
+  }
+  const cost=bestSet.reduce((s,i)=>s+KNAPSACK_ITEMS[i].cost,0);
+  const names=bestSet.map(i=>KNAPSACK_ITEMS[i].name).join(', ');
+  let yourCost=0,yourVal=0;
+  kSelected.forEach(i=>{yourCost+=KNAPSACK_ITEMS[i].cost;yourVal+=KNAPSACK_ITEMS[i].val;});
+  const res=document.getElementById('k-result');
+  const isOptimal=bestSet.length===kSelected.size&&bestSet.every(i=>kSelected.has(i));
+  res.innerHTML=`<strong style="color:var(--gold)">B&B OPTIMAL</strong><br>
+Items: ${names}<br>
+Cost: €${cost} | Value: <strong style="color:var(--teal-light)">${best}</strong><br><br>
+Your pick: Cost €${yourCost} | Value ${yourVal} ${yourCost>BUDGET?'<span style="color:#e07b6e">⚠ Over budget!</span>':''}
+${isOptimal?'<br><strong style="color:var(--teal-light)">✓ You matched the optimal!</strong>':''}`;
+}
+initKnapsack();
+
+// ═══ DEMO 6: COMPARISON ═══
+let compRunning=false,compTimers=[];
+function startComparison(){
+  if(compRunning)return;
+  compRunning=true;
+  document.getElementById('comp-btn').textContent='Running...';
+  const BF_TOTAL=4096, BB_TOTAL=Math.floor(BF_TOTAL*0.12+Math.random()*80+60);
+  let bfDone=0,bbDone=0,bfFin=false,bbFin=false;
+  function checkDone(){
+    if(bfFin&&bbFin){
+      compRunning=false;
+      document.getElementById('comp-btn').textContent='▶ Start Race';
+      const saved=Math.round((1-BB_TOTAL/BF_TOTAL)*100);
+      const chip=document.getElementById('savings-chip');
+      chip.style.display='inline-flex';
+      chip.textContent=`B&B explored ${saved}% fewer nodes`;
+      document.getElementById('bf-badge').textContent=`${BF_TOTAL} nodes evaluated`;
+      document.getElementById('bb-badge').textContent=`Only ${BB_TOTAL} nodes — ${saved}% reduction!`;
+    }
+  }
+  // BF: steady pace
+  const bfIv=setInterval(()=>{
+    bfDone=Math.min(BF_TOTAL,bfDone+Math.floor(Math.random()*80+40));
+    const pct=(bfDone/BF_TOTAL*100).toFixed(1);
+    document.getElementById('bf-progress').style.width=pct+'%';
+    document.getElementById('bf-pval').textContent=pct+'%';
+    document.getElementById('bf-nodes').textContent=bfDone.toLocaleString();
+    if(bfDone>=BF_TOTAL){clearInterval(bfIv);bfFin=true;checkDone();}
+  },60);
+  // BB: fast start, stops early
+  const bbIv=setInterval(()=>{
+    bbDone=Math.min(BB_TOTAL,bbDone+Math.floor(Math.random()*30+15));
+    const pct=(bbDone/BB_TOTAL*100).toFixed(1);
+    document.getElementById('bb-progress').style.width=pct+'%';
+    document.getElementById('bb-pval').textContent=pct+'%';
+    document.getElementById('bb-nodes').textContent=bbDone.toLocaleString();
+    if(bbDone>=BB_TOTAL){clearInterval(bbIv);bbFin=true;
+      document.getElementById('bb-progress').style.width='100%';
+      document.getElementById('bb-pval').textContent='100% ✓';
+      checkDone();}
+  },55);
+}
+function resetComparison(){
+  compRunning=false;
+  document.getElementById('comp-btn').textContent='▶ Start Race';
+  ['bf','bb'].forEach(p=>{
+    document.getElementById(`${p}-progress`).style.width='0%';
+    document.getElementById(`${p}-pval`).textContent='0%';
+    document.getElementById(`${p}-nodes`).textContent='0';
+  });
+  document.getElementById('bf-badge').textContent='Inefficient — 2ⁿ complexity';
+  document.getElementById('bb-badge').textContent='Intelligent Pruning';
+  document.getElementById('savings-chip').style.display='none';
+}
+
+// ═══ DEMO 7: CHALLENGE ═══
+const chSelected=new Set();
+function initChallenge(){
+  const list=document.getElementById('challenge-items');
+  CHALLENGE_ITEMS.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.className='c-item';row.id=`ch-${i}`;
+    row.innerHTML=`<div class="c-item-check">✓</div>
+    <div class="c-item-name">${item.emoji} ${item.name}</div>
+    <div class="c-item-details">€${item.cost} / val ${item.val}</div>`;
+    row.onclick=()=>toggleChallenge(i);
+    list.appendChild(row);
+  });
+}
+function toggleChallenge(i){
+  if(chSelected.has(i))chSelected.delete(i);else chSelected.add(i);
+  document.getElementById(`ch-${i}`).classList.toggle('picked');
+  let cost=0,val=0;
+  chSelected.forEach(j=>{cost+=CHALLENGE_ITEMS[j].cost;val+=CHALLENGE_ITEMS[j].val;});
+  document.getElementById('ch-cost').textContent=`€${cost}`;
+  document.getElementById('ch-val').textContent=val;
+}
+function submitChallenge(){
+  const BUDGET=9;
+  let best=0,bestSet=[];
+  const n=CHALLENGE_ITEMS.length;
+  for(let mask=0;mask<(1<<n);mask++){
+    let c=0,v=0,set=[];
+    for(let j=0;j<n;j++){if(mask&(1<<j)){c+=CHALLENGE_ITEMS[j].cost;v+=CHALLENGE_ITEMS[j].val;set.push(j);}}
+    if(c<=BUDGET&&v>best){best=v;bestSet=[...set];}
+  }
+  let yourCost=0,yourVal=0;
+  chSelected.forEach(i=>{yourCost+=CHALLENGE_ITEMS[i].cost;yourVal+=CHALLENGE_ITEMS[i].val;});
+  const isOver=yourCost>BUDGET;
+  const isOptimal=!isOver&&bestSet.every(i=>chSelected.has(i))&&bestSet.length===chSelected.size;
+  const gap=best-yourVal;
+  const optNames=bestSet.map(i=>CHALLENGE_ITEMS[i].name).join(', ');
+  const res=document.getElementById('ch-result');
+  res.className='result-reveal show '+(isOptimal?'result-win':'result-lose');
+  if(isOptimal){
+    res.innerHTML=`<div class="result-title" style="color:var(--teal-light)">🏆 Optimal! Perfect!</div>
+    <div class="result-text">Your value: <strong>${yourVal}</strong> — matches B&B optimal of <strong>${best}</strong>. Excellent optimization thinking!</div>`;
+  } else if(isOver){
+    res.innerHTML=`<div class="result-title" style="color:#e07b6e">⚠ Over Budget</div>
+    <div class="result-text">Cost €${yourCost} > €${BUDGET} budget. B&B optimal: ${optNames} (value ${best})</div>`;
+  } else {
+    res.innerHTML=`<div class="result-title" style="color:var(--gold)">Close — but not optimal</div>
+    <div class="result-text">Your value: <strong>${yourVal}</strong>. B&B optimal: <strong>${best}</strong> (gap: ${gap})<br>Optimal: ${optNames}</div>`;
+  }
+}
+function resetChallenge(){
+  chSelected.clear();
+  document.querySelectorAll('.c-item').forEach(r=>r.classList.remove('picked'));
+  document.getElementById('ch-cost').textContent='€0';
+  document.getElementById('ch-val').textContent='0';
+  document.getElementById('ch-result').className='result-reveal';
+}
+initChallenge();
+</script>
+</body>
+</html>

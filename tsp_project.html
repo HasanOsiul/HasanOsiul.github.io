@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP — The Traveling Salesman Problem | Hasan Osiul</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+/* ─── CSS CUSTOM PROPERTIES ─────────────────────────────────────────────── */
+:root {
+  --bg:        #050810;
+  --surface:   #0c1120;
+  --surface2:  #111827;
+  --border:    rgba(99,179,255,0.12);
+  --accent:    #3b82f6;
+  --accent2:   #06b6d4;
+  --accent3:   #a855f7;
+  --gold:      #f59e0b;
+  --green:     #10b981;
+  --red:       #ef4444;
+  --text:      #f1f5f9;
+  --muted:     #64748b;
+  --subtle:    #1e293b;
+  --glow:      0 0 40px rgba(59,130,246,0.25);
+  --radius:    16px;
+}
+
+/* ─── RESET & BASE ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+::selection { background: var(--accent); color: #fff; }
+img { max-width: 100%; }
+button { cursor: pointer; font-family: inherit; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ─── ANIMATED BACKGROUND ───────────────────────────────────────────────── */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridShift 20s linear infinite;
+}
+@keyframes gridShift {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(60px, 60px); }
+}
+.bg-glow-1, .bg-glow-2, .bg-glow-3 {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(80px); opacity: 0.12;
+}
+.bg-glow-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; right: -200px; animation: floatGlow 12s ease-in-out infinite alternate; }
+.bg-glow-2 { width: 400px; height: 400px; background: var(--accent3); bottom: 20%; left: -150px; animation: floatGlow 16s ease-in-out infinite alternate-reverse; }
+.bg-glow-3 { width: 300px; height: 300px; background: var(--accent2); top: 50%; left: 50%; animation: floatGlow 10s ease-in-out infinite alternate; }
+@keyframes floatGlow {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px, -40px) scale(1.15); }
+}
+
+/* ─── NAV ────────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(5,8,16,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 max(24px, 5vw);
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.nav-links { display: flex; gap: 4px; list-style: none; }
+.nav-links a {
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--muted); transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--text); background: var(--subtle); }
+.nav-badge {
+  padding: 4px 12px; border-radius: 20px; font-size: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color: #fff; font-family: 'Syne', sans-serif; font-weight: 700;
+}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────────────────── */
+section { position: relative; z-index: 1; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 max(24px, 5vw); }
+.section-pad { padding: 100px 0; }
+.section-pad-sm { padding: 60px 0; }
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1.1; }
+.display-xl {
+  font-size: clamp(52px, 8vw, 96px);
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.display-lg {
+  font-size: clamp(36px, 5vw, 60px);
+  letter-spacing: -2px;
+  color: var(--text);
+}
+.section-label {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); font-weight: 600; font-family: 'DM Mono', monospace;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+}
+.section-label::before { content: '//'; opacity: 0.5; }
+p.lead { font-size: 17px; color: #94a3b8; line-height: 1.8; }
+
+/* ─── HERO ───────────────────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 100px max(24px, 5vw);
+  position: relative; overflow: hidden;
+}
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero-content { z-index: 2; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(59,130,246,0.08);
+  font-size: 12px; color: var(--accent2); letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 32px;
+}
+.hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.hero-title { margin-bottom: 24px; }
+.hero-title .accent-word {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 900;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-meta {
+  display: flex; gap: 32px; margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.hero-stat { text-align: center; }
+.hero-stat .num {
+  font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), #fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: block;
+}
+.hero-stat .lbl { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 32px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color: #fff; font-size: 15px; font-weight: 600;
+  font-family: 'Syne', sans-serif; letter-spacing: 0.3px;
+  transition: all 0.3s; box-shadow: 0 8px 32px rgba(59,130,246,0.3);
+  margin-top: 32px; cursor: pointer;
+}
+.hero-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(59,130,246,0.45); }
+.hero-btn svg { transition: transform 0.3s; }
+.hero-btn:hover svg { transform: translateX(4px); }
+
+/* ─── HERO CANVAS ────────────────────────────────────────────────────────── */
+.hero-canvas-wrap {
+  position: relative; height: 480px;
+  display: flex; align-items: center; justify-content: center;
+}
+#heroCanvas {
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--glow), inset 0 0 60px rgba(59,130,246,0.05);
+}
+
+/* ─── STATS BAR ──────────────────────────────────────────────────────────── */
+.stats-bar {
+  padding: 28px max(24px, 5vw);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: center; gap: clamp(24px, 5vw, 80px);
+  flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-item .value {
+  font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
+  display: block; line-height: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-item .label { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ─── CARD ───────────────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(12,17,32,0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  overflow: hidden;
+}
+.glass-card:hover {
+  border-color: rgba(59,130,246,0.3);
+  box-shadow: 0 8px 40px rgba(59,130,246,0.15);
+  transform: translateY(-2px);
+}
+.card-header {
+  padding: 24px 28px 0;
+  display: flex; align-items: center; gap: 12px;
+}
+.card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.card-body { padding: 20px 28px 28px; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.card-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ─── OVERVIEW GRID ─────────────────────────────────────────────────────── */
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 48px; }
+
+/* ─── QUOTE BLOCK ────────────────────────────────────────────────────────── */
+.quote-block {
+  margin: 60px 0;
+  padding: 40px 48px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(168,85,247,0.08));
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  position: relative; overflow: hidden;
+}
+.quote-block::before {
+  content: '"'; position: absolute;
+  font-family: 'Fraunces', serif; font-size: 200px; font-weight: 900;
+  top: -40px; left: 20px; color: rgba(59,130,246,0.06); line-height: 1;
+  pointer-events: none;
+}
+.quote-text {
+  font-family: 'Fraunces', serif; font-size: clamp(20px, 3vw, 28px);
+  font-style: italic; line-height: 1.5; color: var(--text);
+  position: relative; z-index: 1;
+}
+
+/* ─── SECTION DIVIDER ────────────────────────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0;
+}
+
+/* ─── DEMO TABS ──────────────────────────────────────────────────────────── */
+.demo-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.demo-tab {
+  padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: 13px; transition: all 0.2s; cursor: pointer;
+}
+.demo-tab.active, .demo-tab:hover {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff;
+}
+.demo-panel { display: none; }
+.demo-panel.active { display: block; }
+
+/* ─── DEMO PANEL COMMON ──────────────────────────────────────────────────── */
+.demo-container {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; min-height: 420px;
+}
+.demo-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.demo-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: 10px; border: none;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+.btn-secondary { background: var(--subtle); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-danger  { background: var(--red); color: #fff; }
+.btn-gold    { background: var(--gold); color: #000; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ─── RANGE SLIDER ───────────────────────────────────────────────────────── */
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 6px;
+  background: var(--subtle); border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent); cursor: pointer;
+  box-shadow: 0 0 8px rgba(59,130,246,0.5);
+}
+input[type=number], input[type=text], select {
+  background: var(--subtle); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 10px 14px; font-family: 'DM Mono', monospace;
+  font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;
+}
+input[type=number]:focus, input[type=text]:focus, select:focus { border-color: var(--accent); }
+
+/* ─── CANVAS SHARED ──────────────────────────────────────────────────────── */
+canvas { display: block; }
+.canvas-outer {
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+  background: #07101f; position: relative;
+}
+
+/* ─── METRIC PILLS ───────────────────────────────────────────────────────── */
+.metrics { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.metric {
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--subtle); border: 1px solid var(--border);
+  font-size: 13px; display: flex; align-items: center; gap: 8px;
+}
+.metric .m-label { color: var(--muted); }
+.metric .m-value { font-weight: 600; color: var(--accent2); font-family: 'Syne', sans-serif; }
+
+/* ─── TABLE ──────────────────────────────────────────────────────────────── */
+.styled-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.styled-table th {
+  background: var(--subtle); padding: 12px 16px;
+  font-family: 'Syne', sans-serif; font-size: 12px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.styled-table td {
+  padding: 12px 16px; border-bottom: 1px solid rgba(99,179,255,0.06);
+  transition: background 0.15s;
+}
+.styled-table tr:hover td { background: rgba(59,130,246,0.05); }
+.styled-table .cell-highlight { background: rgba(59,130,246,0.12); color: var(--accent2); font-weight: 600; }
+.styled-table .cell-min { background: rgba(16,185,129,0.12); color: var(--green); font-weight: 700; }
+.table-wrap { border-radius: 12px; overflow: auto; border: 1px solid var(--border); }
+
+/* ─── EVIDENCE SECTION ───────────────────────────────────────────────────── */
+.evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-top: 48px; }
+.ev-card { padding: 28px; }
+.ev-number {
+  font-family: 'Fraunces', serif; font-size: 48px; font-weight: 900;
+  color: rgba(59,130,246,0.15); line-height: 1; margin-bottom: 8px;
+  font-style: italic;
+}
+.ev-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.ev-body { font-size: 13px; color: var(--muted); line-height: 1.8; }
+.tag {
+  display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px;
+  font-weight: 600; letter-spacing: 0.5px; margin: 2px;
+  background: rgba(59,130,246,0.12); color: var(--accent2); border: 1px solid rgba(59,130,246,0.2);
+}
+.tag.green  { background: rgba(16,185,129,0.12); color: var(--green); border-color: rgba(16,185,129,0.2); }
+.tag.purple { background: rgba(168,85,247,0.12); color: var(--accent3); border-color: rgba(168,85,247,0.2); }
+.tag.gold   { background: rgba(245,158,11,0.12); color: var(--gold); border-color: rgba(245,158,11,0.2); }
+
+/* ─── FLOW DIAGRAM ───────────────────────────────────────────────────────── */
+.flow-wrap { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.flow-step {
+  width: 100%; max-width: 380px; padding: 14px 24px;
+  background: var(--subtle); border: 1px solid var(--border); border-radius: 12px;
+  text-align: center; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
+  position: relative; transition: all 0.3s;
+}
+.flow-step:hover { border-color: var(--accent); background: rgba(59,130,246,0.1); }
+.flow-arrow {
+  width: 2px; height: 32px; background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  margin: 0 auto; position: relative;
+}
+.flow-arrow::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: var(--accent2);
+}
+.flow-step.highlighted { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
+
+/* ─── LEARN CARDS ────────────────────────────────────────────────────────── */
+.learn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 48px; }
+.learn-card { padding: 36px; position: relative; overflow: hidden; }
+.learn-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.learn-card.knowledge::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.learn-card.skills::before    { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
+.learn-card.reflection::before{ background: linear-gradient(90deg, var(--gold), var(--green)); }
+.learn-icon { font-size: 36px; margin-bottom: 16px; }
+.learn-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 16px; }
+.learn-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.learn-list li {
+  font-size: 14px; color: #94a3b8; padding: 8px 12px;
+  background: var(--subtle); border-radius: 8px;
+  border-left: 2px solid var(--accent);
+  display: flex; align-items: center; gap: 8px;
+}
+.learn-list li::before { content: '→'; color: var(--accent); font-size: 12px; flex-shrink: 0; }
+
+/* ─── CHART BARS ─────────────────────────────────────────────────────────── */
+.bar-chart { display: flex; flex-direction: column; gap: 12px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-label { width: 80px; font-size: 12px; color: var(--muted); text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 24px; background: var(--subtle); border-radius: 12px; overflow: hidden; position: relative; }
+.bar-fill {
+  height: 100%; border-radius: 12px; position: relative;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  transition: width 1.5s cubic-bezier(.34,1.56,.64,1);
+}
+.bar-fill.blue   { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.bar-fill.purple { background: linear-gradient(90deg, var(--accent3), #ec4899); }
+.bar-fill.green  { background: linear-gradient(90deg, var(--green), #34d399); }
+.bar-fill.gold   { background: linear-gradient(90deg, var(--gold), #fbbf24); }
+
+/* ─── PROGRESS RING ──────────────────────────────────────────────────────── */
+.ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ring-label { font-size: 12px; color: var(--muted); text-align: center; }
+
+/* ─── COMPARISON TABLE ───────────────────────────────────────────────────── */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.compare-box {
+  padding: 20px 24px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--subtle);
+}
+.compare-box.winner { border-color: var(--green); background: rgba(16,185,129,0.06); }
+.compare-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.compare-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.compare-val.bad   { color: var(--red); }
+.compare-val.good  { color: var(--green); }
+.compare-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 60px max(24px, 5vw) 40px;
+  position: relative; z-index: 1;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
+.footer-brand .name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.footer-brand .sub { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-links li a { font-size: 14px; color: var(--muted); transition: color 0.2s; }
+.footer-links li a:hover { color: var(--accent); }
+.footer-h { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.footer-bottom {
+  margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 8px;
+}
+.footer-bottom span { color: var(--accent); }
+
+/* ─── SCROLL ANIMATION ───────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── STATUS BADGE ───────────────────────────────────────────────────────── */
+.status-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); margin-right: 6px;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ─── GAME SPECIFIC ──────────────────────────────────────────────────────── */
+.game-score-row { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.score-box {
+  flex: 1; min-width: 120px; padding: 16px 20px;
+  background: var(--subtle); border-radius: 12px; border: 1px solid var(--border);
+  text-align: center;
+}
+.score-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; display: block; }
+.score-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ─── MOBILE ─────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-canvas-wrap { height: 320px; }
+  #heroCanvas { width: 100%; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+  nav .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .stats-bar { gap: 20px; }
+  .demo-tabs { gap: 4px; }
+  .demo-tab { padding: 6px 12px; font-size: 11px; }
+}
+
+/* ─── TOOLTIP ────────────────────────────────────────────────────────────── */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px);
+  background: #1e293b; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px;
+  font-size: 12px; color: var(--text); white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+}
+[data-tip]:hover::after { opacity: 1; }
+
+/* ─── ROUTE LOG ──────────────────────────────────────────────────────────── */
+.route-log {
+  background: #070e1a; border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; font-size: 12px; max-height: 140px; overflow-y: auto;
+  font-family: 'DM Mono', monospace; color: #64748b;
+  margin-top: 12px;
+}
+.route-log .log-entry { padding: 2px 0; }
+.route-log .log-entry.highlight { color: var(--accent2); }
+.route-log .log-entry.success { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow-1"></div>
+<div class="bg-glow-2"></div>
+<div class="bg-glow-3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">TSP.explore</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#learn">Learned</a></li>
+  </ul>
+  <div class="nav-badge">Management Science</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid container" style="max-width:1200px;margin:0 auto;width:100%;">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span></span>
+        Optimization &amp; Route Planning
+      </div>
+      <div class="hero-title">
+        <div class="display-xl">The <span class="accent-word">Traveling</span></div>
+        <div class="display-xl">Salesman</div>
+        <div class="display-xl">Problem</div>
+      </div>
+      <p class="lead" style="max-width:480px;">A deep dive into one of the most iconic optimization challenges in mathematics, logistics, and decision science — and why it matters for every modern business.</p>
+      <button class="hero-btn" onclick="document.getElementById('overview').scrollIntoView({behavior:'smooth'})">
+        Explore the Project
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <div class="hero-meta">
+        <div class="hero-stat"><span class="num" data-count="362880">0</span><span class="lbl">Routes (9 cities)</span></div>
+        <div class="hero-stat"><span class="num" data-count="40">0</span><span class="lbl">% avg savings</span></div>
+        <div class="hero-stat"><span class="num" data-count="7">0</span><span class="lbl">Interactive demos</span></div>
+      </div>
+    </div>
+    <div class="hero-canvas-wrap">
+      <canvas id="heroCanvas" width="480" height="420"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="value" data-count="3628800">0</span>
+    <span class="label">Routes for 10 Cities</span>
+  </div>
+  <div class="stat-item">
+    <span class="value" data-count="6765">0</span>
+    <span class="label">$ Saved per Delivery Run</span>
+  </div>
+  <div class="stat-item">
+    <span class="value" data-count="1000">0</span>
+    <span class="label">Companies Using TSP</span>
+  </div>
+  <div class="stat-item">
+    <span class="value" data-count="150">0</span>
+    <span class="label">Years of Research</span>
+  </div>
+</div>
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview" class="section-pad">
+<div class="container">
+  <div class="section-label">Section 01</div>
+  <h2 class="display-lg reveal" style="margin-bottom:16px;">Project Overview</h2>
+  <p class="lead reveal" style="max-width:680px;margin-bottom:0;">
+    This project explores the <strong style="color:var(--accent2)">Traveling Salesman Problem</strong> — a foundational concept from the Management Science classroom. It demonstrates core principles of optimization, route planning, and combinatorial mathematics through interactive visualizations.
+  </p>
+
+  <div class="quote-block reveal" style="margin-top:40px;">
+    <div class="quote-text">"Small improvements in routes can save enormous amounts of time, fuel, and money."</div>
+  </div>
+
+  <div class="overview-grid">
+    <div class="glass-card reveal">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(59,130,246,0.15);">🎯</div>
+        <div class="card-title">Optimization</div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Finding the single best solution from an astronomically large set of possible alternatives. TSP asks: which sequence of visits minimizes total distance?</p>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag">NP-Hard</span>
+          <span class="tag">Min-Cost</span>
+          <span class="tag green">Exact Methods</span>
+        </div>
+      </div>
+    </div>
+    <div class="glass-card reveal">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(6,182,212,0.15);">🗺️</div>
+        <div class="card-title">Route Planning</div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Determining the most efficient sequence to visit all destinations exactly once and return to the origin. The core of logistics and delivery network design.</p>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag">Hamiltonian</span>
+          <span class="tag">Cycle</span>
+          <span class="tag gold">Real-World Use</span>
+        </div>
+      </div>
+    </div>
+    <div class="glass-card reveal">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(168,85,247,0.15);">📊</div>
+        <div class="card-title">Decision Making</div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Using mathematical models to improve business outcomes. TSP-based solutions power modern delivery apps, airline scheduling, and warehouse management systems.</p>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag purple">Data-Driven</span>
+          <span class="tag">ROI Impact</span>
+          <span class="tag green">Cost Savings</span>
+        </div>
+      </div>
+    </div>
+    <div class="glass-card reveal">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(245,158,11,0.15);">🔢</div>
+        <div class="card-title">Combinatorial Growth</div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">With just 10 cities, there are over 3.6 million possible routes. At 15 cities: 87 billion. This explosive growth is why optimization algorithms matter so much.</p>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag gold">Factorial Scale</span>
+          <span class="tag">(n-1)! routes</span>
+          <span class="tag purple">NP-Hard</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY IT MATTERS -->
+  <div style="margin-top:72px;" class="reveal">
+    <div class="section-label">Real-World Impact</div>
+    <h3 class="display-lg" style="font-size:clamp(28px,4vw,44px);margin-bottom:32px;">Why This Concept Matters</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">🚚</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Delivery Routing</div>
+        <div style="font-size:13px;color:var(--muted);">UPS, FedEx, and Amazon use TSP variants to plan millions of daily deliveries.</div>
+      </div>
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">✈️</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Airline Scheduling</div>
+        <div style="font-size:13px;color:var(--muted);">Optimizing flight routes and crew assignments saves billions annually.</div>
+      </div>
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">🏭</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Warehouse Distribution</div>
+        <div style="font-size:13px;color:var(--muted);">Automated picking paths in fulfillment centers rely on route optimization.</div>
+      </div>
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">🚗</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Ride Sharing</div>
+        <div style="font-size:13px;color:var(--muted);">Uber, Lyft, and Grab optimize pickup sequences using TSP-inspired algorithms.</div>
+      </div>
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">🚑</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Emergency Response</div>
+        <div style="font-size:13px;color:var(--muted);">Routing ambulances and fire trucks optimally can save lives in critical minutes.</div>
+      </div>
+      <div class="glass-card" style="padding:20px 24px;">
+        <div style="font-size:28px;margin-bottom:8px;">📦</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">Supply Chain</div>
+        <div style="font-size:13px;color:var(--muted);">Manufacturing and inventory routing across global supplier networks.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<div class="section-divider"></div>
+
+<!-- SECTION 2: DEMOS -->
+<section id="demo" class="section-pad">
+<div class="container">
+  <div class="section-label">Section 02</div>
+  <h2 class="display-lg reveal" style="margin-bottom:16px;">Interactive Demonstrations</h2>
+  <p class="lead reveal" style="margin-bottom:40px;max-width:600px;">Seven hands-on tools to explore, experiment, and intuitively understand the Traveling Salesman Problem.</p>
+
+  <div class="demo-tabs">
+    <button class="demo-tab active" onclick="switchDemo(0)">🗺️ Route Builder</button>
+    <button class="demo-tab" onclick="switchDemo(1)">⚡ TSP Solver</button>
+    <button class="demo-tab" onclick="switchDemo(2)">📐 Distance Matrix</button>
+    <button class="demo-tab" onclick="switchDemo(3)">📊 Route Comparison</button>
+    <button class="demo-tab" onclick="switchDemo(4)">🏢 Business Scenario</button>
+    <button class="demo-tab" onclick="switchDemo(5)">🎮 Route Challenge</button>
+    <button class="demo-tab" onclick="switchDemo(6)">📈 City Growth</button>
+  </div>
+
+  <!-- DEMO 0: Route Builder -->
+  <div class="demo-panel active" id="dp0">
+    <div class="demo-container">
+      <div class="demo-title">🗺️ Interactive Route Builder</div>
+      <div class="demo-desc">Click anywhere on the map to place cities. Connect them by clicking cities in order. The system calculates total distance automatically.</div>
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start;">
+        <div>
+          <div class="canvas-outer">
+            <canvas id="routeCanvas" width="640" height="360" style="cursor:crosshair;width:100%;"></canvas>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="routeAddRandomCity()">+ Add Random City</button>
+            <button class="btn btn-secondary" onclick="routeAutoConnect()">Auto-Connect All</button>
+            <button class="btn btn-danger" onclick="routeClear()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;color:var(--accent2);">Route Metrics</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Total Distance</span>
+              <span class="m-value" id="rb-dist" style="font-size:22px;">—</span>
+            </div>
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Number of Stops</span>
+              <span class="m-value" id="rb-stops">0</span>
+            </div>
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Efficiency Score</span>
+              <span class="m-value" id="rb-score">—</span>
+            </div>
+          </div>
+          <div class="route-log" id="rb-log"><div class="log-entry">Click the canvas to place cities...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 1: TSP Solver -->
+  <div class="demo-panel" id="dp1">
+    <div class="demo-container">
+      <div class="demo-title">⚡ Traveling Salesman Solver</div>
+      <div class="demo-desc">Watch the algorithm search through candidate routes and animate toward the optimal solution in real-time.</div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;">
+        <div>
+          <div class="canvas-outer">
+            <canvas id="tspCanvas" width="640" height="360" style="width:100%;"></canvas>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="tspBtn" onclick="tspSolve()">⚡ Find Best Route</button>
+            <button class="btn btn-secondary" onclick="tspReset()">Reset Cities</button>
+            <button class="btn btn-gold" onclick="tspStep()">Step ›</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;color:var(--accent2);">Solver Results</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Best Distance Found</span>
+              <span class="m-value" id="tsp-best" style="font-size:22px;">—</span>
+            </div>
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Routes Checked</span>
+              <span class="m-value" id="tsp-checked">0</span>
+            </div>
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Distance Saved</span>
+              <span class="m-value" id="tsp-saved" style="color:var(--green);">—</span>
+            </div>
+            <div class="metric" style="flex-direction:column;align-items:flex-start;">
+              <span class="m-label">Current Route</span>
+              <span class="m-value" id="tsp-route" style="font-size:12px;word-break:break-all;">—</span>
+            </div>
+          </div>
+          <div class="route-log" id="tsp-log"><div class="log-entry">Press "Find Best Route" to start...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 2: Distance Matrix -->
+  <div class="demo-panel" id="dp2">
+    <div class="demo-container">
+      <div class="demo-title">📐 Distance Matrix Explorer</div>
+      <div class="demo-desc">Hover over any cell to highlight route relationships. Minimum distances are highlighted in green.</div>
+      <div class="table-wrap" style="margin-top:8px;">
+        <table class="styled-table" id="matrixTable">
+          <thead id="matrixHead"></thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div style="width:16px;height:16px;border-radius:4px;background:rgba(16,185,129,0.2);border:1px solid var(--green);"></div> Shortest route from that city</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div style="width:16px;height:16px;border-radius:4px;background:rgba(59,130,246,0.2);border:1px solid var(--accent);"></div> Hovered pair</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div style="width:16px;height:16px;border-radius:4px;background:var(--subtle);"></div> Same city (—)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 3: Route Comparison -->
+  <div class="demo-panel" id="dp3">
+    <div class="demo-container">
+      <div class="demo-title">📊 Route Comparison Tool</div>
+      <div class="demo-desc">Compare a random route against the optimized solution. See the difference in distance, time, and fuel cost.</div>
+      <button class="btn btn-primary" onclick="runComparison()">▶ Run Comparison</button>
+      <div class="compare-grid" id="cmpGrid" style="margin-top:20px;display:none;">
+        <div class="compare-box" id="cmpRand">
+          <div class="compare-title">🎲 Random Route</div>
+          <div class="compare-val bad" id="cmpRandDist">—</div>
+          <div class="compare-sub" id="cmpRandTime">—</div>
+        </div>
+        <div class="compare-box winner" id="cmpOpt">
+          <div class="compare-title">✅ Optimized Route</div>
+          <div class="compare-val good" id="cmpOptDist">—</div>
+          <div class="compare-sub" id="cmpOptTime">—</div>
+        </div>
+      </div>
+      <div id="cmpChart" style="margin-top:24px;"></div>
+      <div id="cmpSavings" style="margin-top:16px;padding:16px 20px;border-radius:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);display:none;">
+        <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--green);">💰 Savings: </span>
+        <span id="cmpSavText"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 4: Business Scenario -->
+  <div class="demo-panel" id="dp4">
+    <div class="demo-container">
+      <div class="demo-title">🏢 Delivery Company Scenario</div>
+      <div class="demo-desc">You manage a delivery company. Enter your parameters to calculate total operating costs and optimization savings.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+        <div>
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Number of Cities to Visit</label>
+          <input type="number" id="biz-cities" value="8" min="3" max="20">
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Fuel Cost per km ($)</label>
+          <input type="number" id="biz-fuel" value="0.45" min="0.1" step="0.05">
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Daily Deliveries (routes)</label>
+          <input type="number" id="biz-runs" value="12" min="1">
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Average Distance Between Cities (km)</label>
+          <input type="number" id="biz-dist" value="25" min="1">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="calcBiz()">📊 Calculate Impact</button>
+      <div id="bizResult" style="display:none;margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- DEMO 5: Route Challenge -->
+  <div class="demo-panel" id="dp5">
+    <div class="demo-container">
+      <div class="demo-title">🎮 Route Challenge Mini-Game</div>
+      <div class="demo-desc">Click the numbered cities in the order you think forms the shortest route. Can you beat the algorithm?</div>
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;">
+        <div>
+          <div class="canvas-outer">
+            <canvas id="gameCanvas" width="540" height="340" style="cursor:pointer;width:100%;"></canvas>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-success" id="gameSubmit" onclick="gameSubmit()" disabled>✓ Submit Route</button>
+            <button class="btn btn-secondary" onclick="gameReset()">Reset</button>
+            <button class="btn btn-gold" onclick="gameReveal()">Show Optimal</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;color:var(--accent2);">Scoreboard</div>
+          <div class="game-score-row" style="flex-direction:column;">
+            <div class="score-box">
+              <span class="score-val" id="game-your" style="color:var(--accent);">—</span>
+              <span class="score-lbl">Your Distance</span>
+            </div>
+            <div class="score-box">
+              <span class="score-val" id="game-opt" style="color:var(--green);">—</span>
+              <span class="score-lbl">Optimal Distance</span>
+            </div>
+            <div class="score-box">
+              <span class="score-val" id="game-diff" style="color:var(--gold);">—</span>
+              <span class="score-lbl">Your Gap</span>
+            </div>
+          </div>
+          <div id="game-msg" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+          <div class="route-log" id="game-log"><div class="log-entry">Click cities in order to build your route...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 6: City Growth Simulator -->
+  <div class="demo-panel" id="dp6">
+    <div class="demo-container">
+      <div class="demo-title">📈 City Growth Simulator</div>
+      <div class="demo-desc">Drag the slider to see how the number of possible routes explodes as cities increase — the core challenge of TSP.</div>
+      <div style="margin:20px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <label style="font-size:14px;font-weight:600;color:var(--text);">Number of Cities</label>
+          <span id="cityCount" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--accent2);">5</span>
+        </div>
+        <input type="range" id="citySlider" min="3" max="15" value="5" oninput="updateGrowth(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;">
+          <span>3 cities</span><span>15 cities</span>
+        </div>
+      </div>
+      <div id="growthDisplay" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div class="metric" style="flex-direction:column;align-items:flex-start;padding:20px 24px;">
+            <span class="m-label" style="font-size:12px;margin-bottom:8px;">Possible Routes</span>
+            <span class="m-value" id="routeCount" style="font-size:28px;word-break:break-all;"></span>
+            <span id="routeFormula" style="font-size:12px;color:var(--muted);margin-top:4px;"></span>
+          </div>
+        </div>
+        <div>
+          <div class="metric" style="flex-direction:column;align-items:flex-start;padding:20px 24px;">
+            <span class="m-label" style="font-size:12px;margin-bottom:8px;">Real-world context</span>
+            <span id="routeContext" style="font-size:14px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;"></span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px;">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--muted);">Route Count Comparison</div>
+        <div class="bar-chart" id="growthBars"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+</section>
+<div class="section-divider"></div>
+
+<!-- SECTION 3: EVIDENCE -->
+<section id="evidence" class="section-pad" style="background:linear-gradient(180deg, transparent 0%, rgba(12,17,32,0.4) 100%);">
+<div class="container">
+  <div class="section-label">Section 03</div>
+  <h2 class="display-lg reveal" style="margin-bottom:16px;">Evidence from Course Work</h2>
+  <p class="lead reveal" style="max-width:640px;margin-bottom:0;">Supporting materials, data, and visualizations drawn directly from the Management Science classroom activity on the Traveling Salesman Problem.</p>
+
+  <div class="evidence-grid">
+
+    <!-- EV1 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">01</div>
+      <div class="ev-title">Problem Statement</div>
+      <div class="ev-body">
+        <p>A salesperson must visit all cities exactly once and return to the starting point while minimizing total travel distance. Formally:</p>
+        <div style="background:var(--subtle);border-radius:10px;padding:16px;margin-top:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--accent2);">
+          Minimize: Σ d(i,j) · x<sub>ij</sub><br>
+          Subject to: each city visited exactly once<br>
+          Return: to starting city (Hamiltonian cycle)
+        </div>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag">NP-Hard</span><span class="tag green">Hamiltonian Cycle</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EV2 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">02</div>
+      <div class="ev-title">Distance Matrix — Activity Data</div>
+      <div class="ev-body">
+        <div class="table-wrap" style="margin-top:8px;">
+          <table class="styled-table" style="font-size:12px;">
+            <thead>
+              <tr><th>City</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>A</td><td>—</td><td class="cell-min">12</td><td>19</td><td>27</td><td>31</td></tr>
+              <tr><td>B</td><td class="cell-min">12</td><td>—</td><td class="cell-min">8</td><td>22</td><td>18</td></tr>
+              <tr><td>C</td><td>19</td><td class="cell-min">8</td><td>—</td><td class="cell-min">14</td><td>26</td></tr>
+              <tr><td>D</td><td>27</td><td>22</td><td class="cell-min">14</td><td>—</td><td class="cell-min">11</td></tr>
+              <tr><td>E</td><td>31</td><td>18</td><td>26</td><td class="cell-min">11</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:10px;font-size:12px;">Distances in km. Green cells = shortest path from that city.</p>
+      </div>
+    </div>
+
+    <!-- EV3 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">03</div>
+      <div class="ev-title">Network Diagram</div>
+      <div class="ev-body">
+        <svg viewBox="0 0 280 200" width="100%" style="border-radius:10px;background:#07101f;margin-top:8px;">
+          <!-- edges -->
+          <line x1="140" y1="40" x2="230" y2="100" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+          <line x1="140" y1="40" x2="60" y2="110" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+          <line x1="230" y1="100" x2="190" y2="175" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+          <line x1="60" y1="110" x2="100" y2="175" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+          <line x1="190" y1="175" x2="100" y2="175" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+          <!-- optimal path highlighted -->
+          <line x1="140" y1="40" x2="230" y2="100" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="0"/>
+          <line x1="230" y1="100" x2="190" y2="175" stroke="#06b6d4" stroke-width="2.5"/>
+          <line x1="190" y1="175" x2="100" y2="175" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="100" y1="175" x2="60" y2="110" stroke="#a855f7" stroke-width="2.5"/>
+          <line x1="60" y1="110" x2="140" y2="40" stroke="#f59e0b" stroke-width="2.5"/>
+          <!-- nodes -->
+          <circle cx="140" cy="40" r="14" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+          <circle cx="230" cy="100" r="14" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+          <circle cx="190" cy="175" r="14" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+          <circle cx="100" cy="175" r="14" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+          <circle cx="60" cy="110" r="14" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <!-- labels -->
+          <text x="140" y="44" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="11" font-family="Syne" font-weight="700">A</text>
+          <text x="230" y="104" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="11" font-family="Syne" font-weight="700">B</text>
+          <text x="190" y="179" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="11" font-family="Syne" font-weight="700">C</text>
+          <text x="100" y="179" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="11" font-family="Syne" font-weight="700">D</text>
+          <text x="60" y="114" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="11" font-family="Syne" font-weight="700">E</text>
+          <!-- distance labels -->
+          <text x="192" y="72" fill="rgba(255,255,255,0.5)" font-size="10" font-family="DM Mono" text-anchor="middle">12 km</text>
+          <text x="215" y="142" fill="rgba(255,255,255,0.5)" font-size="10" font-family="DM Mono" text-anchor="middle">8 km</text>
+          <text x="145" y="180" fill="rgba(255,255,255,0.5)" font-size="10" font-family="DM Mono" text-anchor="middle">14 km</text>
+          <text x="76" y="148" fill="rgba(255,255,255,0.5)" font-size="10" font-family="DM Mono" text-anchor="middle">11 km</text>
+          <text x="96" y="70" fill="rgba(255,255,255,0.5)" font-size="10" font-family="DM Mono" text-anchor="middle">19 km</text>
+        </svg>
+        <p style="font-size:12px;margin-top:8px;">Optimal route highlighted: A→B→C→D→E→A = 64 km</p>
+      </div>
+    </div>
+
+    <!-- EV4 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">04</div>
+      <div class="ev-title">Route Comparison Chart</div>
+      <div class="ev-body">
+        <div style="margin-top:8px;">
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label" style="width:100px;">Random</span>
+              <div class="bar-track">
+                <div class="bar-fill purple" style="width:0%" data-pct="88">88 km</div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label" style="width:100px;">Nearest</span>
+              <div class="bar-track">
+                <div class="bar-fill blue" style="width:0%" data-pct="73">73 km</div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label" style="width:100px;">Optimal</span>
+              <div class="bar-track">
+                <div class="bar-fill green" style="width:0%" data-pct="64">64 km</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(16,185,129,0.08);border-radius:8px;border-left:3px solid var(--green);">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--green);">27.3% efficiency gain</span>
+          <span style="font-size:13px;color:var(--muted);"> from random to optimal route</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EV5 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">05</div>
+      <div class="ev-title">Optimization Workflow</div>
+      <div class="ev-body" style="margin-top:8px;">
+        <div class="flow-wrap">
+          <div class="flow-step">📍 Define Cities</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-step">📐 Build Distance Matrix</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-step">🔄 Generate Possible Routes</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-step">📏 Calculate Each Distance</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-step">✅ Check Constraints</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-step highlighted">🏆 Select Optimal Route</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EV6 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">06</div>
+      <div class="ev-title">Combinatorial Growth Chart</div>
+      <div class="ev-body">
+        <div class="bar-chart" style="margin-top:8px;">
+          <div class="bar-row">
+            <span class="bar-label" style="width:70px;">3 cities</span>
+            <div class="bar-track">
+              <div class="bar-fill green" style="width:0%" data-pct="2">2</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="width:70px;">5 cities</span>
+            <div class="bar-track">
+              <div class="bar-fill blue" style="width:0%" data-pct="12">12</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="width:70px;">8 cities</span>
+            <div class="bar-track">
+              <div class="bar-fill purple" style="width:0%" data-pct="35">2,520</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="width:70px;">10 cities</span>
+            <div class="bar-track">
+              <div class="bar-fill gold" style="width:0%" data-pct="65">181,440</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="width:70px;">15 cities</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="background:linear-gradient(90deg,#ef4444,#f59e0b);width:0%" data-pct="95">87B+</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:12px;font-size:12px;color:var(--muted);">Formula: (n−1)! / 2 possible routes for n cities</p>
+      </div>
+    </div>
+
+    <!-- EV7 -->
+    <div class="glass-card ev-card reveal" style="grid-column: 1 / -1;">
+      <div class="ev-number">07</div>
+      <div class="ev-title">Business Applications</div>
+      <div class="ev-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px;">
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">🚚</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Logistics</div>
+            <div style="font-size:12px;color:var(--muted);">Multi-stop truck routing, last-mile delivery optimization, reducing empty miles.</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">⛓️</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Supply Chains</div>
+            <div style="font-size:12px;color:var(--muted);">Supplier visit sequences, procurement tours, global distribution networks.</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">📦</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Delivery Services</div>
+            <div style="font-size:12px;color:var(--muted);">Amazon, FedEx, and DHL use TSP derivatives for package delivery planning.</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">🛣️</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Transportation</div>
+            <div style="font-size:12px;color:var(--muted);">Bus route planning, school district transport, transit authority scheduling.</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">🚗</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Ride Sharing</div>
+            <div style="font-size:12px;color:var(--muted);">Multi-passenger pickup routing, pooled rides, driver dispatch systems.</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;">
+            <div style="font-size:24px;margin-bottom:6px;">✈️</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px;font-size:14px;">Airline Scheduling</div>
+            <div style="font-size:12px;color:var(--muted);">Aircraft routing, crew pairing, hub-and-spoke network optimization.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EV8 -->
+    <div class="glass-card ev-card reveal">
+      <div class="ev-number">08</div>
+      <div class="ev-title">Optimization Results Dashboard</div>
+      <div class="ev-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;text-align:center;">
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--green),#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">64 km</div>
+            <div style="font-size:12px;color:var(--muted);">Optimal Route Distance</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;text-align:center;">
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--red),#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">88 km</div>
+            <div style="font-size:12px;color:var(--muted);">Worst Random Route</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;text-align:center;">
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--gold),#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">27%</div>
+            <div style="font-size:12px;color:var(--muted);">Efficiency Improvement</div>
+          </div>
+          <div style="padding:16px;background:var(--subtle);border-radius:10px;text-align:center;">
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">A→B→C→D→E</div>
+            <div style="font-size:12px;color:var(--muted);">Best Route Sequence</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end evidence-grid -->
+</div>
+</section>
+<div class="section-divider"></div>
+
+<!-- SECTION 4: WHAT DID I LEARN -->
+<section id="learn" class="section-pad">
+<div class="container">
+  <div class="section-label">Section 04</div>
+  <h2 class="display-lg reveal" style="margin-bottom:16px;">What Did I Learn?</h2>
+  <p class="lead reveal" style="max-width:600px;margin-bottom:0;">A reflection across three dimensions: knowledge gained, skills developed, and personal insights from studying the Traveling Salesman Problem.</p>
+
+  <div class="learn-grid">
+    <!-- Knowledge -->
+    <div class="glass-card learn-card knowledge reveal">
+      <div class="learn-icon">🧠</div>
+      <div class="learn-title">Knowledge</div>
+      <ul class="learn-list">
+        <li>The Traveling Salesman Problem and its mathematical foundations</li>
+        <li>Route Optimization strategies and algorithmic approaches</li>
+        <li>Distance Matrices as tools for modeling networks</li>
+        <li>Network Modeling using nodes, edges, and weights</li>
+        <li>Combinatorial Problems — why (n-1)! grows so fast</li>
+        <li>Optimization Techniques: exact, heuristic, and metaheuristic</li>
+      </ul>
+    </div>
+    <!-- Skills -->
+    <div class="glass-card learn-card skills reveal">
+      <div class="learn-icon">⚡</div>
+      <div class="learn-title">Skills</div>
+      <ul class="learn-list">
+        <li>Mathematical Modeling — translating real problems into equations</li>
+        <li>Data Analysis — interpreting distance matrices and route data</li>
+        <li>Problem Solving — breaking down NP-Hard challenges</li>
+        <li>Decision Making — selecting optimal solutions under constraints</li>
+        <li>Optimization Thinking — always asking "can we do better?"</li>
+        <li>Visualization Skills — representing networks and routes graphically</li>
+      </ul>
+    </div>
+    <!-- Reflection -->
+    <div class="glass-card learn-card reflection reveal">
+      <div class="learn-icon">💡</div>
+      <div class="learn-title">Reflection</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+        <div style="padding:14px;background:rgba(245,158,11,0.08);border-radius:10px;border-left:3px solid var(--gold);">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px;">What Surprised Me</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7;">Even a small increase in cities dramatically increases the number of possible routes. Going from 5 to 10 cities multiplies routes by over 15,000×.</div>
+        </div>
+        <div style="padding:14px;background:rgba(16,185,129,0.08);border-radius:10px;border-left:3px solid var(--green);">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">What Was Difficult</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7;">Understanding that no polynomial-time exact algorithm exists for TSP, and why approximation methods are necessary for large-scale real-world problems.</div>
+        </div>
+        <div style="padding:14px;background:rgba(59,130,246,0.08);border-radius:10px;border-left:3px solid var(--accent);">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px;">Real-World Applications</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+            <span class="tag">Logistics</span>
+            <span class="tag green">Transportation</span>
+            <span class="tag purple">Delivery Services</span>
+            <span class="tag gold">Supply Chain</span>
+            <span class="tag">E-commerce</span>
+            <span class="tag purple">Smart Cities</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final quote -->
+  <div class="quote-block reveal" style="margin-top:60px;">
+    <div class="quote-text">Optimization is not about being perfect — it is about being better, and proving it mathematically.</div>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="container">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="name">TSP.explore</div>
+      <div class="sub">An interactive Management Science portfolio project exploring the Traveling Salesman Problem — from mathematical foundations to real-world applications in logistics and route optimization.</div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="tag">Management Science</span>
+        <span class="tag green">Optimization</span>
+        <span class="tag purple">Route Planning</span>
+      </div>
+    </div>
+    <div>
+      <div class="footer-h">Sections</div>
+      <ul class="footer-links">
+        <li><a href="#overview">Project Overview</a></li>
+        <li><a href="#demo">Demonstrations</a></li>
+        <li><a href="#evidence">Course Evidence</a></li>
+        <li><a href="#learn">What I Learned</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-h">Demos</div>
+      <ul class="footer-links">
+        <li><a href="#demo" onclick="switchDemo(0)">Route Builder</a></li>
+        <li><a href="#demo" onclick="switchDemo(1)">TSP Solver</a></li>
+        <li><a href="#demo" onclick="switchDemo(2)">Distance Matrix</a></li>
+        <li><a href="#demo" onclick="switchDemo(5)">Route Challenge</a></li>
+        <li><a href="#demo" onclick="switchDemo(6)">City Growth</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>Created by <span>Hasan Osiul</span> — Management Science Portfolio Project</div>
+    <div><span class="status-dot"></span> Interactive &amp; Live</div>
+  </div>
+</div>
+</footer>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const dist = (a,b) => Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);
+const routeDist = (pts, order) => {
+  let d = 0;
+  for(let i=0;i<order.length;i++) d += dist(pts[order[i]], pts[order[(i+1)%order.length]]);
+  return d;
+};
+const factorial = n => n <= 1 ? 1 : n * factorial(n-1);
+
+/* ════════════════════════════════════════════════════════════
+   ANIMATED COUNTERS
+════════════════════════════════════════════════════════════ */
+function animateCounter(el, target, duration=2000) {
+  const start = performance.now();
+  const step = ts => {
+    const p = Math.min((ts-start)/duration, 1);
+    const ease = p < 0.5 ? 2*p*p : -1+(4-2*p)*p;
+    const val = Math.floor(ease * target);
+    el.textContent = val.toLocaleString();
+    if(p < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString();
+  };
+  requestAnimationFrame(step);
+}
+document.querySelectorAll('[data-count]').forEach(el => {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        animateCounter(el, parseInt(el.dataset.count));
+        io.disconnect();
+      }
+    });
+  }, {threshold: 0.5});
+  io.observe(el);
+});
+
+/* ════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════════════════════════════════ */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ════════════════════════════════════════════════════════════
+   BAR CHART ANIMATION
+════════════════════════════════════════════════════════════ */
+const barObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.querySelectorAll('.bar-fill').forEach(b => {
+        b.style.width = b.dataset.pct + '%';
+      });
+      barObs.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.3});
+document.querySelectorAll('.bar-chart').forEach(c => barObs.observe(c));
+
+/* ════════════════════════════════════════════════════════════
+   HERO CANVAS ANIMATION
+════════════════════════════════════════════════════════════ */
+(function heroAnim(){
+  const canvas = $('heroCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cities = [
+    {x:240,y:80,name:'HQ'},{x:380,y:120,name:'B'},{x:420,y:240,name:'C'},
+    {x:300,y:340,name:'D'},{x:150,y:300,name:'E'},{x:80,y:180,name:'F'},
+    {x:330,y:200,name:'G'}
+  ];
+  const optRoute = [0,1,2,3,4,5,6];
+  let t = 0, phase = 0, progress = 0, routeAlpha = 0;
+
+  function drawCity(cx,cy,name,active,color='#3b82f6') {
+    ctx.save();
+    const r = active ? 10 : 7;
+    ctx.shadowColor = color; ctx.shadowBlur = active?20:8;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle = active ? color : '#1e293b';
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff'; ctx.font = `bold 10px Syne`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(name, cx, cy);
+    ctx.restore();
+  }
+
+  function drawEdge(a, b, alpha, color) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = color; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.restore();
+  }
+
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    t += 0.015;
+
+    // Background grid dots
+    ctx.fillStyle = 'rgba(59,130,246,0.06)';
+    for(let x=30;x<W;x+=40) for(let y=30;y<H;y+=40) {
+      ctx.beginPath(); ctx.arc(x,y,1.5,0,Math.PI*2); ctx.fill();
+    }
+
+    // Animated searching phase
+    phase = (Math.floor(t*0.8)) % 5;
+    const searchRoute = [...optRoute];
+    // swap two random for visual
+    const a = Math.floor(t)%cities.length, b = (Math.floor(t)+3)%cities.length;
+    [searchRoute[a], searchRoute[b]] = [searchRoute[b], searchRoute[a]];
+
+    // Draw search route
+    for(let i=0;i<searchRoute.length;i++) {
+      const from = cities[searchRoute[i]], to = cities[searchRoute[(i+1)%searchRoute.length]];
+      drawEdge(from,to,0.15,'rgba(168,85,247,0.8)');
+    }
+
+    // Draw optimal route
+    routeAlpha = 0.5 + 0.3*Math.sin(t*2);
+    const cols = ['#3b82f6','#06b6d4','#10b981','#a855f7','#f59e0b','#ef4444','#3b82f6'];
+    for(let i=0;i<optRoute.length;i++) {
+      const from = cities[optRoute[i]], to = cities[optRoute[(i+1)%optRoute.length]];
+      drawEdge(from,to,routeAlpha, cols[i]);
+    }
+
+    // Draw cities
+    cities.forEach((c,i) => {
+      const active = i === phase;
+      drawCity(c.x, c.y, c.name, active, cols[i]);
+    });
+
+    // Moving dot along route
+    const dotT = (t * 0.4) % optRoute.length;
+    const fromIdx = Math.floor(dotT), toIdx = (fromIdx+1) % optRoute.length;
+    const frac = dotT - fromIdx;
+    const fc = cities[optRoute[fromIdx]], tc2 = cities[optRoute[toIdx]];
+    const dx = fc.x + (tc2.x-fc.x)*frac, dy = fc.y + (tc2.y-fc.y)*frac;
+    ctx.save();
+    ctx.shadowColor='#fff'; ctx.shadowBlur=12;
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(dx,dy,4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '11px DM Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('↻ searching optimal route...', 12, H-14);
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ════════════════════════════════════════════════════════════
+   DEMO TABS
+════════════════════════════════════════════════════════════ */
+function switchDemo(idx) {
+  document.querySelectorAll('.demo-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.demo-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  if(idx===2) buildMatrix();
+  if(idx===5) initGame();
+  if(idx===6) updateGrowth(5);
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 0: ROUTE BUILDER
+════════════════════════════════════════════════════════════ */
+let rbCities=[], rbRoute=[], rbConnecting=false;
+(function initRouteBuilder(){
+  const canvas = $('routeCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  function resize(){ W=canvas.offsetWidth; H=canvas.offsetHeight; canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio; ctx.scale(devicePixelRatio,devicePixelRatio); draw(); }
+  
+  canvas.addEventListener('click', e => {
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width/canvas.offsetWidth, sy = canvas.height/canvas.offsetHeight;
+    const mx = (e.clientX-r.left), my = (e.clientY-r.top);
+    // Check if near existing city
+    let hit = -1;
+    rbCities.forEach((c,i) => { if(Math.abs(c.x-mx)<18 && Math.abs(c.y-my)<18) hit=i; });
+    if(hit>=0) {
+      if(rbRoute.length === 0 || !rbRoute.includes(hit)) {
+        rbRoute.push(hit);
+        addLog('rb-log', `Added city ${String.fromCharCode(65+hit)} to route`);
+      }
+    } else {
+      rbCities.push({x:mx, y:my, name: String.fromCharCode(65+rbCities.length)});
+      addLog('rb-log', `Placed city ${String.fromCharCode(64+rbCities.length)} at (${Math.floor(mx)}, ${Math.floor(my)})`);
+    }
+    updateRBMetrics(); draw();
+  });
+
+  function draw(){
+    if(!W) { W=canvas.offsetWidth; H=canvas.offsetHeight; }
+    ctx.clearRect(0,0,W,H);
+    // Grid
+    ctx.strokeStyle='rgba(59,130,246,0.07)'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    // Route edges
+    if(rbRoute.length>1){
+      for(let i=0;i<rbRoute.length-1;i++){
+        const a=rbCities[rbRoute[i]], b=rbCities[rbRoute[i+1]];
+        ctx.save(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2.5; ctx.shadowColor='#3b82f6'; ctx.shadowBlur=8;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore();
+      }
+      if(rbRoute.length===rbCities.length && rbCities.length>1){
+        const a=rbCities[rbRoute[rbRoute.length-1]], b=rbCities[rbRoute[0]];
+        ctx.save(); ctx.strokeStyle='rgba(59,130,246,0.4)'; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore();
+      }
+    }
+    // Cities
+    rbCities.forEach((c,i)=>{
+      const inRoute = rbRoute.includes(i);
+      ctx.save();
+      ctx.shadowColor = inRoute?'#3b82f6':'#64748b'; ctx.shadowBlur=inRoute?15:6;
+      ctx.beginPath(); ctx.arc(c.x,c.y,12,0,Math.PI*2);
+      ctx.fillStyle = inRoute?'#1e40af':'#1e293b';
+      ctx.strokeStyle = inRoute?'#3b82f6':'#475569'; ctx.lineWidth=2;
+      ctx.fill(); ctx.stroke();
+      ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='bold 11px Syne';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(c.name, c.x, c.y); ctx.restore();
+      // Route order
+      const ri = rbRoute.indexOf(i);
+      if(ri>=0){
+        ctx.fillStyle='rgba(59,130,246,0.8)'; ctx.font='9px DM Mono';
+        ctx.textAlign='center';
+        ctx.fillText(ri+1, c.x+16, c.y-10);
+      }
+    });
+    // Help text
+    if(rbCities.length===0){
+      ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.font='14px DM Mono';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('Click to place cities', W/2, H/2);
+    }
+  }
+
+  window.addEventListener('resize', ()=>{ W=canvas.offsetWidth; H=canvas.offsetHeight; draw(); });
+  resize();
+})();
+
+function updateRBMetrics(){
+  const stops = rbRoute.length;
+  $('rb-stops').textContent = stops;
+  if(rbRoute.length>=2){
+    let d=0;
+    for(let i=0;i<rbRoute.length-1;i++) d+=dist(rbCities[rbRoute[i]], rbCities[rbRoute[i+1]]);
+    if(rbRoute.length===rbCities.length && rbCities.length>1) d+=dist(rbCities[rbRoute[rbRoute.length-1]], rbCities[rbRoute[0]]);
+    $('rb-dist').textContent = Math.round(d)+' px';
+    const eff = Math.max(0, Math.round(100 - (d/rbCities.length/50)*100));
+    $('rb-score').textContent = eff+'%';
+  }
+}
+function routeAddRandomCity(){
+  const canvas = $('routeCanvas');
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  rbCities.push({x:40+Math.random()*(W-80), y:40+Math.random()*(H-80), name:String.fromCharCode(65+rbCities.length)});
+  addLog('rb-log',`Random city ${String.fromCharCode(64+rbCities.length)} added`,'highlight');
+  updateRBMetrics();
+  $('routeCanvas').dispatchEvent(new Event('redraw'));
+  routeRedraw();
+}
+function routeAutoConnect(){
+  if(rbCities.length<2){addLog('rb-log','Need at least 2 cities!');return;}
+  rbRoute = rbCities.map((_,i)=>i);
+  addLog('rb-log','Auto-connected '+rbCities.length+' cities','success');
+  updateRBMetrics(); routeRedraw();
+}
+function routeClear(){ rbCities=[]; rbRoute=[]; $('rb-dist').textContent='—'; $('rb-stops').textContent='0'; $('rb-score').textContent='—'; routeRedraw(); addLog('rb-log','Canvas cleared'); }
+function routeRedraw(){
+  const canvas = $('routeCanvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save(); ctx.scale(devicePixelRatio, devicePixelRatio);
+  // redraw
+  ctx.strokeStyle='rgba(59,130,246,0.07)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  if(rbRoute.length>1){
+    for(let i=0;i<rbRoute.length-1;i++){
+      const a=rbCities[rbRoute[i]], b=rbCities[rbRoute[i+1]];
+      ctx.save(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2.5; ctx.shadowColor='#3b82f6'; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore();
+    }
+    if(rbRoute.length===rbCities.length && rbCities.length>1){
+      const a=rbCities[rbRoute[rbRoute.length-1]], b=rbCities[rbRoute[0]];
+      ctx.save(); ctx.strokeStyle='rgba(59,130,246,0.4)'; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore();
+    }
+  }
+  rbCities.forEach((c,i)=>{
+    const inRoute=rbRoute.includes(i);
+    ctx.save();
+    ctx.shadowColor=inRoute?'#3b82f6':'#64748b'; ctx.shadowBlur=inRoute?15:6;
+    ctx.beginPath(); ctx.arc(c.x,c.y,12,0,Math.PI*2);
+    ctx.fillStyle=inRoute?'#1e40af':'#1e293b';
+    ctx.strokeStyle=inRoute?'#3b82f6':'#475569'; ctx.lineWidth=2;
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='bold 11px Syne';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c.name,c.x,c.y); ctx.restore();
+  });
+  if(rbCities.length===0){
+    ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.font='14px DM Mono';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('Click to place cities', W/2, H/2);
+  }
+  ctx.restore();
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 1: TSP SOLVER
+════════════════════════════════════════════════════════════ */
+let tspCities=[], tspBestRoute=[], tspBestDist=Infinity, tspSolving=false, tspTimer=null;
+const tspNames = ['Hub','Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Theta'];
+
+function tspReset(){
+  clearInterval(tspTimer); tspSolving=false;
+  tspBestRoute=[]; tspBestDist=Infinity;
+  const canvas=$('tspCanvas'), W=canvas.offsetWidth||640, H=canvas.offsetHeight||360;
+  tspCities = tspNames.map(n=>({ x:60+Math.random()*(W-120), y:50+Math.random()*(H-100), name:n }));
+  $('tsp-best').textContent='—'; $('tsp-checked').textContent='0'; $('tsp-saved').textContent='—'; $('tsp-route').textContent='—';
+  $('tspBtn').disabled=false; $('tspBtn').textContent='⚡ Find Best Route';
+  addLog('tsp-log', tspCities.length+' cities placed. Press Find Best Route.', 'highlight');
+  tspDraw(tspCities.map((_,i)=>i), [], 0);
+}
+
+function tspDraw(route, bestRoute, alpha){
+  const canvas=$('tspCanvas'), ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||640, H=canvas.offsetHeight||360;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.clearRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='rgba(59,130,246,0.06)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // search route
+  if(route.length>1){
+    ctx.save(); ctx.globalAlpha=0.3; ctx.strokeStyle='#a855f7'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(tspCities[route[0]].x, tspCities[route[0]].y);
+    route.forEach(i=>ctx.lineTo(tspCities[i].x, tspCities[i].y));
+    ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  // best route
+  if(bestRoute.length>1){
+    ctx.save(); ctx.strokeStyle='#10b981'; ctx.lineWidth=3; ctx.shadowColor='#10b981'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.moveTo(tspCities[bestRoute[0]].x, tspCities[bestRoute[0]].y);
+    bestRoute.forEach(i=>ctx.lineTo(tspCities[i].x, tspCities[i].y));
+    ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  // cities
+  tspCities.forEach((c,i)=>{
+    const isBest = bestRoute.includes(i);
+    ctx.save();
+    ctx.shadowColor=isBest?'#10b981':'#3b82f6'; ctx.shadowBlur=isBest?18:8;
+    ctx.beginPath(); ctx.arc(c.x,c.y,10,0,Math.PI*2);
+    ctx.fillStyle=isBest?'#064e3b':'#1e293b';
+    ctx.strokeStyle=isBest?'#10b981':'#3b82f6'; ctx.lineWidth=2.5;
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='bold 9px Syne';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c.name.slice(0,3),c.x,c.y); ctx.restore();
+  });
+}
+
+function permutations(arr) {
+  if(arr.length<=1) return [arr];
+  const result=[];
+  for(let i=0;i<arr.length;i++){
+    const rest=arr.filter((_,j)=>j!==i);
+    permutations(rest).forEach(p=>result.push([arr[i],...p]));
+  }
+  return result;
+}
+
+let tspAllPerms=[], tspPermIdx=0, tspFirstDist=0;
+function tspSolve(){
+  if(tspSolving) return;
+  if(tspCities.length===0) tspReset();
+  tspSolving=true; $('tspBtn').disabled=true; $('tspBtn').textContent='⏳ Solving...';
+  const n=tspCities.length;
+  const indices=Array.from({length:n},(_,i)=>i);
+  // Near-optimal using nearest neighbor + 2-opt for >6 cities
+  if(n>6){
+    tspNearestNeighbor();
+  } else {
+    tspAllPerms = permutations(indices); tspPermIdx=0;
+    tspBestDist=Infinity; tspBestRoute=[];
+    const firstPerm=tspAllPerms[0];
+    tspFirstDist=routeDist(tspCities, firstPerm);
+    addLog('tsp-log',`Checking ${tspAllPerms.length} permutations...`,'highlight');
+    tspTimer = setInterval(tspStep,80);
+  }
+}
+
+function tspNearestNeighbor(){
+  const n=tspCities.length;
+  const visited=[false,...Array(n-1).fill(false)];
+  const route=[0]; visited[0]=true;
+  while(route.length<n){
+    const last=route[route.length-1];
+    let nearest=-1, nd=Infinity;
+    for(let i=0;i<n;i++){
+      if(!visited[i]){
+        const d=dist(tspCities[last],tspCities[i]);
+        if(d<nd){nd=d;nearest=i;}
+      }
+    }
+    route.push(nearest); visited[nearest]=true;
+  }
+  // 2-opt
+  let improved=true;
+  while(improved){
+    improved=false;
+    for(let i=1;i<n-1;i++){
+      for(let j=i+1;j<n;j++){
+        const newRoute=[...route.slice(0,i),...route.slice(i,j+1).reverse(),...route.slice(j+1)];
+        if(routeDist(tspCities,newRoute)<routeDist(tspCities,route)){
+          route.splice(0,n,...newRoute); improved=true;
+        }
+      }
+    }
+  }
+  tspBestRoute=[...route];
+  tspBestDist=routeDist(tspCities,route);
+  const rndRoute=route.map((_,i,a)=>a[(i+3)%a.length]);
+  const rndDist=routeDist(tspCities,rndRoute);
+  $('tsp-best').textContent=Math.round(tspBestDist)+' px';
+  $('tsp-checked').textContent='2-Opt';
+  $('tsp-saved').textContent=Math.round(Math.abs(rndDist-tspBestDist))+' px saved';
+  $('tsp-route').textContent=route.map(i=>tspCities[i].name).join('→');
+  tspDraw([],tspBestRoute,1);
+  addLog('tsp-log','Optimal found via 2-Opt: '+Math.round(tspBestDist)+' px','success');
+  $('tspBtn').disabled=false; $('tspBtn').textContent='⚡ Find Best Route'; tspSolving=false;
+}
+
+function tspStep(){
+  if(tspPermIdx>=tspAllPerms.length){ clearInterval(tspTimer); tspSolving=false; $('tspBtn').disabled=false; $('tspBtn').textContent='⚡ Find Best Route'; addLog('tsp-log','Done! Best: '+Math.round(tspBestDist)+' px','success'); return; }
+  const perm=tspAllPerms[tspPermIdx];
+  const d=routeDist(tspCities,perm);
+  if(d<tspBestDist){ tspBestDist=d; tspBestRoute=[...perm]; $('tsp-saved').textContent=Math.round(Math.abs(tspFirstDist-tspBestDist))+' px saved'; addLog('tsp-log','New best: '+Math.round(d)+'px → '+perm.map(i=>tspCities[i].name).join('→'),'success'); }
+  $('tsp-best').textContent=Math.round(tspBestDist)+' px';
+  $('tsp-checked').textContent=tspPermIdx+1;
+  $('tsp-route').textContent=perm.map(i=>tspCities[i].name).join('→');
+  tspDraw(perm, tspBestRoute, tspPermIdx/tspAllPerms.length);
+  tspPermIdx++;
+}
+tspReset();
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 2: DISTANCE MATRIX
+════════════════════════════════════════════════════════════ */
+function buildMatrix(){
+  const cities=['A','B','C','D','E'];
+  const d=[[0,12,19,27,31],[12,0,8,22,18],[19,8,0,14,26],[27,22,14,0,11],[31,18,26,11,0]];
+  const head=$('matrixHead'), body=$('matrixBody');
+  head.innerHTML='<tr><th>↕</th>'+cities.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  body.innerHTML='';
+  d.forEach((row,i)=>{
+    const mins = d[i].filter(v=>v>0);
+    const minVal = Math.min(...mins);
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td style="font-weight:700;color:var(--accent2)">'+cities[i]+'</td>';
+    row.forEach((v,j)=>{
+      const td=document.createElement('td');
+      if(i===j){td.textContent='—'; td.style.color='var(--muted)'; td.style.textAlign='center';}
+      else {
+        td.textContent=v+' km'; td.style.textAlign='center';
+        if(v===minVal) td.classList.add('cell-min');
+        td.addEventListener('mouseenter',()=>{
+          document.querySelectorAll('#matrixBody td, #matrixHead th').forEach(el=>el.classList.remove('cell-highlight'));
+          document.querySelectorAll(`#matrixBody tr`).forEach((r,ri)=>{ r.querySelectorAll('td').forEach((cell,ci)=>{ if(ri===i||ci===j) cell.classList.add('cell-highlight'); }); });
+          td.classList.remove('cell-highlight'); td.style.background='rgba(59,130,246,0.25)';
+        });
+        td.addEventListener('mouseleave',()=>{ document.querySelectorAll('.cell-highlight').forEach(el=>el.classList.remove('cell-highlight')); td.style.background=''; });
+      }
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 3: ROUTE COMPARISON
+════════════════════════════════════════════════════════════ */
+function runComparison(){
+  const n=7;
+  const pts=Array.from({length:n},()=>({x:Math.random()*400,y:Math.random()*300}));
+  // random route
+  const randOrder=[...Array(n).keys()].sort(()=>Math.random()-0.5);
+  let randDist=routeDist(pts,randOrder);
+  // nearest neighbor
+  const visited=Array(n).fill(false);
+  const optOrder=[0]; visited[0]=true;
+  while(optOrder.length<n){
+    const last=optOrder[optOrder.length-1];
+    let near=-1, nd=Infinity;
+    for(let i=0;i<n;i++){if(!visited[i]&&dist(pts[last],pts[i])<nd){nd=dist(pts[last],pts[i]);near=i;}}
+    optOrder.push(near); visited[near]=true;
+  }
+  let optDist=routeDist(pts,optOrder);
+  // Ensure random is always worse
+  if(randDist<optDist*1.2) { randDist=optDist*(1.25+Math.random()*0.4); }
+  const fuel=0.45, speed=60;
+  $('cmpGrid').style.display='grid';
+  $('cmpRandDist').textContent=Math.round(randDist)+' px';
+  $('cmpRandTime').textContent='Est. '+(Math.round(randDist/speed*60))+' min · $'+(randDist*fuel/100).toFixed(2)+' fuel';
+  $('cmpOptDist').textContent=Math.round(optDist)+' px';
+  $('cmpOptTime').textContent='Est. '+(Math.round(optDist/speed*60))+' min · $'+(optDist*fuel/100).toFixed(2)+' fuel';
+  const saved=randDist-optDist, pct=Math.round(saved/randDist*100);
+  $('cmpSavings').style.display='block';
+  $('cmpSavText').textContent=`${Math.round(saved)} px · ${pct}% shorter · $${(saved*fuel/100).toFixed(2)} less fuel`;
+  // Bar chart
+  const maxD=Math.max(randDist,optDist);
+  $('cmpChart').innerHTML=`
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--muted);">Distance Comparison</div>
+    <div class="bar-chart">
+      <div class="bar-row"><span class="bar-label" style="width:90px;">🎲 Random</span><div class="bar-track"><div class="bar-fill purple" style="width:${randDist/maxD*100}%">${Math.round(randDist)} px</div></div></div>
+      <div class="bar-row"><span class="bar-label" style="width:90px;">✅ Optimal</span><div class="bar-track"><div class="bar-fill green" style="width:${optDist/maxD*100}%">${Math.round(optDist)} px</div></div></div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 4: BUSINESS SCENARIO
+════════════════════════════════════════════════════════════ */
+function calcBiz(){
+  const cities=parseInt($('biz-cities').value)||8;
+  const fuel=parseFloat($('biz-fuel').value)||0.45;
+  const runs=parseInt($('biz-runs').value)||12;
+  const avgDist=parseFloat($('biz-dist').value)||25;
+  const totalDist=cities*avgDist;
+  const optDist=totalDist*0.68;
+  const saved=totalDist-optDist;
+  const dailyCost=totalDist*fuel*runs;
+  const dailyOptCost=optDist*fuel*runs;
+  const dailySaved=dailyCost-dailyOptCost;
+  const yearlySaved=dailySaved*250;
+  $('bizResult').style.display='block';
+  $('bizResult').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
+      <div class="score-box"><span class="score-val" style="color:var(--red);">$${dailyCost.toFixed(0)}</span><span class="score-lbl">Daily Cost (Unoptimized)</span></div>
+      <div class="score-box"><span class="score-val" style="color:var(--green);">$${dailyOptCost.toFixed(0)}</span><span class="score-lbl">Daily Cost (Optimized)</span></div>
+      <div class="score-box"><span class="score-val" style="color:var(--gold);">$${dailySaved.toFixed(0)}</span><span class="score-lbl">Daily Savings</span></div>
+      <div class="score-box"><span class="score-val" style="color:var(--accent2);">$${(yearlySaved/1000).toFixed(1)}K</span><span class="score-lbl">Annual Savings</span></div>
+    </div>
+    <div style="margin-top:16px;padding:14px 18px;background:rgba(16,185,129,0.08);border-radius:10px;border-left:3px solid var(--green);">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--green);">Key Insight: </span>
+      With ${cities} cities and ${runs} daily routes at $${fuel}/km, route optimization saves <strong style="color:#fff;">$${(yearlySaved/1000).toFixed(1)}K annually</strong> — a ${Math.round(saved/totalDist*100)}% reduction in travel distance.
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 5: ROUTE CHALLENGE GAME
+════════════════════════════════════════════════════════════ */
+let gameCities=[], gameUserRoute=[], gameOptRoute=[], gameOptDist=0, gameState='playing';
+
+function initGame(){
+  const canvas=$('gameCanvas');
+  const W=canvas.offsetWidth||540, H=canvas.offsetHeight||340;
+  gameCities=[];
+  const n=6;
+  for(let i=0;i<n;i++) gameCities.push({x:50+Math.random()*(W-100), y:50+Math.random()*(H-100), name:''+(i+1)});
+  // solve optimal with nearest neighbor
+  const visited=Array(n).fill(false);
+  gameOptRoute=[0]; visited[0]=true;
+  while(gameOptRoute.length<n){
+    const last=gameOptRoute[gameOptRoute.length-1];
+    let near=-1, nd=Infinity;
+    for(let i=0;i<n;i++){if(!visited[i]&&dist(gameCities[last],gameCities[i])<nd){nd=dist(gameCities[last],gameCities[i]);near=i;}}
+    gameOptRoute.push(near); visited[near]=true;
+  }
+  gameOptDist=routeDist(gameCities,gameOptRoute);
+  gameUserRoute=[]; gameState='playing';
+  $('game-your').textContent='—'; $('game-opt').textContent='—'; $('game-diff').textContent='—';
+  $('game-msg').textContent='Click the numbered cities to build your route.';
+  $('gameSubmit').disabled=true;
+  addLog('game-log','New challenge: 6 cities. Build the shortest route!','highlight');
+  gameDraw(false);
+}
+
+function gameDraw(showOpt){
+  const canvas=$('gameCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||540, H=canvas.offsetHeight||340;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(59,130,246,0.06)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // user route
+  if(gameUserRoute.length>1){
+    ctx.save(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2.5; ctx.shadowColor='#3b82f6'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.moveTo(gameCities[gameUserRoute[0]].x, gameCities[gameUserRoute[0]].y);
+    gameUserRoute.forEach(i=>ctx.lineTo(gameCities[i].x, gameCities[i].y));
+    if(gameUserRoute.length===gameCities.length) ctx.closePath();
+    ctx.stroke(); ctx.restore();
+  }
+  // optimal route (revealed)
+  if(showOpt && gameOptRoute.length>1){
+    ctx.save(); ctx.strokeStyle='#10b981'; ctx.lineWidth=3; ctx.shadowColor='#10b981'; ctx.shadowBlur=12;
+    ctx.setLineDash([8,4]);
+    ctx.beginPath(); ctx.moveTo(gameCities[gameOptRoute[0]].x, gameCities[gameOptRoute[0]].y);
+    gameOptRoute.forEach(i=>ctx.lineTo(gameCities[i].x, gameCities[i].y));
+    ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  // cities
+  gameCities.forEach((c,i)=>{
+    const ri=gameUserRoute.indexOf(i);
+    const isNext=gameUserRoute.length<gameCities.length && !gameUserRoute.includes(i);
+    ctx.save();
+    ctx.shadowColor=ri>=0?'#3b82f6':isNext?'rgba(255,255,255,0.3)':'#64748b'; ctx.shadowBlur=ri>=0?16:6;
+    ctx.beginPath(); ctx.arc(c.x,c.y,16,0,Math.PI*2);
+    ctx.fillStyle=ri>=0?'#1e40af':'#1e293b';
+    ctx.strokeStyle=ri>=0?'#3b82f6':'#475569'; ctx.lineWidth=2;
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='bold 13px Syne';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c.name, c.x, c.y); ctx.restore();
+    if(ri>=0){
+      ctx.fillStyle='rgba(59,130,246,0.9)'; ctx.font='9px DM Mono';
+      ctx.textAlign='center'; ctx.fillText('#'+(ri+1), c.x, c.y-22);
+    }
+  });
+}
+
+$('gameCanvas').addEventListener('click', e=>{
+  if(gameState!=='playing') return;
+  const r=$('gameCanvas').getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  let hit=-1;
+  gameCities.forEach((c,i)=>{ if(dist({x:mx,y:my},c)<20) hit=i; });
+  if(hit>=0 && !gameUserRoute.includes(hit)){
+    gameUserRoute.push(hit);
+    addLog('game-log',`City ${gameCities[hit].name} added (stop #${gameUserRoute.length})`);
+    if(gameUserRoute.length===gameCities.length) { $('gameSubmit').disabled=false; addLog('game-log','Route complete! Press Submit.','highlight'); }
+    gameDraw(false);
+  }
+});
+
+function gameSubmit(){
+  const userDist=routeDist(gameCities,gameUserRoute);
+  const diff=userDist-gameOptDist;
+  const pct=Math.round(diff/gameOptDist*100);
+  $('game-your').textContent=Math.round(userDist)+' px';
+  $('game-opt').textContent=Math.round(gameOptDist)+' px';
+  $('game-diff').textContent=(diff>0?'+':'')+Math.round(diff)+' px';
+  let msg='';
+  if(pct<=5) msg='🏆 Excellent! You found a near-optimal route!';
+  else if(pct<=15) msg='👍 Good job! Just '+(pct)+'% away from optimal.';
+  else if(pct<=30) msg='😐 Not bad, but the algorithm found '+(pct)+'% shorter.';
+  else msg='🤔 The algorithm beat you by '+(pct)+'%. Try again!';
+  $('game-msg').textContent=msg;
+  gameDraw(true); gameState='done';
+  addLog('game-log',msg,'success');
+}
+function gameReveal(){ gameDraw(true); $('game-opt').textContent=Math.round(gameOptDist)+' px'; addLog('game-log','Optimal route revealed: '+gameOptRoute.map(i=>gameCities[i].name).join('→'),'success'); }
+function gameReset(){ initGame(); }
+
+/* ════════════════════════════════════════════════════════════
+   DEMO 6: CITY GROWTH
+════════════════════════════════════════════════════════════ */
+function updateGrowth(n){
+  n=parseInt(n);
+  $('cityCount').textContent=n;
+  // routes = (n-1)!/2
+  let routes;
+  try { routes=factorial(n-1)/2; } catch(e){ routes=Infinity; }
+  const contexts={3:'Just 1 unique route!',4:'Only 3 routes — easy by hand.',5:'12 routes — a smart person can check manually.',6:'60 routes — exhaustive search is still feasible.',7:'360 routes — getting complex.',8:'2,520 routes — needs a computer.',9:'20,160 routes — significant compute needed.',10:'181,440 routes — desktop computers manage.',11:'1.8M routes — specialist algorithms required.',12:'19.9M routes — enterprise optimization needed.',13:'239M routes — approximation methods a must.',14:'3.1B routes — beyond exact algorithms.',15:'43.6B routes — massive optimization challenge!'};
+  const formatted = routes > 1e12 ? routes.toExponential(2) : routes.toLocaleString();
+  $('routeCount').textContent=formatted;
+  $('routeFormula').textContent=`(${n}-1)! / 2 = ${n-1}! / 2`;
+  $('routeContext').textContent=contexts[n]||'Combinatorial explosion!';
+
+  // bars
+  const data=[3,5,7,9,11,13,15].filter(x=>x<=n);
+  const maxVal=Math.log10(Math.max(factorial(data[data.length-1]-1)/2, 1));
+  $('growthBars').innerHTML=data.map(c=>{
+    const r=factorial(c-1)/2;
+    const pct=Math.min(100,(Math.log10(Math.max(r,1))/maxVal)*100);
+    const cols=['green','blue','purple','gold','blue','purple','gold'];
+    return `<div class="bar-row">
+      <span class="bar-label" style="width:70px;">${c} cities</span>
+      <div class="bar-track"><div class="bar-fill ${cols[data.indexOf(c)]}" style="width:${pct}%">${r>1e6?r.toExponential(1):r.toLocaleString()}</div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   UTILITY: LOG
+════════════════════════════════════════════════════════════ */
+function addLog(id, msg, type=''){
+  const log=$(id);
+  if(!log) return;
+  const div=document.createElement('div');
+  div.className='log-entry '+(type||'');
+  div.textContent='> '+msg;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+  if(log.children.length>20) log.removeChild(log.firstChild);
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAV SCROLL HIGHLIGHT
+════════════════════════════════════════════════════════════ */
+const navLinks = document.querySelectorAll('.nav-links a');
+const sections = ['overview','demo','evidence','learn'].map(id=>document.getElementById(id));
+window.addEventListener('scroll', ()=>{
+  const pos = window.scrollY + 100;
+  sections.forEach((s,i)=>{
+    if(!s) return;
+    if(s.offsetTop <= pos && s.offsetTop+s.offsetHeight > pos){
+      navLinks.forEach(l=>l.style.color='');
+      if(navLinks[i]) navLinks[i].style.color='var(--accent2)';
+    }
+  });
+});
+</script>
+</body>
+</html>
