@@ -408,6 +408,11 @@
       margin-left: 0.1rem;
     }
 
+    /* ── SECTION SPACER ── */
+    .section-spacer {
+      margin-top: 4rem;
+    }
+
     /* ── FOOTER ── */
     footer {
       position: relative;
@@ -445,6 +450,11 @@
     .card:nth-child(1) { animation-delay: 0.06s; }
     .card:nth-child(2) { animation-delay: 0.14s; }
     .card:nth-child(3) { animation-delay: 0.22s; }
+    .card:nth-child(4) { animation-delay: 0.30s; }
+    .card:nth-child(5) { animation-delay: 0.38s; }
+    .card:nth-child(6) { animation-delay: 0.46s; }
+    .card:nth-child(7) { animation-delay: 0.54s; }
+    .card:nth-child(8) { animation-delay: 0.62s; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
@@ -536,7 +546,6 @@
 
     <div class="grade-btn-wrap">
       <span class="grade-label">Academic Record</span>
-      <!-- REPLACE # WITH YOUR GRADE VIEWER URL -->
       <a href="https://josuedean.github.io/ibm/gradeviewer/" target="_blank" class="grade-btn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -555,6 +564,7 @@
   <!-- ═══════════════════════ MAIN ═══════════════════════ -->
   <main>
 
+    <!-- ═══ ASSIGNMENTS SECTION ═══ -->
     <div class="section-header">
       <span class="section-label">Assignments</span>
       <span class="section-count">[ 03 ]</span>
@@ -573,7 +583,6 @@
           <div class="card-tag"><span class="tag-dot"></span>Document File</div>
           <h2>Custom Optimization<br/>Problem</h2>
           <div class="btn-group">
-            <!-- REPLACE custom-optimization.docx WITH YOUR ACTUAL FILENAME -->
             <a href="Delivery_Route_Optimization.docx" target="_blank" class="btn btn-cyan">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -598,7 +607,6 @@
           <div class="card-tag"><span class="tag-dot"></span>Excalidraw &nbsp;·&nbsp; 3 Diagrams</div>
           <h2>Branch and Bound</h2>
           <div class="btn-group">
-            <!-- REPLACE # WITH YOUR EXCALIDRAW LINKS OR FILE PATHS -->
             <a href="Decision Tree Team.excalidraw" target="_blank" class="btn btn-cyan">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <circle cx="12" cy="12" r="3"/>
@@ -634,14 +642,12 @@
           <div class="card-tag"><span class="tag-dot"></span>Video &amp; Document</div>
           <h2>May the 4th<br/>Be With You!</h2>
           <div class="btn-group">
-            <!-- REPLACE may-4th-video.mp4 WITH YOUR ACTUAL VIDEO FILENAME -->
             <a href="https://drive.google.com/file/d/1xzgQKMyw2XNNQ9CwExz5ClQqZ5eK9cnn/view?usp=sharing" target="_blank" class="btn btn-cyan">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
               Watch Video
             </a>
-            <!-- REPLACE # WITH YOUR GOOGLE DOCS OR DOC LINK -->
             <a href="May the 4th.docx" target="_blank" class="btn btn-emerald">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -656,6 +662,125 @@
       </div>
 
     </div>
+
+    <!-- ═══ PROJECTS SECTION ═══ -->
+    <div class="section-spacer">
+      <div class="section-header">
+        <span class="section-label">Projects</span>
+        <span class="section-count">[ 05 ]</span>
+        <div class="section-line"></div>
+      </div>
+    </div>
+
+    <div class="cards">
+
+      <!-- ─── P01 · Pizza Optimizer ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">P1</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Interactive Project</div>
+          <h2>Pizza Optimizer</h2>
+          <div class="btn-group">
+            <a href="pizza-optimizer.html" target="_blank" class="btn btn-cyan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              Open Project
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── P02 · Branch & Bound Project ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">P2</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Interactive Project</div>
+          <h2>Branch &amp; Bound<br/>Project</h2>
+          <div class="btn-group">
+            <a href="bb_project.html" target="_blank" class="btn btn-emerald">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              Open Project
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── P03 · Travelling Salesman Problem ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">P3</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Interactive Project</div>
+          <h2>Travelling Salesman<br/>Problem</h2>
+          <div class="btn-group">
+            <a href="tsp_project.html" target="_blank" class="btn btn-amber">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              Open Project
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── P04 · Pinocchio Optimization ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">P4</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Interactive Project</div>
+          <h2>Pinocchio<br/>Optimization</h2>
+          <div class="btn-group">
+            <a href="pinocchio_optimization.html" target="_blank" class="btn btn-cyan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              Open Project
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── P05 · Mathematical Modeling ─── -->
+      <div class="card">
+        <div class="num-col">
+          <div class="card-num">P5</div>
+          <div class="num-dash"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag"><span class="tag-dot"></span>Interactive Project</div>
+          <h2>Mathematical<br/>Modeling</h2>
+          <div class="btn-group">
+            <a href="mathematical_modeling.html" target="_blank" class="btn btn-emerald">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              Open Project
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </main>
 
   <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
