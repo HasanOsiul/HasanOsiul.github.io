@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ulsan Day Trip — Busan → Ulsan → Busan</title>
+<style>
+  :root{
+    --ink:#1b1a17;
+    --paper:#faf6ee;
+    --gold:#c79a3c;
+    --gold-bright:#e8b94a;
+    --dawn-1:#fde7c8; --dawn-2:#f6c98e; --dawn-3:#eea96a;
+    --morn-1:#cfe7f0; --morn-2:#8fc6dd; --morn-3:#4f9bbd;
+    --noon-1:#bfe3cf; --noon-2:#6fbf9a; --noon-3:#2f8f6e;
+    --aft-1:#cfe0e8; --aft-2:#8fb9c9; --aft-3:#3f7a93;
+    --gold-1:#ffe2a8; --gold-2:#f0a93c;
+    --dusk-1:#3a2750; --dusk-2:#8a3a5a; --dusk-3:#e0703f;
+    --night-1:#161229; --night-2:#241c3d; --night-3:#3a2150;
+    --line: rgba(27,26,23,0.12);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family: 'Iowan Old Style','Palatino Linotype', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x:hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ===== Utility type ===== */
+  .eyebrow{
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size:11px;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    opacity:0.72;
+    font-weight:600;
+  }
+
+  .display{
+    font-family: 'Didot','Iowan Old Style', Georgia, serif;
+    font-weight:400;
+    letter-spacing:0.01em;
+  }
+
+  /* ===== Progress rail (the day's arc) ===== */
+  #rail{
+    position:fixed;
+    left:0; top:0;
+    width:6px; height:100vh;
+    z-index:50;
+    background: linear-gradient(180deg,
+      var(--dawn-3) 0%,
+      var(--morn-3) 16%,
+      var(--noon-3) 34%,
+      var(--noon-3) 46%,
+      var(--aft-3) 60%,
+      var(--gold-bright) 76%,
+      var(--dusk-3) 90%,
+      var(--night-3) 100%);
+    opacity:0.9;
+  }
+  #rail-dot{
+    position:fixed;
+    left:-5px;
+    width:16px; height:16px;
+    border-radius:50%;
+    background:var(--paper);
+    border:3px solid var(--gold-bright);
+    box-shadow:0 0 0 4px rgba(0,0,0,0.06);
+    z-index:51;
+    top:0;
+    transition: top 0.05s linear;
+  }
+
+  /* ===== Nav dots ===== */
+  #stop-nav{
+    position:fixed;
+    right:22px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:60;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  #stop-nav a{
+    width:10px; height:10px;
+    border-radius:50%;
+    background:rgba(27,26,23,0.18);
+    display:block;
+    position:relative;
+    transition: background 0.3s, transform 0.3s;
+  }
+  #stop-nav a.active{
+    background:var(--gold-bright);
+    transform:scale(1.5);
+  }
+  #stop-nav a .tip{
+    position:absolute;
+    right:20px; top:50%;
+    transform:translateY(-50%);
+    white-space:nowrap;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--paper);
+    padding:5px 10px;
+    border-radius:3px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s;
+  }
+  #stop-nav a:hover .tip{opacity:1;}
+  @media (max-width:760px){ #stop-nav{display:none;} }
+
+  /* ===== Sections ===== */
+  section{
+    position:relative;
+    min-height:100vh;
+    width:100%;
+    display:flex;
+    align-items:center;
+    padding: 90px 8vw;
+    overflow:hidden;
+  }
+
+  /* HERO ================================================= */
+  #hero{
+    background:
+      radial-gradient(ellipse 120% 80% at 30% 0%, var(--dawn-1) 0%, transparent 60%),
+      linear-gradient(160deg, var(--dawn-1) 0%, var(--dawn-2) 45%, var(--dawn-3) 100%);
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:120px;
+  }
+  .sun{
+    position:absolute;
+    right:8%;
+    top:14%;
+    width:260px; height:260px;
+    border-radius:50%;
+    background: radial-gradient(circle at 38% 32%, #fff6e0, var(--gold-bright) 55%, var(--dawn-3) 100%);
+    box-shadow: 0 0 120px 40px rgba(232,185,74,0.35);
+    animation: rise 3s ease-out;
+  }
+  @keyframes rise{
+    from{ transform:translateY(60px); opacity:0;}
+    to{ transform:translateY(0); opacity:1;}
+  }
+  .route-line{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:13px;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.65;
+    margin-bottom:28px;
+  }
+  #hero h1{
+    font-size:clamp(48px, 8.2vw, 118px);
+    line-height:0.96;
+    max-width:14ch;
+  }
+  #hero h1 em{
+    font-style:italic;
+    color:var(--gold);
+    display:block;
+  }
+  #hero .sub{
+    margin-top:30px;
+    font-size:18px;
+    max-width:42ch;
+    line-height:1.55;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    opacity:0.85;
+  }
+  .train-card{
+    margin-top:46px;
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .pill{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:12px;
+    letter-spacing:0.06em;
+    background:rgba(255,255,255,0.55);
+    border:1px solid rgba(27,26,23,0.25);
+    padding:10px 18px;
+    border-radius:30px;
+    backdrop-filter:blur(4px);
+  }
+  .pill b{font-weight:700;}
+  .scroll-cue{
+    position:absolute;
+    bottom:36px; left:8vw;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    opacity:0.6;
+    display:flex; align-items:center; gap:10px;
+  }
+  .scroll-cue .ln{
+    width:40px; height:1px; background:var(--ink);
+    animation: pulse-w 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse-w{ 0%,100%{width:40px;} 50%{width:14px;} }
+
+  /* STOP SECTION TEMPLATE ================================ */
+  .stop{
+    flex-direction:column;
+    justify-content:center;
+  }
+  .stop-head{
+    display:flex;
+    align-items:baseline;
+    gap:22px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .stop-time{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:13px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    border:1px solid currentColor;
+    border-radius:20px;
+    opacity:0.85;
+  }
+  .stop h2{
+    font-size:clamp(34px,5.6vw,72px);
+    line-height:1;
+  }
+  .stop .kr{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:14px;
+    opacity:0.55;
+    letter-spacing:0.05em;
+    margin-left:2px;
+  }
+  .stop-grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap:54px;
+    margin-top:38px;
+    width:100%;
+    align-items:center;
+  }
+  .stop-grid.reverse{
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+  .stop-grid.reverse .gallery{order:2;}
+  .stop-grid.reverse .copy{order:1;}
+  @media (max-width:880px){
+    .stop-grid, .stop-grid.reverse{ grid-template-columns:1fr; }
+    .stop-grid.reverse .gallery{order:1;}
+    .stop-grid.reverse .copy{order:2;}
+  }
+
+  .copy p{
+    font-size:17px;
+    line-height:1.7;
+    max-width:48ch;
+    opacity:0.9;
+  }
+  .copy .lede{
+    font-size:20px;
+    line-height:1.6;
+    margin-bottom:18px;
+    font-style:italic;
+  }
+  .highlights{
+    margin-top:26px;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+  .highlights div{
+    display:flex;
+    gap:14px;
+    align-items:baseline;
+    font-size:15px;
+  }
+  .highlights .mk{
+    width:7px; height:7px;
+    border-radius:50%;
+    background:currentColor;
+    flex:none;
+    transform:translateY(-2px);
+  }
+
+  /* gallery */
+  .gallery{
+    position:relative;
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:14px;
+    height:440px;
+  }
+  .gallery img{
+    width:100%; height:100%;
+    object-fit:cover;
+    border-radius:4px;
+    display:block;
+    box-shadow:0 18px 40px -16px rgba(0,0,0,0.35);
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1), box-shadow 0.6s;
+  }
+  .gallery img:hover{ transform:scale(1.035) translateY(-3px); }
+  .gallery .big{ grid-row:1 / 3; }
+  .gallery .cap{
+    position:absolute;
+    bottom:10px; left:10px;
+    background:rgba(20,18,15,0.55);
+    color:#fff;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:10px;
+    letter-spacing:0.06em;
+    padding:4px 9px;
+    border-radius:3px;
+    backdrop-filter:blur(3px);
+  }
+
+  /* color themes per stop */
+  #stop1{ background: linear-gradient(170deg, var(--morn-1), var(--morn-2) 60%, var(--morn-3)); color:var(--ink); }
+  #stop2{ background: linear-gradient(170deg, var(--noon-1), var(--noon-2) 55%, var(--noon-3)); color:var(--ink); }
+  #lunch{ background: linear-gradient(170deg, #fff3e0, #ffd9a0); color:var(--ink); }
+  #stop3{ background: linear-gradient(170deg, var(--aft-1), var(--aft-2) 55%, var(--aft-3)); color:#10221f; }
+  #stop4{ background: linear-gradient(170deg, var(--gold-1), var(--gold-bright) 55%, var(--dusk-3)); color:#2a1810; }
+  #dinner{ background: linear-gradient(170deg, var(--dusk-1), var(--dusk-2) 60%, var(--dusk-3)); color:#fff0e6; }
+  #return{ background: linear-gradient(170deg, var(--night-1), var(--night-2) 55%, var(--night-3)); color:#f1ecff; }
+
+  #lunch, #dinner{ min-height:auto; padding:80px 8vw; }
+  .meal-flex{
+    display:flex;
+    gap:50px;
+    align-items:center;
+    width:100%;
+    flex-wrap:wrap;
+  }
+  .meal-flex img{
+    width:340px; max-width:42vw;
+    height:240px;
+    object-fit:cover;
+    border-radius:4px;
+    box-shadow:0 18px 40px -16px rgba(0,0,0,0.4);
+  }
+  @media (max-width:700px){ .meal-flex img{ max-width:100%; width:100%; } }
+  .meal-text h3{ font-size:clamp(26px,4vw,40px); margin-bottom:14px; }
+  .meal-text p{ font-size:16px; line-height:1.7; max-width:46ch; opacity:0.92; }
+
+  /* RETURN / footer */
+  #return{
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+  }
+  #return h2{ font-size:clamp(34px,5.6vw,68px); }
+  .timeline-recap{
+    margin-top:50px;
+    width:100%;
+    border-top:1px solid rgba(255,255,255,0.18);
+  }
+  .tl-row{
+    display:flex;
+    gap:24px;
+    padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:14px;
+    align-items:baseline;
+  }
+  .tl-row .t{ width:150px; flex:none; opacity:0.65; letter-spacing:0.04em;}
+  .tl-row .d{ font-family:Georgia,serif; font-size:16px; }
+  .tl-row .tag{
+    margin-left:auto;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    opacity:0.55;
+  }
+  footer{
+    background:var(--night-1);
+    color:rgba(241,236,255,0.5);
+    text-align:center;
+    padding:30px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:0.1em;
+  }
+
+  /* reveal on scroll */
+  .reveal{
+    opacity:0;
+    transform:translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.8,.2,1);
+  }
+  .reveal.in{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* lightbox */
+  #lightbox{
+    position:fixed; inset:0;
+    background:rgba(10,9,8,0.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:5vw;
+  }
+  #lightbox.open{ display:flex; }
+  #lightbox img{
+    max-width:90vw; max-height:85vh;
+    border-radius:4px;
+    box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  }
+  #lightbox-close{
+    position:absolute; top:24px; right:32px;
+    color:#fff; font-size:30px; cursor:pointer;
+    font-family:Georgia,serif;
+    opacity:0.8;
+  }
+  #lightbox-close:hover{opacity:1;}
+
+  .gallery img, .meal-flex img{ cursor:zoom-in; }
+
+  a:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--gold-bright);
+    outline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<div id="rail"></div>
+<div id="rail-dot"></div>
+
+<nav id="stop-nav">
+  <a href="#hero" data-name="Start"><span class="tip">Depart Busan</span></a>
+  <a href="#stop1" data-name="Daewangam"><span class="tip">Daewangam Park</span></a>
+  <a href="#stop2" data-name="Ilsan"><span class="tip">Ilsan Beach</span></a>
+  <a href="#lunch" data-name="Lunch"><span class="tip">Lunch</span></a>
+  <a href="#stop3" data-name="Taehwagang"><span class="tip">Taehwagang Garden</span></a>
+  <a href="#stop4" data-name="Grand Park"><span class="tip">Grand Park Fountain</span></a>
+  <a href="#dinner" data-name="Dinner"><span class="tip">Dinner</span></a>
+  <a href="#return" data-name="Return"><span class="tip">Return to Busan</span></a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="sun"></div>
+  <div class="route-line">Busan → Ulsan → Busan · One Day</div>
+  <h1 class="display reveal in">Ulsan,<br><em>in a single day.</em></h1>
+  <p class="sub reveal in">A coastline of granite and pine, a river of bamboo, and a fountain lit gold at dusk — out from Busan at 7:30, back by 9.</p>
+  <div class="train-card reveal in">
+    <div class="pill">Depart Busan Station · <b>7:30 AM</b></div>
+    <div class="pill">KTX/SRT <b>20–25 min</b> · Mugunghwa <b>50–60 min</b></div>
+    <div class="pill">Arrive Taehwagang Station · <b>~8:30–9:00 AM</b></div>
+  </div>
+  <div class="scroll-cue"><span class="ln"></span> Scroll through the day</div>
+</section>
+
+<!-- STOP 1: DAEWANGAM PARK -->
+<section id="stop1" class="stop">
+  <div class="reveal">
+    <div class="stop-head">
+      <span class="stop-time">9:00 — 11:30 AM</span>
+      <h2 class="display">Daewangam Park <span class="kr">대왕암공원</span></h2>
+    </div>
+  </div>
+  <div class="stop-grid reveal">
+    <div class="copy">
+      <p class="lede">Probably the most beautiful place in Ulsan — and the morning's anchor.</p>
+      <p>A black pine forest opens onto a jagged volcanic coastline, where a suspension bridge sways out over the open sea toward a lighthouse rock. Slow paths, sea air, and the best light of the day for photographs.</p>
+      <div class="highlights">
+        <div><span class="mk"></span> Famous rocky coastline</div>
+        <div><span class="mk"></span> Suspension bridge over the sea</div>
+        <div><span class="mk"></span> Pine forest walking trails</div>
+        <div><span class="mk"></span> Excellent photography spots</div>
+      </div>
+    </div>
+    <div class="gallery">
+      <img class="big" src="https://tong.visitkorea.or.kr/cms/resource/43/2728943_image2_1.jpg" alt="Daewangam Park Suspension Bridge over the sea" onerror="this.onerror=null;this.src='https://source.unsplash.com/800x900/?suspension-bridge,sea,coast';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/16/3583516_image2_1.jpg" alt="Daewangam Park rocky coastline and pine forest" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?rocky,coastline';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/16/3583516_image2_1.jpg" alt="Daewangam Park pine forest trail" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?pine-forest,coastal-trail';">
+      <span class="cap">Daewangam Park · official tourism photos</span>
+    </div>
+  </div>
+</section>
+
+<!-- STOP 2: ILSAN BEACH -->
+<section id="stop2" class="stop">
+  <div class="reveal">
+    <div class="stop-head">
+      <span class="stop-time">11:30 AM — 12:30 PM</span>
+      <h2 class="display">Ilsan Beach <span class="kr">일산해수욕장</span></h2>
+    </div>
+  </div>
+  <div class="stop-grid reverse reveal">
+    <div class="copy">
+      <p class="lede">A short walk from Daewangam, and the day's first real pause.</p>
+      <p>Soft sand, calm shallow water, and a wide promenade backed by low hills. No itinerary item here — just slow down, feel the sea breeze, and let the morning's walking settle before lunch.</p>
+      <div class="highlights">
+        <div><span class="mk"></span> Walking distance from Daewangam Park</div>
+        <div><span class="mk"></span> Relax, take photos</div>
+        <div><span class="mk"></span> Enjoy the sea breeze</div>
+      </div>
+    </div>
+    <div class="gallery">
+      <img class="big" src="https://tong.visitkorea.or.kr/cms/resource/44/3528444_image2_1.jpg" alt="Ulsan Ilsan Beach shoreline" onerror="this.onerror=null;this.src='https://source.unsplash.com/800x900/?sandy-beach,korea';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/44/3528444_image2_1.jpg" alt="Ilsan Beach promenade" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?beach,promenade';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/16/3583516_image2_1.jpg" alt="Coastal view near Daewangam and Ilsan Beach" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?coast,sea-breeze';">
+      <span class="cap">Ilsan Beach · official tourism photo</span>
+    </div>
+  </div>
+</section>
+
+<!-- LUNCH -->
+<section id="lunch">
+  <div class="meal-flex reveal">
+    <img src="https://source.unsplash.com/700x500/?korean,seafood,fresh" alt="Fresh Korean seafood spread, similar to what's served near Ilsan Beach">
+    <div class="meal-text">
+      <div class="stop-time" style="margin-bottom:14px;display:inline-block;">12:30 — 1:30 PM</div>
+      <h3 class="display">Lunch near Ilsan Beach</h3>
+      <p>Fresh seafood is the obvious move this close to the water — raw fish, grilled shellfish, or a spicy seafood stew. If you'd rather not, the side streets behind the beach have solid Korean standards too.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STOP 3: TAEHWAGANG NATIONAL GARDEN -->
+<section id="stop3" class="stop">
+  <div class="reveal">
+    <div class="stop-head">
+      <span class="stop-time">2:00 — 4:30 PM</span>
+      <h2 class="display">Taehwagang National Garden <span class="kr">태화강 국가정원</span></h2>
+    </div>
+  </div>
+  <div class="stop-grid reveal">
+    <div class="copy">
+      <p class="lede">One of Korea's best urban parks — and a complete change of pace.</p>
+      <p>A vast bamboo forest, locally called Sipri Daenamu-sup, lines the river for nearly a kilometer, with paths that turn the afternoon light green. Beyond it, open gardens and river views make this the day's most peaceful stretch.</p>
+      <div class="highlights">
+        <div><span class="mk"></span> Huge bamboo forest</div>
+        <div><span class="mk"></span> River views</div>
+        <div><span class="mk"></span> Flower gardens</div>
+        <div><span class="mk"></span> Peaceful walking paths</div>
+      </div>
+    </div>
+    <div class="gallery">
+      <img class="big" src="https://tong.visitkorea.or.kr/cms/resource/88/2613688_image2_1.jpg" alt="Taehwagang National Garden Simni Bamboo Grove path" onerror="this.onerror=null;this.src='https://source.unsplash.com/800x900/?bamboo,forest,path';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/88/2613688_image2_1.jpg" alt="Taehwagang bamboo forest river view" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?river,bamboo';">
+      <img src="https://source.unsplash.com/700x500/?flower-garden,riverside" alt="Flower garden path">
+      <span class="cap">Taehwagang National Garden · official tourism photo</span>
+    </div>
+  </div>
+</section>
+
+<!-- STOP 4: ULSAN GRAND PARK FOUNTAIN -->
+<section id="stop4" class="stop">
+  <div class="reveal">
+    <div class="stop-head">
+      <span class="stop-time">5:00 — 6:00 PM</span>
+      <h2 class="display">Ulsan Grand Park <span class="kr">울산대공원</span></h2>
+    </div>
+  </div>
+  <div class="stop-grid reverse reveal">
+    <div class="copy">
+      <p class="lede">The fountain, finally — timed for the day's best light.</p>
+      <p>As the sun drops, the park's musical fountain show begins (schedule varies by season), with jets lit gold and rose against the evening sky. The whole park is built for an evening walk, but this is the moment to slow down and watch.</p>
+      <div class="highlights">
+        <div><span class="mk"></span> Sunset photos</div>
+        <div><span class="mk"></span> Evening walk</div>
+        <div><span class="mk"></span> Fountain show — schedule varies by season</div>
+      </div>
+    </div>
+    <div class="gallery">
+      <img class="big" src="https://tong.visitkorea.or.kr/cms/resource/22/3072322_image2_1.jpg" alt="Ulsan Grand Park" onerror="this.onerror=null;this.src='https://source.unsplash.com/800x900/?park,fountain,evening';">
+      <img src="https://tong.visitkorea.or.kr/cms/resource/22/3072322_image2_1.jpg" alt="Ulsan Grand Park grounds" onerror="this.onerror=null;this.src='https://source.unsplash.com/700x500/?fountain,lit,night';">
+      <img src="https://source.unsplash.com/700x500/?park,sunset,walk" alt="Park evening walk sunset">
+      <span class="cap">Ulsan Grand Park · official tourism photo</span>
+    </div>
+  </div>
+</section>
+
+<!-- DINNER -->
+<section id="dinner">
+  <div class="meal-flex reveal">
+    <img src="https://source.unsplash.com/700x500/?korean,dinner,restaurant" alt="Korean dinner table">
+    <div class="meal-text">
+      <div class="stop-time" style="margin-bottom:14px;display:inline-block;border-color:#fff0e6;">6:00 — 7:00 PM</div>
+      <h3 class="display">Dinner in Ulsan</h3>
+      <p>Wind down near the city center or back around the Taehwagang area — both have plenty of options for a relaxed final meal before the train.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RETURN -->
+<section id="return">
+  <div class="reveal">
+    <div class="stop-time" style="margin-bottom:18px;display:inline-block;border-color:#f1ecff;">7:30 — 8:00 PM</div>
+    <h2 class="display">Return to Busan</h2>
+    <p style="margin-top:16px; font-size:17px; max-width:46ch; line-height:1.7; opacity:0.85;">Train from Taehwagang Station back toward Busan. Arrive around 8:30–9:00 PM — a full day, coast to garden to fountain, and home by night.</p>
+  </div>
+
+  <div class="timeline-recap reveal">
+    <div class="tl-row"><span class="t">7:30 AM</span><span class="d">Leave Busan Station</span><span class="tag">Train</span></div>
+    <div class="tl-row"><span class="t">9:00–11:30 AM</span><span class="d">Daewangam Park</span><span class="tag">Coast</span></div>
+    <div class="tl-row"><span class="t">11:30–12:30 PM</span><span class="d">Ilsan Beach</span><span class="tag">Beach</span></div>
+    <div class="tl-row"><span class="t">12:30–1:30 PM</span><span class="d">Lunch near Ilsan Beach</span><span class="tag">Meal</span></div>
+    <div class="tl-row"><span class="t">2:00–4:30 PM</span><span class="d">Taehwagang National Garden</span><span class="tag">Garden</span></div>
+    <div class="tl-row"><span class="t">5:00–6:00 PM</span><span class="d">Ulsan Grand Park Fountain</span><span class="tag">Sunset</span></div>
+    <div class="tl-row"><span class="t">6:00–7:00 PM</span><span class="d">Dinner</span><span class="tag">Meal</span></div>
+    <div class="tl-row"><span class="t">7:30–9:00 PM</span><span class="d">Return to Busan</span><span class="tag">Train</span></div>
+  </div>
+</section>
+
+<footer>Busan → Ulsan → Busan · One Day Itinerary</footer>
+
+<div id="lightbox"><span id="lightbox-close">&times;</span><img id="lightbox-img" src="" alt=""></div>
+
+<script>
+  // universal image failsafe — if any photo fails to load, swap to a themed placeholder gradient
+  document.querySelectorAll('img').forEach(img=>{
+    img.addEventListener('error', function handler(){
+      if(this.dataset.failed) return;
+      this.dataset.failed = '1';
+      this.style.background = 'linear-gradient(135deg, #cfa45c, #8a6a3a)';
+      this.style.minHeight = '200px';
+    }, {once:true});
+  });
+
+  // scroll progress rail
+  const rail = document.getElementById('rail-dot');
+  function updateRail(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight);
+    const max = window.innerHeight - 16;
+    rail.style.top = (scrolled * max) + 'px';
+  }
+  document.addEventListener('scroll', updateRail);
+  updateRail();
+
+  // reveal on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in'); }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // active nav dot
+  const navLinks = document.querySelectorAll('#stop-nav a');
+  const sections = Array.from(navLinks).map(a => document.querySelector(a.getAttribute('href')));
+  function updateNav(){
+    let idx = 0;
+    sections.forEach((s,i)=>{
+      if(s && s.getBoundingClientRect().top < window.innerHeight*0.5) idx = i;
+    });
+    navLinks.forEach((a,i)=> a.classList.toggle('active', i===idx));
+  }
+  document.addEventListener('scroll', updateNav);
+  updateNav();
+
+  // lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  document.querySelectorAll('.gallery img, .meal-flex img').forEach(img=>{
+    img.addEventListener('click', ()=>{
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightbox.classList.add('open');
+    });
+  });
+  document.getElementById('lightbox-close').addEventListener('click', ()=> lightbox.classList.remove('open'));
+  lightbox.addEventListener('click', (e)=>{ if(e.target===lightbox) lightbox.classList.remove('open'); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') lightbox.classList.remove('open'); });
+</script>
+
+</body>
+</html>
