@@ -472,7 +472,7 @@
 let clockInTime   = null;      // raw Date
 let clockInRound  = null;      // rounded Date (used for calculations)
 let timerInterval = null;
-let shiftLog      = JSON.parse(localStorage.getItem('timeEarnLog2') || '[]');
+let shiftLog      = [];
 
 // ─── LIVE CLOCK ────────────────────────────────────
 function updateClock() {
@@ -535,6 +535,22 @@ function getSettings() {
     stdHrs: parseFloat(document.getElementById('std-hours').value) || 8,
     sym:    document.getElementById('currency').value
   };
+}
+
+function saveSettings() {
+  const s = getSettings();
+  localStorage.setItem('timeEarnSettings', JSON.stringify(s));
+}
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('timeEarnSettings'));
+    if (!s) return;
+    if (s.wage   !== undefined) document.getElementById('hourly-wage').value = s.wage;
+    if (s.holPct !== undefined) document.getElementById('holiday-pct').value = s.holPct;
+    if (s.stdHrs !== undefined) document.getElementById('std-hours').value   = s.stdHrs;
+    if (s.sym    !== undefined) document.getElementById('currency').value     = s.sym;
+  } catch(e) {}
 }
 
 // ─── CLOCK IN ──────────────────────────────────────
@@ -651,7 +667,7 @@ function recalcToday(hours) {
 }
 
 // ─── RECALC ALL ────────────────────────────────────
-function recalcAll() { renderLog(); }
+function recalcAll() { saveSettings(); renderLog(); }
 
 // ─── RENDER LOG ────────────────────────────────────
 function renderLog() {
@@ -751,26 +767,37 @@ function clearLog() {
 }
 
 
-const savedClockIn = localStorage.getItem('activeClockIn');
+// ─── INIT (runs after DOM is fully ready) ──────────
+document.addEventListener('DOMContentLoaded', function () {
 
-if (savedClockIn) {
-  clockInTime = new Date(savedClockIn);
-  clockInRound = applyRound(clockInTime);
+  // Load saved shift log
+  try {
+    shiftLog = JSON.parse(localStorage.getItem('timeEarnLog2') || '[]');
+  } catch(e) { shiftLog = []; }
 
-  document.getElementById('display-in').textContent = fmtTime(clockInRound);
-  document.getElementById('display-in').classList.remove('empty');
+  // Restore saved settings (wage, currency, etc.)
+  loadSettings();
 
-  document.getElementById('btn-clock-in').disabled = true;
-  document.getElementById('btn-clock-out').disabled = false;
+  // Restore an active clock-in session if one was in progress
+  const savedClockIn = localStorage.getItem('activeClockIn');
+  if (savedClockIn) {
+    clockInTime  = new Date(savedClockIn);
+    clockInRound = applyRound(clockInTime);
 
-  document.getElementById('timer-strip').classList.add('visible');
+    document.getElementById('display-in').textContent = fmtTime(clockInRound);
+    document.getElementById('display-in').classList.remove('empty');
 
-  timerInterval = setInterval(tickTimer, 1000);
-  tickTimer();
-}
+    document.getElementById('btn-clock-in').disabled  = true;
+    document.getElementById('btn-clock-out').disabled = false;
 
-// ─── INIT ──────────────────────────────────────────
-renderLog();
+    document.getElementById('timer-strip').classList.add('visible');
+
+    timerInterval = setInterval(tickTimer, 1000);
+    tickTimer();
+  }
+
+  renderLog();
+});
 
 </script>
 </body>
