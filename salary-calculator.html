@@ -546,6 +546,8 @@ function clockIn() {
   clockInTime  = raw;
   clockInRound = rounded;
 
+  localStorage.setItem('activeClockIn', raw.toISOString());
+
   document.getElementById('display-in').textContent = fmtTime(rounded);
   document.getElementById('display-in').classList.remove('empty');
 
@@ -569,6 +571,7 @@ function clockOut() {
   const rawOut     = new Date();
   const roundedOut = applyRound(rawOut);
   clearInterval(timerInterval);
+  localStorage.removeItem('activeClockIn');
 
   const diffMs = roundedOut - clockInRound;
   const hours  = Math.max(0, diffMs / 3600000);
@@ -747,8 +750,28 @@ function clearLog() {
   renderLog();
 }
 
+
+const savedClockIn = localStorage.getItem('activeClockIn');
+
+if (savedClockIn) {
+  clockInTime = new Date(savedClockIn);
+  clockInRound = applyRound(clockInTime);
+
+  document.getElementById('display-in').textContent = fmtTime(clockInRound);
+  document.getElementById('display-in').classList.remove('empty');
+
+  document.getElementById('btn-clock-in').disabled = true;
+  document.getElementById('btn-clock-out').disabled = false;
+
+  document.getElementById('timer-strip').classList.add('visible');
+
+  timerInterval = setInterval(tickTimer, 1000);
+  tickTimer();
+}
+
 // ─── INIT ──────────────────────────────────────────
 renderLog();
+
 </script>
 </body>
 </html>
