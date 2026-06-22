@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeEarn — Salary Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2330;
+    --border:    #2a3340;
+    --accent:    #00e5a0;
+    --accent-dim:#00b87d;
+    --warn:      #ff6b6b;
+    --warn-dim:  #c94444;
+    --text:      #e6edf3;
+    --muted:     #7d8590;
+    --punch:     #58a6ff;
+    --gold:      #f0c060;
+    --radius:    14px;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Space Grotesk', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    max-width: 860px;
+    margin: 0 auto 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+  .logo h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.03em; }
+  .logo h1 span { color: var(--accent); }
+  #live-clock {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* ─── GRID ───────────────────────────────── */
+  .grid {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .span-2 { grid-column: span 2; }
+  @media (max-width: 600px) { .span-2 { grid-column: span 1; } }
+
+  /* ─── CARDS ──────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .card-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* ─── PUNCH ROWS ─────────────────────────── */
+  .punch-card { display: flex; flex-direction: column; gap: 16px; }
+  .punch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    transition: border-color 0.2s;
+  }
+  .punch-row.active-in  { border-color: var(--accent); }
+  .punch-row.active-out { border-color: var(--warn); }
+  .punch-info { display: flex; flex-direction: column; gap: 4px; }
+  .punch-title { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+  .punch-time { font-family: var(--mono); font-size: 1.05rem; font-weight: 600; color: var(--text); }
+  .punch-time.empty { color: var(--border); }
+  .punch-sub  { font-size: 0.68rem; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+
+  /* ─── BUTTONS ────────────────────────────── */
+  .btn {
+    border: none; cursor: pointer;
+    font-family: var(--sans); font-weight: 600;
+    font-size: 0.82rem;
+    border-radius: 8px;
+    padding: 10px 18px;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-in  { background: var(--accent); color: #0d1117; }
+  .btn-in:hover  { background: var(--accent-dim); }
+  .btn-out { background: var(--warn); color: #fff; }
+  .btn-out:hover { background: var(--warn-dim); }
+  .btn-out:disabled, .btn-in:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-reset {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+  .btn-reset:hover { border-color: var(--muted); color: var(--text); }
+
+  /* ─── ROUND TOGGLE ───────────────────────── */
+  .round-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    gap: 12px;
+  }
+  .round-info { display: flex; flex-direction: column; gap: 3px; }
+  .round-title { font-size: 0.85rem; font-weight: 600; }
+  .round-desc  { font-size: 0.72rem; color: var(--muted); }
+  /* toggle switch */
+  .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle-wrap input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-wrap input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+  /* ─── SETTINGS ───────────────────────────── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 480px) { .settings-grid { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.75rem; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .field input, .field select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--punch); }
+  .field select option { background: var(--surface2); }
+
+  /* ─── TODAY SNAPSHOT ─────────────────────── */
+  .today-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 480px) { .today-grid { grid-template-columns: 1fr 1fr; } }
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .stat-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .stat-value { font-family: var(--mono); font-size: 1.25rem; font-weight: 600; color: var(--text); }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.gold  { color: var(--gold); }
+  .stat-value.blue  { color: var(--punch); }
+
+  /* ─── WEDNESDAY BADGE ────────────────────── */
+  .wed-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(240,192,96,0.1);
+    border: 1px solid rgba(240,192,96,0.25);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+  .wed-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+
+  /* ─── PROGRESS ───────────────────────────── */
+  .progress-wrap { margin-top: 16px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; }
+  .progress-bar { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 1s linear; max-width: 100%; }
+
+  /* ─── LOG TABLE ──────────────────────────── */
+  .log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .log-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .log-table th {
+    text-align: left;
+    font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 10px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .log-table td {
+    padding: 11px 10px;
+    font-family: var(--mono);
+    border-bottom: 1px solid var(--surface2);
+    color: var(--text);
+  }
+  .log-table tr:last-child td { border-bottom: none; }
+  .log-table .earn-cell { color: var(--accent); font-weight: 600; }
+  .log-table .holiday-row td { background: rgba(240,192,96,0.05); }
+  .tag-in    { background: rgba(0,229,160,0.12);  color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
+  .tag-out   { background: rgba(255,107,107,0.12); color: var(--warn);   padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
+  .tag-wed   { background: rgba(240,192,96,0.15);  color: var(--gold);   padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
+  .log-empty { text-align: center; color: var(--muted); padding: 28px 0; font-size: 0.85rem; }
+  .delete-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--border); font-size: 0.9rem; padding: 2px 6px;
+    border-radius: 4px; transition: color 0.15s, background 0.15s;
+  }
+  .delete-btn:hover { color: var(--warn); background: rgba(255,107,107,0.1); }
+
+  /* ─── TIMER STRIP ────────────────────────── */
+  .timer-strip {
+    display: none; align-items: center; gap: 10px;
+    background: rgba(0,229,160,0.06);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-top: -4px;
+  }
+  .timer-strip.visible { display: flex; }
+  .timer-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .timer-text  { font-size: 0.82rem; color: var(--muted); }
+  .timer-count { font-family: var(--mono); font-size: 0.95rem; color: var(--accent); font-weight: 600; margin-left: auto; }
+
+  /* ─── TOTALS BANNER ──────────────────────── */
+  .totals-banner {
+    background: linear-gradient(135deg, #0f2a1e 0%, #0d1f35 100%);
+    border: 1px solid #1e4030;
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 600px) { .totals-banner { grid-template-columns: 1fr 1fr; } }
+  .total-item { display: flex; flex-direction: column; gap: 6px; }
+  .total-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #4a8c6a; }
+  .total-value { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .total-value.gold-val { font-size: 1.1rem; color: var(--gold); }
+
+  /* ─── FOOTER ─────────────────────────────── */
+  .footer-note { max-width: 860px; margin: 32px auto 0; text-align: center; font-size: 0.72rem; color: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⏱</div>
+    <h1>Time<span>Earn</span></h1>
+  </div>
+  <div id="live-clock">--:--:--</div>
+</header>
+
+<div class="grid">
+
+  <!-- CLOCK IN / OUT -->
+  <div class="card span-2">
+    <div class="card-label">Today's Session</div>
+    <div class="punch-card">
+
+      <!-- Round-up toggle -->
+      <div class="round-row">
+        <div class="round-info">
+          <div class="round-title">Round Time to Nearest Hour</div>
+          <div class="round-desc">e.g. 4:50 PM → 5:00 PM &nbsp;|&nbsp; 9:12 AM → 9:00 AM</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="round-toggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="punch-row" id="row-in">
+        <div class="punch-info">
+          <div class="punch-title">Clock In</div>
+          <div class="punch-time empty" id="display-in">Not yet</div>
+          <div class="punch-sub" id="display-in-raw"></div>
+        </div>
+        <button class="btn btn-in" id="btn-clock-in" onclick="clockIn()">▶ Clock In</button>
+      </div>
+
+      <div id="timer-strip" class="timer-strip">
+        <span class="timer-dot"></span>
+        <span class="timer-text">Working …</span>
+        <span class="timer-count" id="timer-count">0:00:00</span>
+      </div>
+
+      <div class="punch-row" id="row-out">
+        <div class="punch-info">
+          <div class="punch-title">Clock Out</div>
+          <div class="punch-time empty" id="display-out">Not yet</div>
+          <div class="punch-sub" id="display-out-raw"></div>
+        </div>
+        <button class="btn btn-out" id="btn-clock-out" onclick="clockOut()" disabled>■ Clock Out</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+    <div class="card-label">Pay Settings</div>
+    <div class="settings-grid">
+      <div class="field">
+        <label>Hourly Wage (₩)</label>
+        <input type="number" id="hourly-wage" value="9860" min="0" oninput="recalcAll()">
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <select id="currency" onchange="recalcAll()">
+          <option value="₩">₩ KRW</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+          <option value="¥">¥ JPY</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Weekly Holiday Pay (%)</label>
+        <input type="number" id="holiday-pct" value="8.33" min="0" max="100" step="0.01" oninput="recalcAll()">
+      </div>
+      <div class="field">
+        <label>Standard Day (hrs)</label>
+        <input type="number" id="std-hours" value="8" min="1" max="24" step="0.5" oninput="recalcAll()">
+      </div>
+    </div>
+    <div class="wed-badge" style="margin-top:14px;">
+      <span class="dot"></span>
+      Holiday allowance is paid every Wednesday (your day off)
+    </div>
+  </div>
+
+  <!-- TODAY SNAPSHOT -->
+  <div class="card">
+    <div class="card-label">Today's Snapshot</div>
+    <div class="today-grid">
+      <div class="stat-box">
+        <div class="stat-label">Hours</div>
+        <div class="stat-value blue" id="today-hours">0:00</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Day's Pay</div>
+        <div class="stat-value green" id="today-base">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Pay</div>
+        <div class="stat-value green" id="today-net">—</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Day Progress</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG TABLE -->
+  <div class="card span-2">
+    <div class="log-header">
+      <div class="card-label" style="margin-bottom:0">Shift Log</div>
+      <button class="btn btn-reset" onclick="clearLog()">Clear Log</button>
+    </div>
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Day</th>
+          <th>Clock In</th>
+          <th>Clock Out</th>
+          <th>Hours</th>
+          <th>Day Pay</th>
+          <th>Holiday</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="log-body">
+        <tr><td colspan="10" class="log-empty">No shifts recorded yet. Clock in to begin.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TOTALS BANNER -->
+  <div class="totals-banner span-2">
+    <div class="total-item">
+      <div class="total-label">Total Hours Worked</div>
+      <div class="total-value" id="total-hours">0:00</div>
+    </div>
+    <div class="total-item">
+      <div class="total-label">Total Holiday Paid</div>
+      <div class="total-value gold-val" id="total-holiday">₩ 0</div>
+    </div>
+    <div class="total-item">
+      <div class="total-label">Total Earnings</div>
+      <div class="total-value" id="total-net">₩ 0</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">TimeEarn · All data stored locally in your browser · Wednesday = Holiday Allowance Day</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────
+let clockInTime   = null;      // raw Date
+let clockInRound  = null;      // rounded Date (used for calculations)
+let timerInterval = null;
+let shiftLog      = JSON.parse(localStorage.getItem('timeEarnLog2') || '[]');
+
+// ─── LIVE CLOCK ────────────────────────────────────
+function updateClock() {
+  document.getElementById('live-clock').textContent =
+    new Date().toLocaleTimeString('en-GB', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── ROUND TO NEAREST HOUR ─────────────────────────
+function roundToHour(d) {
+  const r = new Date(d);
+  if (r.getMinutes() >= 30) {
+    r.setHours(r.getHours() + 1);
+  }
+  r.setMinutes(0, 0, 0);
+  return r;
+}
+
+function shouldRound() {
+  return document.getElementById('round-toggle').checked;
+}
+
+function applyRound(d) {
+  return shouldRound() ? roundToHour(d) : d;
+}
+
+// ─── FORMAT HELPERS ────────────────────────────────
+function fmtTime(d) {
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+function fmtTimeFull(d) {
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+function toDateStr(d) {
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function getDayName(d) {
+  return d.toLocaleDateString('en-GB', { weekday: 'short' });
+}
+function decToHM(h) {
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  return `${hh}:${String(mm).padStart(2,'0')}`;
+}
+function secToHMS(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = Math.floor(sec % 60);
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtMoney(sym, val) {
+  return sym + ' ' + Math.round(val).toLocaleString();
+}
+
+function getSettings() {
+  return {
+    wage:   parseFloat(document.getElementById('hourly-wage').value) || 0,
+    holPct: parseFloat(document.getElementById('holiday-pct').value) || 0,
+    stdHrs: parseFloat(document.getElementById('std-hours').value) || 8,
+    sym:    document.getElementById('currency').value
+  };
+}
+
+// ─── CLOCK IN ──────────────────────────────────────
+function clockIn() {
+  if (clockInTime) return;
+  const raw     = new Date();
+  const rounded = applyRound(raw);
+
+  clockInTime  = raw;
+  clockInRound = rounded;
+
+  document.getElementById('display-in').textContent = fmtTime(rounded);
+  document.getElementById('display-in').classList.remove('empty');
+
+  if (shouldRound() && raw.getMinutes() !== 0) {
+    document.getElementById('display-in-raw').textContent =
+      'actual: ' + fmtTimeFull(raw);
+  } else {
+    document.getElementById('display-in-raw').textContent = '';
+  }
+
+  document.getElementById('row-in').classList.add('active-in');
+  document.getElementById('btn-clock-in').disabled  = true;
+  document.getElementById('btn-clock-out').disabled = false;
+  document.getElementById('timer-strip').classList.add('visible');
+  timerInterval = setInterval(tickTimer, 1000);
+}
+
+// ─── CLOCK OUT ─────────────────────────────────────
+function clockOut() {
+  if (!clockInTime) return;
+  const rawOut     = new Date();
+  const roundedOut = applyRound(rawOut);
+  clearInterval(timerInterval);
+
+  const diffMs = roundedOut - clockInRound;
+  const hours  = Math.max(0, diffMs / 3600000);
+  const day    = getDayName(rawOut);   // e.g. "Wed"
+  const isWed  = rawOut.getDay() === 3;
+
+  const entry = {
+    date:    toDateStr(rawOut),
+    day:     day,
+    isWed:   isWed,
+    inTime:  fmtTime(clockInRound),
+    outTime: fmtTime(roundedOut),
+    hours:   hours
+  };
+  shiftLog.push(entry);
+  localStorage.setItem('timeEarnLog2', JSON.stringify(shiftLog));
+
+  // reset UI
+  clockInTime  = null;
+  clockInRound = null;
+  document.getElementById('display-in').textContent  = 'Not yet';
+  document.getElementById('display-in').classList.add('empty');
+  document.getElementById('display-in-raw').textContent = '';
+  document.getElementById('display-out').textContent = 'Not yet';
+  document.getElementById('display-out').classList.add('empty');
+  document.getElementById('display-out-raw').textContent = '';
+  document.getElementById('row-in').classList.remove('active-in');
+  document.getElementById('row-out').classList.remove('active-out');
+  document.getElementById('btn-clock-in').disabled  = false;
+  document.getElementById('btn-clock-out').disabled = true;
+  document.getElementById('timer-strip').classList.remove('visible');
+  document.getElementById('timer-count').textContent = '0:00:00';
+  document.getElementById('today-hours').textContent = '0:00';
+  document.getElementById('today-base').textContent  = '—';
+  document.getElementById('today-net').textContent   = '—';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-pct').textContent  = '0%';
+
+  renderLog();
+}
+
+// ─── TIMER TICK ────────────────────────────────────
+function tickTimer() {
+  if (!clockInTime) return;
+  const elapsed = (new Date() - clockInTime) / 1000;
+  document.getElementById('timer-count').textContent = secToHMS(elapsed);
+
+  // live clock-out display (rounded)
+  const nowRounded = applyRound(new Date());
+  document.getElementById('display-out').textContent = fmtTime(nowRounded);
+  document.getElementById('display-out').classList.remove('empty');
+  document.getElementById('row-out').classList.add('active-out');
+
+  if (shouldRound() && new Date().getMinutes() !== 0) {
+    document.getElementById('display-out-raw').textContent =
+      'actual: ' + fmtTimeFull(new Date());
+  } else {
+    document.getElementById('display-out-raw').textContent = '';
+  }
+
+  // live pay snapshot (using rounded elapsed)
+  const roundedElapsed = (nowRounded - clockInRound) / 3600000;
+  recalcToday(Math.max(0, roundedElapsed));
+}
+
+// ─── RECALC TODAY SNAPSHOT ─────────────────────────
+function recalcToday(hours) {
+  if (hours === undefined) hours = 0;
+  const { wage, stdHrs, sym } = getSettings();
+  const base = hours * wage;
+  document.getElementById('today-hours').textContent = decToHM(hours);
+  document.getElementById('today-base').textContent  = fmtMoney(sym, base);
+  document.getElementById('today-net').textContent   = fmtMoney(sym, base);
+  const pct = Math.min(100, (hours / stdHrs) * 100).toFixed(1);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent  = pct + '%';
+}
+
+// ─── RECALC ALL ────────────────────────────────────
+function recalcAll() { renderLog(); }
+
+// ─── RENDER LOG ────────────────────────────────────
+function renderLog() {
+  const { wage, holPct, sym } = getSettings();
+  const tbody = document.getElementById('log-body');
+
+  if (shiftLog.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="log-empty">No shifts recorded yet. Clock in to begin.</td></tr>`;
+    setTotals(sym, 0, 0, 0);
+    return;
+  }
+
+  // Group by week (Mon–Sun) to compute weekly totals for holiday
+  // Key = ISO week string
+  function weekKey(dateStr) {
+    // parse "15 Jun 2025" style
+    const d = new Date(dateStr);
+    const day = d.getDay() === 0 ? 6 : d.getDay() - 1; // Mon=0
+    const mon = new Date(d); mon.setDate(d.getDate() - day);
+    return mon.toISOString().slice(0,10);
+  }
+
+  // Build weekly wage totals (excluding holiday)
+  const weeklyWage = {};
+  shiftLog.forEach(s => {
+    const wk = weekKey(s.date);
+    weeklyWage[wk] = (weeklyWage[wk] || 0) + s.hours * wage;
+  });
+
+  // For each Wednesday entry, compute holiday = that week's wage * holPct/100
+  // We attach holiday to the Wed entry of that week
+  const wedHoliday = {};
+  shiftLog.forEach((s, i) => {
+    if (s.isWed) {
+      const wk = weekKey(s.date);
+      wedHoliday[i] = (weeklyWage[wk] || 0) * (holPct / 100);
+    }
+  });
+
+  let totalHours   = 0;
+  let totalPay     = 0;
+  let totalHoliday = 0;
+
+  let html = '';
+  shiftLog.forEach((s, i) => {
+    const pay     = s.hours * wage;
+    const holiday = wedHoliday[i] || 0;
+    const total   = pay + holiday;
+
+    totalHours   += s.hours;
+    totalPay     += pay;
+    totalHoliday += holiday;
+
+    const dayTag   = s.isWed
+      ? `<span class="tag-wed">Wed ★</span>`
+      : `<span style="color:var(--muted);font-size:0.78rem">${s.day}</span>`;
+    const holCell  = s.isWed
+      ? `<span style="color:var(--gold);font-weight:600">${fmtMoney(sym, holiday)}</span>`
+      : `<span style="color:var(--border)">—</span>`;
+    const rowClass = s.isWed ? ' class="holiday-row"' : '';
+
+    html += `<tr${rowClass}>
+      <td>${i + 1}</td>
+      <td>${s.date}</td>
+      <td>${dayTag}</td>
+      <td><span class="tag-in">${s.inTime}</span></td>
+      <td><span class="tag-out">${s.outTime}</span></td>
+      <td>${decToHM(s.hours)}</td>
+      <td class="earn-cell">${fmtMoney(sym, pay)}</td>
+      <td>${holCell}</td>
+      <td class="earn-cell">${fmtMoney(sym, total)}</td>
+      <td><button class="delete-btn" onclick="deleteEntry(${i})" title="Delete">✕</button></td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
+  setTotals(sym, totalHours, totalHoliday, totalPay + totalHoliday);
+}
+
+function setTotals(sym, hrs, holiday, net) {
+  document.getElementById('total-hours').textContent   = decToHM(hrs);
+  document.getElementById('total-holiday').textContent = fmtMoney(sym, holiday);
+  document.getElementById('total-net').textContent     = fmtMoney(sym, net);
+}
+
+function deleteEntry(i) {
+  shiftLog.splice(i, 1);
+  localStorage.setItem('timeEarnLog2', JSON.stringify(shiftLog));
+  renderLog();
+}
+
+function clearLog() {
+  if (!confirm('Clear all shift records?')) return;
+  shiftLog = [];
+  localStorage.setItem('timeEarnLog2', JSON.stringify(shiftLog));
+  renderLog();
+}
+
+// ─── INIT ──────────────────────────────────────────
+renderLog();
+</script>
+</body>
+</html>
