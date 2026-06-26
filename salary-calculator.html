@@ -320,6 +320,18 @@
     <div class="card-label">Today's Session</div>
     <div class="punch-card">
 
+      <!-- Half-hour snap toggle -->
+      <div class="round-row">
+        <div class="round-info">
+          <div class="round-title">Snap to Half Hour</div>
+          <div class="round-desc">:20–:40 → :30 &nbsp;|&nbsp; e.g. 4:25 → 4:30 &nbsp;|&nbsp; 9:35 → 9:30</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="half-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
       <!-- Round-up toggle -->
       <div class="round-row">
         <div class="round-info">
@@ -492,12 +504,30 @@ function roundToHour(d) {
   return r;
 }
 
+// ─── SNAP TO HALF HOUR ─────────────────────────────
+// Minutes 20–40 → snap to :30  |  otherwise leave unchanged
+function snapToHalf(d) {
+  const r = new Date(d);
+  const m = r.getMinutes();
+  if (m >= 20 && m <= 40) {
+    r.setMinutes(30, 0, 0);
+  }
+  return r;
+}
+
 function shouldRound() {
   return document.getElementById('round-toggle').checked;
 }
 
+function shouldSnapHalf() {
+  return document.getElementById('half-toggle').checked;
+}
+
 function applyRound(d) {
-  return shouldRound() ? roundToHour(d) : d;
+  let r = new Date(d);
+  if (shouldSnapHalf()) r = snapToHalf(r);   // snap :20–:40 → :30 first
+  if (shouldRound())    r = roundToHour(r);  // then round to nearest hour
+  return r;
 }
 
 // ─── FORMAT HELPERS ────────────────────────────────
@@ -567,7 +597,7 @@ function clockIn() {
   document.getElementById('display-in').textContent = fmtTime(rounded);
   document.getElementById('display-in').classList.remove('empty');
 
-  if (shouldRound() && raw.getMinutes() !== 0) {
+  if ((shouldRound() || shouldSnapHalf()) && fmtTime(rounded) !== fmtTime(raw)) {
     document.getElementById('display-in-raw').textContent =
       'actual: ' + fmtTimeFull(raw);
   } else {
@@ -579,6 +609,25 @@ function clockIn() {
   document.getElementById('btn-clock-out').disabled = false;
   document.getElementById('timer-strip').classList.add('visible');
   timerInterval = setInterval(tickTimer, 1000);
+}
+
+// ─── GOOGLE SHEETS SYNC ────────────────────────────
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz70t8o8WXWcfDE1kJCe9UoIPlECf_uhUNHqBzoGR6UepHQURnAwS_7H4RtuavWMOraxg/exec';
+
+function logToSheets(entry, earnings) {
+  const payload = {
+    date:        entry.date,
+    clockIn:     entry.inTime,
+    clockOut:    entry.outTime,
+    hoursWorked: parseFloat(entry.hours.toFixed(2)),
+    earnings:    earnings
+  };
+  fetch('https://script.google.com/macros/s/AKfycbz70t8o8WXWcfDE1kJCe9UoIPlECf_uhUNHqBzoGR6UepHQURnAwS_7H4RtuavWMOraxg/exec', {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload)
+  }).catch(err => console.warn('Sheets sync failed:', err));
 }
 
 // ─── CLOCK OUT ─────────────────────────────────────
@@ -604,6 +653,11 @@ function clockOut() {
   };
   shiftLog.push(entry);
   localStorage.setItem('timeEarnLog2', JSON.stringify(shiftLog));
+
+  // ── Send to Google Sheets ──
+  const { wage, sym } = getSettings();
+  const earnings = parseFloat((hours * wage).toFixed(2));
+  logToSheets(entry, sym + earnings);
 
   // reset UI
   clockInTime  = null;
@@ -641,9 +695,10 @@ function tickTimer() {
   document.getElementById('display-out').classList.remove('empty');
   document.getElementById('row-out').classList.add('active-out');
 
-  if (shouldRound() && new Date().getMinutes() !== 0) {
+  const rawNow = new Date();
+  if ((shouldRound() || shouldSnapHalf()) && fmtTime(nowRounded) !== fmtTime(rawNow)) {
     document.getElementById('display-out-raw').textContent =
-      'actual: ' + fmtTimeFull(new Date());
+      'actual: ' + fmtTimeFull(rawNow);
   } else {
     document.getElementById('display-out-raw').textContent = '';
   }
