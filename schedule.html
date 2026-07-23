@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3rd Year Schedule</title>
+<style>
+  :root{
+    --bg:#f6f5f2;
+    --ink:#1c2430;
+    --paper:#ffffff;
+    --line:#dfdcd3;
+    --required:#1e3a8a;
+    --required-bg:#e7ecfb;
+    --elective:#0f766e;
+    --elective-bg:#e3f3f1;
+    --field:#b45309;
+    --field-bg:#faf0e1;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    padding:40px 24px 80px;
+  }
+  .wrap{max-width:1100px;margin:0 auto;}
+  header{margin-bottom:32px;}
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#8a8577;
+    font-weight:600;
+  }
+  h1{
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:34px;
+    margin:6px 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .sub{color:#6b6659;font-size:14px;}
+
+  /* Legend */
+  .legend{display:flex;gap:18px;margin:20px 0 28px;flex-wrap:wrap;}
+  .legend span{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;font-weight:600;color:#4a4636;
+  }
+  .dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+  .dot.required{background:var(--required);}
+  .dot.elective{background:var(--elective);}
+  .dot.field{background:var(--field);}
+
+  /* Grid timetable */
+  .grid-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px;
+    overflow-x:auto;
+    margin-bottom:44px;
+  }
+  .timetable{
+    display:grid;
+    grid-template-columns:64px repeat(4,1fr);
+    min-width:760px;
+    border-collapse:collapse;
+  }
+  .tt-head{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#8a8577;
+    font-weight:700;
+    padding:8px 6px 14px;
+    border-bottom:2px solid var(--ink);
+    text-align:center;
+  }
+  .tt-head.time-col{border-bottom:2px solid transparent;}
+  .time-label{
+    font-size:11px;
+    color:#9b9686;
+    padding:2px 6px;
+    text-align:right;
+    border-right:1px solid var(--line);
+    white-space:nowrap;
+  }
+  .cell{
+    position:relative;
+    border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line);
+    min-height:26px;
+  }
+  .cell:last-child{border-right:none;}
+
+  .block{
+    position:absolute;
+    left:3px;right:3px;
+    border-radius:7px;
+    padding:6px 8px 5px;
+    font-size:12px;
+    line-height:1.35;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.05);
+  }
+  .block .name{font-weight:700;display:block;font-size:12.5px;}
+  .block .room{opacity:.85;font-size:11px;display:block;margin-top:1px;}
+
+  .block.required{background:var(--required-bg);color:var(--required);border:1px solid #c3d0f5;}
+  .block.elective{background:var(--elective-bg);color:var(--elective);border:1px solid #bfe4df;}
+  .block.field{background:var(--field-bg);color:var(--field);border:1px solid #f0dcb8;}
+
+  /* Course detail cards */
+  .section-title{
+    font-family:Georgia, serif;
+    font-size:20px;
+    margin:0 0 16px;
+  }
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:14px;
+  }
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    position:relative;
+  }
+  .card .tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:3px 9px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .tag.required{background:var(--required-bg);color:var(--required);}
+  .tag.elective{background:var(--elective-bg);color:var(--elective);}
+  .tag.field{background:var(--field-bg);color:var(--field);}
+
+  .card h3{margin:0 0 2px;font-size:16.5px;}
+  .card .kr{color:#8a8577;font-size:13px;margin-bottom:12px;}
+  .card .num{
+    font-size:11.5px;color:#9b9686;font-family:'Courier New',monospace;
+    margin-bottom:12px;
+  }
+  .kv{display:grid;grid-template-columns:70px 1fr;gap:5px 10px;font-size:13px;margin-bottom:5px;}
+  .kv .k{color:#9b9686;}
+  .kv .v{color:var(--ink);}
+
+  .note{
+    font-size:12px;
+    color:#a15b1c;
+    background:#fff6e8;
+    border:1px dashed #e8c58a;
+    border-radius:8px;
+    padding:8px 12px;
+    margin-top:24px;
+  }
+  footer{margin-top:20px;font-size:12px;color:#a39e8f;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">3rd Year &middot; Fall Schedule</div>
+    <h1>My Course Timetable</h1>
+    <div class="sub">6 courses &middot; 18 credits &middot; Financial management, Econometrics, Marketing strategy, Franchise management, Big date &amp; Business strategy, Field Trip VI</div>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot required"></i>Major Required</span>
+    <span><i class="dot elective"></i>Major Elective</span>
+    <span><i class="dot field"></i>Elective</span>
+  </div>
+
+  <div class="grid-card">
+    <div class="timetable" id="timetable">
+      <div class="tt-head time-col"></div>
+      <div class="tt-head">Mon</div>
+      <div class="tt-head">Tue</div>
+      <div class="tt-head">Wed</div>
+      <div class="tt-head">Thu</div>
+      <!-- rows injected by JS -->
+    </div>
+  </div>
+
+  <section>
+    <h2 class="section-title">Course details</h2>
+    <div class="cards">
+
+      <div class="card">
+        <span class="tag required">Major Required</span>
+        <h3>Financial management</h3>
+        <div class="kr">재무관리</div>
+        <div class="num">01IBM301 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Tue / Thu</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">Tue 13:30–15:00 · Thu 15:00–16:30</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">Tue: B04(C)-0305 · Thu: B05-0406</span></div>
+      </div>
+
+      <div class="card">
+        <span class="tag required">Major Required</span>
+        <h3>Econometrics</h3>
+        <div class="kr">계량경제학</div>
+        <div class="num">01IBM302 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Tue / Wed</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">15:00–16:30 (both days)</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">B05-0406</span></div>
+      </div>
+
+      <div class="card">
+        <span class="tag elective">Major Elective</span>
+        <h3>Marketing strategy</h3>
+        <div class="kr">마케팅전략</div>
+        <div class="num">01IBM310 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Tue / Thu</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">Tue 12:00–13:30 · Thu 13:30–15:00</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">B04(C)-B207-2</span></div>
+      </div>
+
+      <div class="card">
+        <span class="tag elective">Major Elective</span>
+        <h3>Franchise management</h3>
+        <div class="kr">프랜차이즈경영론</div>
+        <div class="num">01IBM308 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Tue / Thu</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">10:30–12:00 (both days)</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">Tue: LMS lecture (online) · Thu: B04(C)-0112</span></div>
+      </div>
+
+      <div class="card">
+        <span class="tag elective">Major Elective</span>
+        <h3>Big date &amp; Business strategy</h3>
+        <div class="kr">빅데이터와경영전략</div>
+        <div class="num">01IBM309 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Mon / Wed</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">19:00–10:30 (as listed on original table)</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">B05-0406</span></div>
+      </div>
+
+      <div class="card">
+        <span class="tag field">Elective</span>
+        <h3>Field Trip VI</h3>
+        <div class="kr">-</div>
+        <div class="num">01FGE608 &middot; Division 01 &middot; 3 credits</div>
+        <div class="kv"><span class="k">Day</span><span class="v">Mon / Wed</span></div>
+        <div class="kv"><span class="k">Time</span><span class="v">11:00–12:00</span></div>
+        <div class="kv"><span class="k">Room</span><span class="v">B04(B)-0806</span></div>
+      </div>
+
+    </div>
+    <div class="note">Note: "Big date &amp; Business strategy" shows <strong>19:00~10:30</strong> in your source table — that looks like a typo (likely meant to be 09:00~10:30). I placed it on the grid at 09:00–10:30; double‑check against the official timetable before finalizing.</div>
+  </section>
+
+  <footer>Placed on the grid using the times as printed, with the one flagged exception above.</footer>
+</div>
+
+<script>
+const START_HOUR = 9;   // 09:00
+const END_HOUR = 17;    // 17:00
+const ROW_H = 30; // px per 30 min
+const days = ["Mon","Tue","Wed","Thu"];
+
+function toMin(t){
+  const [h,m] = t.split(":").map(Number);
+  return h*60+m;
+}
+
+const courses = [
+  {name:"Financial management", room:"B04(C)-0305", type:"required", day:"Tue", start:"13:30", end:"15:00"},
+  {name:"Financial management", room:"B05-0406", type:"required", day:"Thu", start:"15:00", end:"16:30"},
+  {name:"Econometrics", room:"B05-0406", type:"required", day:"Tue", start:"15:00", end:"16:30"},
+  {name:"Econometrics", room:"B05-0406", type:"required", day:"Wed", start:"15:00", end:"16:30"},
+  {name:"Marketing strategy", room:"B04(C)-B207-2", type:"elective", day:"Tue", start:"12:00", end:"13:30"},
+  {name:"Marketing strategy", room:"B04(C)-B207-2", type:"elective", day:"Thu", start:"13:30", end:"15:00"},
+  {name:"Franchise management", room:"LMS lecture", type:"elective", day:"Tue", start:"10:30", end:"12:00"},
+  {name:"Franchise management", room:"B04(C)-0112", type:"elective", day:"Thu", start:"10:30", end:"12:00"},
+  {name:"Big date & Business strategy", room:"B05-0406", type:"elective", day:"Mon", start:"09:00", end:"10:30"},
+  {name:"Big date & Business strategy", room:"B05-0406", type:"elective", day:"Wed", start:"09:00", end:"10:30"},
+  {name:"Field Trip VI", room:"B04(B)-0806", type:"field", day:"Mon", start:"11:00", end:"12:00"},
+  {name:"Field Trip VI", room:"B04(B)-0806", type:"field", day:"Wed", start:"11:00", end:"12:00"},
+];
+
+const tt = document.getElementById("timetable");
+const totalRows = ((END_HOUR-START_HOUR)*60)/30;
+
+// build time labels + empty cells
+for(let r=0;r<totalRows;r++){
+  const minutesFromStart = r*30;
+  const hh = START_HOUR + Math.floor(minutesFromStart/60);
+  const mm = minutesFromStart%60;
+  const label = document.createElement("div");
+  label.className = "time-label";
+  label.style.gridRow = (r+2);
+  label.style.gridColumn = 1;
+  if(mm===0){
+    label.textContent = (hh<10?"0"+hh:hh)+":00";
+  }
+  tt.appendChild(label);
+
+  days.forEach((d,di)=>{
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.style.gridRow = (r+2);
+    cell.style.gridColumn = di+2;
+    cell.dataset.day = d;
+    cell.dataset.rowStart = minutesFromStart;
+    tt.appendChild(cell);
+  });
+}
+tt.style.gridTemplateRows = `auto repeat(${totalRows}, ${ROW_H}px)`;
+
+// place course blocks
+courses.forEach(c=>{
+  const dayIdx = days.indexOf(c.day);
+  const colStart = dayIdx+2;
+  const startMin = toMin(c.start) - START_HOUR*60;
+  const endMin = toMin(c.end) - START_HOUR*60;
+  const rowStart = Math.round(startMin/30)+2;
+  const rowSpan = Math.round((endMin-startMin)/30);
+
+  const block = document.createElement("div");
+  block.className = "block "+c.type;
+  block.style.gridColumn = colStart;
+  block.style.gridRow = `${rowStart} / span ${rowSpan}`;
+  block.style.position = "relative";
+  block.style.margin = "2px 3px";
+  block.innerHTML = `<span class="name">${c.name}</span><span class="room">${c.start}–${c.end}<br>${c.room}</span>`;
+  tt.appendChild(block);
+});
+</script>
+</body>
+</html>
