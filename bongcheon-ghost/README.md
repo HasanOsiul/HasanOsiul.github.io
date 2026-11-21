@@ -30,3 +30,23 @@ ffmpeg -i out/video_silent.mp4 -i public/soundtrack.wav -c:v copy -c:a aac -b:a 
 Timeline (scenes + subtitles) lives in `src/timeline.json`.
 
 > নোট: এটি একটি হরর কিংবদন্তি ও কল্পকাহিনিভিত্তিক পুনর্কথন। বর্ণিত অতিপ্রাকৃত ঘটনাগুলোর সত্যতা প্রমাণিত নয়।
+
+## Adding the voice-over (TTSForFree)
+`voice/lines.json` holds all 46 lines (≈1,500 characters) with their timing,
+role and the chosen voice per role:
+
+| Role | Voice | Treatment in `voice/mix_voice.py` |
+|---|---|---|
+| narr — Bengali narrator | Enceladus Gemini (breathy, low male) | warm, close, light room |
+| girl — the schoolgirl | Leda Gemini (youthful female) | fear tremolo, small room |
+| ghost — Mrs. Cho (Korean) | Gacrux Gemini (mature female) | −3 st, −9 st double, whisper layer, ring-mod, reverse swell, big reverb |
+| other — helping woman | Vindemiatrix Gemini (gentle female) | muffled → clear (girl waking up) |
+
+Steps:
+1. Generate one MP3 per line with its role's voice (TTSForFree
+   `text_to_speech`), save as `voice/raw/<id>.mp3`
+   (host `cdn.ttsforfree.com` must be allowed in the environment network).
+2. `python3 voice/mix_voice.py` → `public/soundtrack_vo.wav` (lines are fitted to
+   their subtitle windows; the music/SFX bed ducks under the voices).
+3. `ffmpeg -i out/video_silent.mp4 -i public/soundtrack_vo.wav -map 0:v -map 1:a -c:v libx264 -preset slow -b:v 3100k -maxrate 4500k -bufsize 9000k -c:a aac -b:a 192k -shortest -movflags +faststart bongcheon-ghost-vo.mp4`
+   (re-render `out/video_silent.mp4` first if this is a fresh container).
