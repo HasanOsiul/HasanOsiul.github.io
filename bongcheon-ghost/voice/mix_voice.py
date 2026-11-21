@@ -78,10 +78,11 @@ def norm(x, peak=0.9):
 
 
 # per-role pitch shift (semitones) shaping one base voice into characters
-SEMIS = json.loads(os.environ.get("VO_SEMIS", '{"narr": -4.0, "girl": 2.5, "other": 0.5, "ghost": -3.0}'))
+SEMIS = json.loads(os.environ.get("VO_SEMIS", '{"narr": -5.0, "girl": 4.0, "other": 1.5, "ghost": 2.0}'))
 
 vo = np.zeros((N, 2))
-for ln in cfg["lines"]:
+LINES = cfg["lines"]
+for li, ln in enumerate(LINES):
     path = os.path.join(HERE, "raw", ln["id"] + ".wav")
     if not os.path.exists(path):
         path = path[:-4] + ".mp3"
@@ -89,11 +90,13 @@ for ln in cfg["lines"]:
         print("missing", path, file=sys.stderr)
         continue
     role = ln["role"]
-    window = ln["e"] - ln["t"] - 0.15
+    nxt = LINES[li + 1]["t"] if li + 1 < len(LINES) else N / SR
+    window = min(nxt - ln["t"] - 0.15, ln["e"] - ln["t"] + 1.2)
     semis = SEMIS[role]
     x = decode(path, 1.0, semis)
     if len(x) / SR > window:
-        x = decode(path, min(1.3, len(x) / SR / window), semis)
+        x = decode(path, min(1.5, len(x) / SR / window), semis)
+        print(ln["id"], f"tempo {min(1.5, len(x) / SR / window):.2f}", file=sys.stderr)
     n = len(x)
     tt = np.arange(n) / SR
     if role == "narr":

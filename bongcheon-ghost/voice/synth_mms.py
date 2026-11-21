@@ -18,7 +18,7 @@ cfg = json.load(open(os.path.join(HERE, "lines.json")))
 os.makedirs(os.path.join(HERE, "raw"), exist_ok=True)
 
 # speaking rate per role (lower = slower, more dread)
-RATE = {"narr": 0.82, "girl": 1.02, "other": 0.95, "ghost": 0.72}
+RATE = {"narr": 1.0, "girl": 1.02, "other": 0.95, "ghost": 0.72}
 NOISE = {"narr": 0.55, "girl": 0.75, "other": 0.6, "ghost": 0.8}
 
 BN_DIGITS = {"১১টা ২০ মিনিট": "এগারোটা বিশ মিনিট"}

@@ -31,22 +31,25 @@ Timeline (scenes + subtitles) lives in `src/timeline.json`.
 
 > নোট: এটি একটি হরর কিংবদন্তি ও কল্পকাহিনিভিত্তিক পুনর্কথন। বর্ণিত অতিপ্রাকৃত ঘটনাগুলোর সত্যতা প্রমাণিত নয়।
 
-## Adding the voice-over (TTSForFree)
-`voice/lines.json` holds all 46 lines (≈1,500 characters) with their timing,
-role and the chosen voice per role:
+## Voice-over (Meta MMS-TTS, generated locally)
+`voice/lines.json` holds all 46 lines with timing and role. `voice/synth_mms.py`
+renders them on CPU with Meta's open models `facebook/mms-tts-ben` (Bengali)
+and `facebook/mms-tts-kor` (Korean) into `voice/raw/<id>.wav`.
+`voice/mix_voice.py` turns the base voices into characters and blends them:
 
-| Role | Voice | Treatment in `voice/mix_voice.py` |
-|---|---|---|
-| narr — Bengali narrator | Enceladus Gemini (breathy, low male) | warm, close, light room |
-| girl — the schoolgirl | Leda Gemini (youthful female) | fear tremolo, small room |
-| ghost — Mrs. Cho (Korean) | Gacrux Gemini (mature female) | −3 st, −9 st double, whisper layer, ring-mod, reverse swell, big reverb |
-| other — helping woman | Vindemiatrix Gemini (gentle female) | muffled → clear (girl waking up) |
+| Role | Shaping |
+|---|---|
+| narrator | −5 semitones (deep), warm EQ, close room |
+| schoolgirl | +4 semitones, fear tremolo, small room |
+| helping woman | +1.5 semitones, muffled → clear (girl waking up) |
+| Mrs. Cho (Korean) | +2 st with −4 st double, whisper layer, ring-mod, reverse swell, big reverb — layered over the synthesized ghost voice |
 
-Steps:
-1. Generate one MP3 per line with its role's voice (TTSForFree
-   `text_to_speech`), save as `voice/raw/<id>.mp3`
-   (host `cdn.ttsforfree.com` must be allowed in the environment network).
-2. `python3 voice/mix_voice.py` → `public/soundtrack_vo.wav` (lines are fitted to
-   their subtitle windows; the music/SFX bed ducks under the voices).
-3. `ffmpeg -i out/video_silent.mp4 -i public/soundtrack_vo.wav -map 0:v -map 1:a -c:v libx264 -preset slow -b:v 3100k -maxrate 4500k -bufsize 9000k -c:a aac -b:a 192k -shortest -movflags +faststart bongcheon-ghost-vo.mp4`
-   (re-render `out/video_silent.mp4` first if this is a fresh container).
+Lines are fitted to their slot (up to 1.5× tempo) and the music/SFX bed ducks
+under every voice. Output: `public/soundtrack_vo.wav`.
+
+```bash
+pip install torch transformers uroman
+HF_HUB_DISABLE_XET=1 python3 voice/synth_mms.py
+python3 voice/mix_voice.py
+ffmpeg -i out/video_silent.mp4 -i public/soundtrack_vo.wav -map 0:v -map 1:a -c:v libx264 -preset slow -b:v 3100k -maxrate 4500k -bufsize 9000k -c:a aac -b:a 192k -shortest -movflags +faststart bongcheon-ghost.mp4
+```
