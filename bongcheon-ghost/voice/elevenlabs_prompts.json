@@ -1,0 +1,286 @@
+[
+ {
+  "id": "l00",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[softly] [slowly] রাত তখন প্রায় এগারোটা বিশ মিনিট…"
+ },
+ {
+  "id": "l01",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[quietly] সিউলের বংচন-দং এলাকা। [pause]"
+ },
+ {
+  "id": "l02",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[softly] [nervous] একটি মেয়ে একা হেঁটে বাড়ি ফিরছিল।"
+ },
+ {
+  "id": "l03",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[tired] [softly] হাইস্কুলের ছাত্রী… ফিরতে অনেক রাত হয়ে গেছে।"
+ },
+ {
+  "id": "l04",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] চারদিকে অদ্ভুত নীরবতা… [long pause]"
+ },
+ {
+  "id": "l05",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[nervous] বাতি জ্বলছে… কিন্তু কোথাও কোনো মানুষ নেই।"
+ },
+ {
+  "id": "l06",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[breathless] [nervous] মেয়েটি দ্রুত পা চালাল।"
+ },
+ {
+  "id": "l07",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[gasps] [whispers] হঠাৎ… রাস্তার সামনে একজন মহিলা।"
+ },
+ {
+  "id": "l08",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[low voice] [uneasy] পরনে ময়লা গোলাপি পায়জামা।"
+ },
+ {
+  "id": "l09",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[cautiously] কিন্তু… সে স্বাভাবিকভাবে হাঁটছিল না।"
+ },
+ {
+  "id": "l10",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[slowly] [disturbed] হাত ঝুলে আছে… পা যেন ভাঙা… শরীর একদিকে কাত।"
+ },
+ {
+  "id": "l11",
+  "role": "girl",
+  "voice": "q4yUdydpWxqfmkQH7gK7",
+  "prompt": "[whispers] [trembling voice] [scared] মহিলাটি কি অসুস্থ? কোনো দুর্ঘটনা?"
+ },
+ {
+  "id": "l12",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [nervous] কাছে যাওয়ার সাহস হলো না… সে দূরত্ব রেখে হাঁটল।"
+ },
+ {
+  "id": "l13",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[tense] হঠাৎ মহিলাটি থেমে গেল।"
+ },
+ {
+  "id": "l14",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] মেয়েটিও থেমে গেল।"
+ },
+ {
+  "id": "l15",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[long pause] [whispers] তারপর…"
+ },
+ {
+  "id": "l16",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[slowly] [whispers] [dramatically] মাথাটা… ধীরে ধীরে… পেছনে ঘুরতে লাগল…"
+ },
+ {
+  "id": "l17",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[shocked] [whispers] কিন্তু শরীরটা একটুও নড়ছে না!"
+ },
+ {
+  "id": "l18",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[gasps] [horrified] চোখ দুটি অস্বাভাবিক বড়… মুখটা বিকৃত।"
+ },
+ {
+  "id": "l19",
+  "role": "ghost",
+  "voice": "fucCZkuDBeKO8ZpPNr6N",
+  "prompt": "[slowly] [sad] [eerie whisper] 내 아기… 어디 있어?"
+ },
+ {
+  "id": "l20",
+  "role": "ghost",
+  "voice": "fucCZkuDBeKO8ZpPNr6N",
+  "prompt": "[whispers] [menacing] 내 아기… 봤어?"
+ },
+ {
+  "id": "l21",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[breathless] [trembling voice] মনে হলো, এখনই অজ্ঞান হয়ে যাবে…"
+ },
+ {
+  "id": "l22",
+  "role": "girl",
+  "voice": "q4yUdydpWxqfmkQH7gK7",
+  "prompt": "[trembling voice] [terrified] [whispers] ও… ও… ওইদিকে…"
+ },
+ {
+  "id": "l23",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[cautiously] মহিলাটি সেদিকে হাঁটতে শুরু করল।"
+ },
+ {
+  "id": "l24",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[exhales] [relieved] [softly] সে স্বস্তির নিঃশ্বাস ফেলল…"
+ },
+ {
+  "id": "l25",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] যতটা সম্ভব নিঃশব্দে… বাড়ির দিকে।"
+ },
+ {
+  "id": "l26",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [nervous] মনে হচ্ছিল… পেছন থেকে কেউ তাকে দেখছে।"
+ },
+ {
+  "id": "l27",
+  "role": "ghost",
+  "voice": "fucCZkuDBeKO8ZpPNr6N",
+  "prompt": "[shouting] [angry] [screaming] 거기 내 아기 없잖아!!!"
+ },
+ {
+  "id": "l28",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[panicked] [breathless] সেই মহিলা তার দিকে ছুটে আসছে!"
+ },
+ {
+  "id": "l29",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[breathless] [terrified] চিৎকার করতে চাইল… কিন্তু… গলা দিয়ে শব্দ বের হলো না।"
+ },
+ {
+  "id": "l30",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[slowly] [whispers] আর তারপর… সবকিছু… অন্ধকার।"
+ },
+ {
+  "id": "l31",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[softly] [tired] কিছুক্ষণ পর মেয়েটির জ্ঞান ফিরল।"
+ },
+ {
+  "id": "l32",
+  "role": "other",
+  "voice": "VixjjTLMa0rgjbAS8LTX",
+  "prompt": "[worried] [warmly] তুমি ঠিক আছ? কী হয়েছিল তোমার?"
+ },
+ {
+  "id": "l33",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[confused] [softly] সেই মহিলার কোনো চিহ্ন নেই… কেউ তাকে দেখেনি।"
+ },
+ {
+  "id": "l34",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [serious] কিন্তু মেয়েটি নিশ্চিত… এটা স্বপ্ন ছিল না।"
+ },
+ {
+  "id": "l35",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[softly] [sad] এই এলাকায় একসময় থাকতেন মিসেস চো।"
+ },
+ {
+  "id": "l36",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[warmly] [sad] তার ছিল দুই বছরের একটি ছোট্ট মেয়ে।"
+ },
+ {
+  "id": "l37",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[sad] কিন্তু বিবাহবিচ্ছেদের পর… [pause]"
+ },
+ {
+  "id": "l38",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[sad] [trembling voice] তিনি মেয়ের অভিভাবকত্ব হারালেন।"
+ },
+ {
+  "id": "l39",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[sad] [slowly] দিনের পর দিন শুধু মেয়ের কথা ভাবতেন…"
+ },
+ {
+  "id": "l40",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[softly] [serious] কিংবদন্তি বলে, উঁচু ভবন থেকে লাফ দিয়ে তিনি প্রাণ হারান।"
+ },
+ {
+  "id": "l41",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [eerie] তার আত্মা নাকি আজও সেই রাস্তায় ঘুরে বেড়ায়…"
+ },
+ {
+  "id": "l42",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[sad] [softly] একজন মা… যে মৃত্যুর পরও সন্তানকে খুঁজে বেড়ায়।"
+ },
+ {
+  "id": "l43",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[serious] [low voice] ভুল রাস্তা দেখালে… সে ভয়ংকর ক্ষিপ্ত হয়ে ওঠে।"
+ },
+ {
+  "id": "l44",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [slowly] আর যদি কোনো রাতে… সে তোমার সামনে এসে দাঁড়ায়…"
+ },
+ {
+  "id": "l45",
+  "role": "ghost",
+  "voice": "fucCZkuDBeKO8ZpPNr6N",
+  "prompt": "[whispers] [eerie] 내 아기… 어디 있어?"
+ },
+ {
+  "id": "l46",
+  "role": "narr",
+  "voice": "YyFoWJwI20bOlOPfwy6X",
+  "prompt": "[whispers] [slowly] তাহলে… তুমি কী উত্তর দেবে?",
+  "t": 198.3,
+  "e": 201.8
+ }
+]
