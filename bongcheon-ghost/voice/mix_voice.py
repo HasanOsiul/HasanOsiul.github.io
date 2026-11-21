@@ -81,9 +81,9 @@ def norm(x, peak=0.9):
 SEMIS = json.loads(os.environ.get("VO_SEMIS", '{"narr": -5.0, "girl": 4.0, "other": 1.5, "ghost": 2.0}'))
 
 vo = np.zeros((N, 2))
-LINES = cfg["lines"]
+LINES = cfg["lines"] + [{"id": "l46", "t": 198.3, "e": 201.8, "role": "narr", "text": "তাহলে তুমি কী উত্তর দেবে?"}]
 for li, ln in enumerate(LINES):
-    path = os.path.join(HERE, "raw", ln["id"] + ".wav")
+    path = os.path.join(HERE, os.environ.get("VO_DIR", "raw"), ln["id"] + ".wav")
     if not os.path.exists(path):
         path = path[:-4] + ".mp3"
     if not os.path.exists(path):
