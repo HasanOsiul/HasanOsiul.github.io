@@ -30,11 +30,8 @@ rng = np.random.default_rng(11)
 
 def decode(path, tempo=1.0, semis=0.0):
     af = []
-    if semis:
-        r = 2 ** (semis / 12)
-        af += [f"asetrate={int(SR * r)}", f"aresample={SR}", f"atempo={1 / r:.5f}"]
-    if tempo != 1.0:
-        af.append(f"atempo={tempo:.4f}")
+    if semis or tempo != 1.0:
+        af.append(f"rubberband=pitch={2 ** (semis / 12):.5f}:tempo={tempo:.4f}:pitchq=quality:window=standard")
     cmd = ["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", str(SR)]
     if af:
         cmd += ["-af", ",".join(af)]
@@ -80,15 +77,20 @@ def norm(x, peak=0.9):
     return x / (np.abs(x).max() + 1e-9) * peak
 
 
+# per-role pitch shift (semitones) shaping one base voice into characters
+SEMIS = json.loads(os.environ.get("VO_SEMIS", '{"narr": -4.0, "girl": 2.5, "other": 0.5, "ghost": -3.0}'))
+
 vo = np.zeros((N, 2))
 for ln in cfg["lines"]:
-    path = os.path.join(HERE, "raw", ln["id"] + ".mp3")
+    path = os.path.join(HERE, "raw", ln["id"] + ".wav")
+    if not os.path.exists(path):
+        path = path[:-4] + ".mp3"
     if not os.path.exists(path):
         print("missing", path, file=sys.stderr)
         continue
     role = ln["role"]
     window = ln["e"] - ln["t"] - 0.15
-    semis = -3.0 if role == "ghost" else 0.0
+    semis = SEMIS[role]
     x = decode(path, 1.0, semis)
     if len(x) / SR > window:
         x = decode(path, min(1.3, len(x) / SR / window), semis)
@@ -106,7 +108,7 @@ for ln in cfg["lines"]:
         y = verb(norm(lp * (1 - k) + x * k), IR_SMALL, 0.2) * 0.72
     else:  # ghost
         whisper = filt(x, "high", 2500) * 2.0
-        low = decode(path, 1.0, -9.0)[:n]
+        low = decode(path, 1.0, semis - 6.0)[:n]
         low = np.pad(low, (0, n - len(low)))
         g = norm(x) + 0.5 * norm(low) + 0.35 * norm(whisper)
         g *= 1 + 0.25 * np.sin(2 * np.pi * 31 * tt)                   # unsettling ring-mod
